@@ -25,6 +25,9 @@
     "paths": {
       "@/*": ["src/*"]
     },
-    "types": ["node","jest"]
+    "types": ["node", "jest"]
+  },
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
   }
 }
