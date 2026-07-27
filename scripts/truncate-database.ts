@@ -1,34 +1,44 @@
-import { AppDataSource } from '../db/data-source';
+import { NestFactory } from '@nestjs/core';
+import { INestApplicationContext } from '@nestjs/common';
+import { CliModule } from '@/modules';
+import { DatabaseService } from '@/modules/database/database.service';
 
 async function main(): Promise<void> {
+  let app: INestApplicationContext | null = null;
   try {
     console.log('🔄 Connecting database...');
 
     const env = process.env.NODE_ENV || 'development';
-    console.log(process.env);
-    
-
     if (env === 'production') {
       console.error('❌ Cannot run in production!');
       process.exit(1);
     }
 
-    await AppDataSource.initialize();
+    app = await NestFactory.createApplicationContext(CliModule);
+
+    const database = app.get(DatabaseService);
+    if (!database.isConnected()) {
+      throw new Error('Database connection failed');
+    }
 
     console.log('\n✅ Database connected successfully!');
 
-    const tables = await AppDataSource.query(`
+    const dataSource = database.connection;
+
+    const tables = await dataSource.query(`
       SELECT table_name AS name
       FROM information_schema.tables
       WHERE table_schema = DATABASE();
     `);
 
-    await AppDataSource.query(`
-      SET FOREIGN_KEY_CHECKS = 0;
-    `);
+    try {
+      await dataSource.query(`SET FOREIGN_KEY_CHECKS = 0;`);
 
-    for (const table of tables) {
-      await AppDataSource.query(`TRUNCATE TABLE \`${table.name}\`;`);
+      for (const table of tables) {
+        await dataSource.query(`TRUNCATE TABLE \`${table.name}\`;`);
+      }
+    } finally {
+      await dataSource.query(`SET FOREIGN_KEY_CHECKS = 1;`);
     }
 
     console.log('\n✅ Database truncated successfully!');
@@ -38,12 +48,8 @@ async function main(): Promise<void> {
 
     process.exit(1);
   } finally {
-    if (AppDataSource.isInitialized) {
-      await AppDataSource.query(`
-          SET FOREIGN_KEY_CHECKS = 1;
-        `);
-
-      await AppDataSource.destroy();
+    if (app) {
+      await app.close();
     }
   }
 }
