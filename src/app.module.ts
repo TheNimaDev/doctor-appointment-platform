@@ -12,6 +12,7 @@ import * as Modules from '@/modules';
 
     // Core App Modules
     Modules.DatabaseModule,
+    Modules.UserModule,
   ],
 })
 export class AppModule {}
