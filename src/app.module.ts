@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import * as Modules from '@/modules';
 
 @Module({
   imports: [
@@ -8,6 +9,9 @@ import { ConfigModule } from '@nestjs/config';
       isGlobal: true,
       envFilePath: '.env',
     }),
+
+    // Core App Modules
+    Modules.DatabaseModule,
   ],
 })
 export class AppModule {}
