@@ -17,13 +17,13 @@ export interface BaseApiResponseData<T> extends BaseApiResponse {
   data: T;
 }
 
-/** API response type */
-export type ApiResponse<T = void> = T extends void ? BaseApiResponse : BaseApiResponseData<T>;
-
 /** Standard response format returned by response interceptor */
 export interface InterceptorResponse<T> extends BaseResponse {
-  response: ApiResponse<T>;
+  response: BaseApiResponseData<T> | BaseApiResponse;
 }
+
+/** API response type */
+export type ApiResponse<T = void> = T extends void ? BaseApiResponse : BaseApiResponseData<T>;
 
 /** Base exception payload structure */
 export interface BaseException {
