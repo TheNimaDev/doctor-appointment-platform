@@ -1,4 +1,4 @@
-/** base response for exceptions and ok responses */
+/** Base response structure for API responses */
 export interface BaseResponse {
   success: boolean;
   statusCode: number;
@@ -7,17 +7,26 @@ export interface BaseResponse {
   path?: string;
 }
 
-/** API Responses without data */
+/** API response without payload data */
 export interface BaseApiResponse {
   message: string;
 }
 
-/** API Responses with data */
+/** API response with payload data */
 export interface BaseApiResponseData<T> extends BaseApiResponse {
   data: T;
 }
 
-/** Schema response when request is SUCCESS */
+/** API response type */
+export type ApiResponse<T = void> = T extends void ? BaseApiResponse : BaseApiResponseData<T>;
+
+/** Standard response format returned by response interceptor */
 export interface InterceptorResponse<T> extends BaseResponse {
-  response: BaseApiResponseData<T> | BaseApiResponse;
+  response: ApiResponse<T>;
+}
+
+/** Base exception payload structure */
+export interface BaseException {
+  message: string;
+  error: string;
 }
