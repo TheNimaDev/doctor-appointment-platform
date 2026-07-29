@@ -15,6 +15,7 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
     // Core App Modules
     Modules.DatabaseModule,
     Modules.UserModule,
+    Modules.AuthModule,
   ],
   providers: [
     {
