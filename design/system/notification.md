@@ -24,7 +24,7 @@ Examples:
 | userId    | UUID         | ❌       | FK → User                  |
 | title     | varchar(255) | ❌       | عنوان اعلان                |
 | message   | text         | ❌       | متن اعلان                  |
-| channel   | enum         | ❌       | Email / SMS / Push / InApp |
+| channel   | enum         | ❌       | Email / Push / InApp |
 | type      | enum         | ❌       | نوع اعلان                  |
 | status    | enum         | ❌       | وضعیت ارسال                |
 | readAt    | datetime     | ✅       | زمان مشاهده                |

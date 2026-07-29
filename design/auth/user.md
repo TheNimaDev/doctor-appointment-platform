@@ -15,8 +15,7 @@
 | id          | UUID         | ❌       | Primary Key                 |
 | firstName   | varchar(100) | ❌       | نام                         |
 | lastName    | varchar(100) | ❌       | نام خانوادگی                |
-| mobile      | varchar(11)  | ❌       | شماره موبایل                |
-| email       | varchar(255) | ✅       | ایمیل                       |
+| email       | varchar(255) | ❌       | ایمیل                       |
 | password    | varchar(255) | ❌       | رمز عبور Hash شده           |
 | avatarId    | UUID         | ✅       | FK → File                   | @   |
 | status      | enum         | ❌       | ACTIVE / INACTIVE / BLOCKED |
@@ -30,8 +29,6 @@
 # Indexes
 
 ```text
-UNIQUE(mobile)
-
 UNIQUE(email)
 
 INDEX(status)
@@ -53,22 +50,12 @@ WHERE status = 'ACTIVE';
 
 # Constraints
 
-## Mobile
-
-```text
-mobile cannot be null
-
-mobile must be unique
-```
-
----
-
 ## Email
 
 ```text
-email is optional
+email cannot be null
 
-if exists => unique
+email must be unique
 ```
 
 ---
