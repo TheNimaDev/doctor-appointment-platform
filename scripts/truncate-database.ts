@@ -23,7 +23,7 @@ async function main(): Promise<void> {
 
     console.log('\n✅ Database connected successfully!');
 
-    const dataSource = database.connection;
+    const dataSource = database.dataSource;
 
     const tables = await dataSource.query(`
       SELECT table_name AS name
