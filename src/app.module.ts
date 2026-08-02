@@ -1,7 +1,7 @@
-import { Module } from '@nestjs/common';
+import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import * as Modules from '@/modules';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 
 @Module({
@@ -18,6 +18,14 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
     Modules.AuthModule,
   ],
   providers: [
+    {
+      provide: APP_PIPE,
+      useValue: new ValidationPipe({
+        transform: true,
+        whitelist: true,
+        forbidNonWhitelisted: true,
+      }),
+    },
     {
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,
