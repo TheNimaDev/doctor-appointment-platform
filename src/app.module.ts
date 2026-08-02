@@ -16,6 +16,7 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
     Modules.DatabaseModule,
     Modules.UserModule,
     Modules.AuthModule,
+    Modules.EmailModule,
   ],
   providers: [
     {

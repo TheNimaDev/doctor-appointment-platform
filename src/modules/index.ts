@@ -2,3 +2,4 @@ export * from './database';
 export * from './cli';
 export * from './user';
 export * from './auth';
+export * from './email';
