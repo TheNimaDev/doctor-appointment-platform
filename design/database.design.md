@@ -10,6 +10,7 @@
 
 ## Authentication & Authorization
 
+- EmailVerification
 - Permission
 - RefreshToken
 - RolePermission

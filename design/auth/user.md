@@ -10,25 +10,25 @@
 
 # Fields
 
-| Field       | Type         | Nullable | Description                 |
-| ----------- | ------------ | -------- | --------------------------- | --- |
-| id          | UUID         | ❌       | Primary Key                 |
-| firstName   | varchar(100) | ❌       | نام                         |
-| lastName    | varchar(100) | ❌       | نام خانوادگی                |
-| email       | varchar(255) | ❌       | ایمیل                       |
-| password    | varchar(255) | ❌       | رمز عبور Hash شده           |
-| avatarId    | UUID         | ✅       | FK → File                   | @   |
-| status      | enum         | ❌       | ACTIVE / INACTIVE / BLOCKED |
-| lastLoginAt | datetime     | ✅       | آخرین ورود                  |
-| createdAt   | datetime     | ❌       | زمان ایجاد                  |
-| updatedAt   | datetime     | ❌       | زمان بروزرسانی              |
-| deletedAt   | datetime     | ✅       | Soft Delete                 |
+| Field | Type | Nullable | Description |
+|---|---|---|---|
+| id | UUID | ❌ | Primary Key |
+| firstName | varchar(100) | ❌ | نام |
+| lastName | varchar(100) | ❌ | نام خانوادگی |
+| email | varchar(255) | ❌ | ایمیل |
+| password | varchar(255) | ❌ | رمز عبور Hash شده |
+| avatarId | UUID | ✅ | FK → File |
+| status | enum | ❌ | وضعیت حساب کاربر |
+| lastLoginAt | datetime | ✅ | آخرین ورود |
+| createdAt | datetime | ❌ | زمان ایجاد |
+| updatedAt | datetime | ❌ | زمان بروزرسانی |
+| deletedAt | datetime | ✅ | Soft Delete |
 
 ---
 
 # Indexes
 
-```text
+```
 UNIQUE(email)
 
 INDEX(status)
@@ -36,9 +36,9 @@ INDEX(status)
 
 ## Why status Index?
 
-زیرا وضعیت کاربران زیاد در Queryها استفاده می‌شود.
+زیرا وضعیت کاربران در Queryهای مختلف استفاده می‌شود.
 
-مثال:
+Example:
 
 ```sql
 SELECT *
@@ -52,7 +52,7 @@ WHERE status = 'ACTIVE';
 
 ## Email
 
-```text
+```
 email cannot be null
 
 email must be unique
@@ -62,7 +62,7 @@ email must be unique
 
 ## Password
 
-```text
+```
 Minimum length validation happens in DTO
 
 Database stores only hash
@@ -70,10 +70,55 @@ Database stores only hash
 
 Example:
 
-```text
-password:
-
+```
 $2b$10$Xk2....
+```
+
+---
+
+# Email Verification Flow
+
+کاربر بعد از ثبت‌نام بلافاصله Active نمی‌شود.
+
+Flow:
+
+```
+Register
+
+↓
+
+Create User
+
+status = PENDING_VERIFICATION
+
+↓
+
+Create EmailVerification
+
+↓
+
+Generate Verification Token
+
+↓
+
+Send Verification Email
+
+↓
+
+User clicks verification link
+
+↓
+
+Validate Token
+
+↓
+
+EmailVerification.verifiedAt = NOW()
+EmailVerification.isVerified = True
+
+↓
+
+User.status = ACTIVE
 ```
 
 ---
@@ -117,6 +162,45 @@ User
 
 Patient
 ```
+
+### Description
+
+اگر کاربر نقش بیمار داشته باشد، یک Patient Profile خواهد داشت.
+
+---
+
+## User → EmailVerification
+
+```
+User
+
+1
+
+↓
+
+1
+
+EmailVerification
+```
+
+### Description
+
+هر User فقط یک Email Verification فعال دارد.
+
+Relation توسط `EmailVerification.userId` برقرار می‌شود.
+
+Constraint:
+
+```
+EmailVerification.userId UNIQUE
+```
+
+در صورت درخواست مجدد تایید ایمیل:
+
+- EmailVerification قبلی حذف می‌شود.
+- EmailVerification جدید ایجاد می‌شود.
+- Token جدید تولید می‌شود.
+- Email تایید دوباره ارسال می‌شود.
 
 ---
 
@@ -247,7 +331,6 @@ Role
 Example:
 
 یک User می‌تواند چند Role داشته باشد:
-
 ```
 User:
 
@@ -267,12 +350,20 @@ CLINIC_ADMIN
 ## UserStatus
 
 ```ts
-ACTIVE;
+PENDING_VERIFICATION;
 
-INACTIVE;
+ACTIVE;
 
 BLOCKED;
 ```
+
+## Status Description
+
+| Status | Description |
+|---|---|
+| PENDING_VERIFICATION | کاربر ثبت‌نام کرده ولی ایمیل را تایید نکرده |
+| ACTIVE | حساب فعال و قابل استفاده |
+| BLOCKED | حساب توسط سیستم یا Admin مسدود شده |
 
 ---
 
@@ -280,7 +371,7 @@ BLOCKED;
 
 ## Rule 1
 
-هر شماره موبایل فقط متعلق به یک کاربر است.
+هر ایمیل فقط متعلق به یک کاربر است.
 
 ---
 
@@ -292,7 +383,7 @@ Soft Delete استفاده می‌شود.
 
 Example:
 
-```text
+```
 deletedAt = 2026-07-24
 ```
 
@@ -364,6 +455,34 @@ Doctor
 
 ---
 
+## Rule 6
+
+کاربر تا قبل از تایید ایمیل اجازه Login ندارد.
+
+Example:
+
+```
+status = PENDING_VERIFICATION
+
+↓
+
+Login rejected
+```
+
+---
+
+## Rule 7
+
+هر User فقط یک Email Verification فعال دارد.
+
+در صورت درخواست مجدد تایید ایمیل:
+
+- Verification قبلی حذف می‌شود.
+- Token جدید ساخته می‌شود.
+- Email تایید دوباره ارسال می‌شود.
+
+---
+
 # Future Improvements
 
 مواردی که در آینده می‌توان اضافه کرد:
@@ -372,5 +491,7 @@ Doctor
 - Login History
 - User Preferences
 - Multiple Phone Numbers
-- Account Verification Status
+- Security Notifications
+- Email Change Verification
+- Password Reset Flow
 - User Activity Tracking
