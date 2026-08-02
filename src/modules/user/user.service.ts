@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { User } from './entities';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BaseException, SafeUser, AuthUser } from '@/types';
+import { BaseException, SafeUser } from '@/types';
 
 @Injectable()
 export class UserService {
@@ -43,21 +43,5 @@ export class UserService {
     });
 
     return user;
-  }
-
-  /**
-   * Find user for authentication
-   * - Used only in auth module
-   */
-  async findOneForAuth(email: string): Promise<AuthUser | null> {
-    return this.userRepository.findOne({
-      where: { email },
-      select: {
-        id: true,
-        email: true,
-        password: true,
-        status: true,
-      },
-    });
   }
 }
