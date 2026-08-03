@@ -2,7 +2,7 @@ import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import * as Modules from '@/modules';
 import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
-import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import { ResponseInterceptor } from '@/common';
 
 @Module({
   imports: [
