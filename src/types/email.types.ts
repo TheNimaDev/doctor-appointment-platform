@@ -6,3 +6,8 @@ export interface VerifyEmailParams {
   userId: string;
   token: string;
 }
+
+export interface SignupVerificationEvent {
+  email: string;
+  token: string;
+}
