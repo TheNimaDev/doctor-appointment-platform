@@ -1,6 +1,6 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterDto } from './dto';
+import { RegisterDto, VerifyEmailDto } from './dto';
 import { ApiResponse } from '@/types';
 
 @Controller('auth')
@@ -13,6 +13,15 @@ export class AuthController {
 
     return {
       message: 'Registration successful. Please verify your email.',
+    };
+  }
+
+  @Get('verify/email')
+  async verifyEmail(@Query() verifyEmailDto: VerifyEmailDto) {
+    await this.authService.verifyEmail(verifyEmailDto);
+
+    return {
+      message: 'Email verified successfully.',
     };
   }
 }
