@@ -4,3 +4,4 @@ export * from './auth.types';
 export * from './email.types';
 export * from './mail.types';
 export * from './token.types';
+export * from './request.types';
