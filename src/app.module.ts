@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import * as Modules from '@/modules';
 import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ResponseInterceptor } from '@/common';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -11,6 +12,9 @@ import { ResponseInterceptor } from '@/common';
       isGlobal: true,
       envFilePath: '.env',
     }),
+
+    // Config Event Emitter
+    EventEmitterModule.forRoot(),
 
     // Core App Modules
     Modules.DatabaseModule,
