@@ -3,7 +3,6 @@ export interface CreateEmailParams {
 }
 
 export interface VerifyEmailParams {
-  userId: string;
   token: string;
 }
 
