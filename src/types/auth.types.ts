@@ -1,19 +1,14 @@
-import { SafeUser } from './user.types';
-
-/** Auth response user payload */
-export interface AuthUserResponse {
-  user: SafeUser;
-}
+import { UserResponse } from './user.types';
 
 /** Login response payload */
-export interface LoginResponse extends AuthUserResponse {
+export interface LoginResponse extends UserResponse {
   accessToken: string;
 }
 
-/** User registration service parameters */
-export type RegisterParams = {
+/** Register service parameters */
+export interface RegisterParams {
   email: string;
   password: string;
   firstName: string;
   lastName: string;
-};
+}
