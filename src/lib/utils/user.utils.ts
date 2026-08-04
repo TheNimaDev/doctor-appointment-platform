@@ -1,10 +1,20 @@
-import { User } from '@/modules/user/entities';
-import { AuthUserResponse } from '@/types';
+import { SafeUser, UserResponse } from '@/types';
 
-export function getSafeUser(user: User): AuthUserResponse {
-  const { password, ...safeUser } = user;
-
+export function getSafeUser(user: SafeUser): UserResponse {
   return {
-    user: { ...safeUser },
+    user: {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      status: user.status,
+      avatarId: user.avatarId,
+      permissions: [],
+      roles: [],
+      lastLoginAt: user.lastLoginAt,
+      updatedAt: user.updatedAt,
+      createdAt: user.createdAt,
+      deletedAt: user.deletedAt,
+    },
   };
 }
