@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '@/modules/database/database.service';
 import { User } from '@/modules/user/entities';
-import { RegisterParams } from '@/types';
+import { RegisterParams, VerifyEmailParams } from '@/types';
 import { checkDatabaseError, getSafeUser, hashSecret } from '@/lib';
 import { EmailService } from '../email/email.service';
 import { EVENTS } from '@/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { UserStatus } from '@/modules/user/enums';
 
 @Injectable()
 export class AuthService {
@@ -46,5 +47,12 @@ export class AuthService {
         token,
       });
     } catch (_) {}
+  }
+
+  async verifyEmail(params: VerifyEmailParams): Promise<void> {
+    const userId = await this.emailService.verify(params);
+    await this.databaseService.dataSource.manager.update(User, userId, {
+      status: UserStatus.ACTIVE,
+    });
   }
 }
