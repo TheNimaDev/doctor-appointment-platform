@@ -12,3 +12,9 @@ export interface RegisterParams {
   firstName: string;
   lastName: string;
 }
+
+/** Login service parameters */
+export interface LoginParams {
+  email: string;
+  password: string;
+}
