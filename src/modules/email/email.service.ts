@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Email } from './entities';
 import { Repository } from 'typeorm';
@@ -36,18 +36,18 @@ export class EmailService {
     return token;
   }
 
-  async verify(params: VerifyEmailParams): Promise<boolean> {
+  async verify(params: VerifyEmailParams): Promise<string> {
     const email = await this.emailRepository.findOne({
       where: {
-        userId: params.userId,
+        tokenHash: hashToken(params.token),
         isVerified: false,
       },
     });
 
     if (!email) {
-      throw new NotFoundException({
-        message: 'Email verification token not found',
-        error: 'Token Not Found',
+      throw new BadRequestException({
+        message: 'Invalid email verification token',
+        error: 'Invalid Token',
       } as BaseException);
     }
 
@@ -58,20 +58,11 @@ export class EmailService {
       } as BaseException);
     }
 
-    const isValid = hashToken(params.token) === email.tokenHash;
-
-    if (!isValid) {
-      throw new BadRequestException({
-        message: 'Invalid email verification token',
-        error: 'Invalid Token',
-      } as BaseException);
-    }
-
     email.isVerified = true;
     email.verifiedAt = new Date();
 
     await this.emailRepository.save(email);
 
-    return true;
+    return email.userId
   }
 }
