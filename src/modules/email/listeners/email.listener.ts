@@ -10,7 +10,7 @@ export class EmailListener {
 
   @OnEvent(EVENTS.SIGNUP_VERIFICATION)
   async handleSignupVerification(payload: SignupVerificationEvent): Promise<void> {
-    const verifyUrl = `http://localhost:3000/api/v1/auth/verify-email?token=${payload.token}`;
+    const verifyUrl = `http://localhost:3000/api/v1/auth/verify/email?token=${payload.token}`;
 
     await this.mailService.send({
       to: payload.email,
