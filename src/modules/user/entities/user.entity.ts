@@ -30,7 +30,7 @@ export class User {
   avatarId: string | null;
 
   @Index()
-  @Column({ type: 'enum', enum: UserStatus, default: UserStatus.ACTIVE })
+  @Column({ type: 'enum', enum: UserStatus, default: UserStatus.PENDING_VERIFICATION })
   status: UserStatus;
 
   @Column({ type: 'datetime', nullable: true })
