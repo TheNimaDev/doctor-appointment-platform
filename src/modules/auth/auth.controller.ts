@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterDto, VerifyEmailDto } from './dto';
-import { ApiResponse } from '@/types';
+import { LoginDto, RegisterDto, VerifyEmailDto } from './dto';
+import { ApiResponse, LoginResponse } from '@/types';
 
 @Controller('auth')
 export class AuthController {
@@ -22,6 +22,16 @@ export class AuthController {
 
     return {
       message: 'Email verified successfully.',
+    };
+  }
+
+  @Post('login')
+  async login(@Body() loginDto: LoginDto): Promise<ApiResponse<LoginResponse>> {
+    const { refreshToken, ...data } = await this.authService.login(loginDto);
+
+    return {
+      message: 'Registration successful. Please verify your email.',
+      data,
     };
   }
 }
