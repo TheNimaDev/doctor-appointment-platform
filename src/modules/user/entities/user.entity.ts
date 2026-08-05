@@ -4,10 +4,12 @@ import {
   DeleteDateColumn,
   Entity,
   Index,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { UserStatus } from '../enums';
+import { RefreshToken } from '@/modules/refresh-token/entities';
 
 @Entity('users')
 export class User {
@@ -32,6 +34,9 @@ export class User {
   @Index()
   @Column({ type: 'enum', enum: UserStatus, default: UserStatus.PENDING_VERIFICATION })
   status: UserStatus;
+
+  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
+  refreshTokens: RefreshToken[];
 
   @Column({ type: 'datetime', nullable: true })
   lastLoginAt: Date | null;
