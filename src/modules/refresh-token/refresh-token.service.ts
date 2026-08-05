@@ -1,5 +1,5 @@
 import { generateRandomToken, hashToken } from '@/lib';
-import { CreateRefreshTokenPayload } from '@/types';
+import { CreateRefreshTokenOutput, CreateRefreshTokenPayload } from '@/types';
 import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { RefreshToken } from './entities';
@@ -15,7 +15,7 @@ export class RefreshTokenService {
     private readonly configService: ConfigService,
   ) {}
 
-  async createRefreshToken(payload: CreateRefreshTokenPayload): Promise<string> {
+  async createRefreshToken(payload: CreateRefreshTokenPayload): Promise<CreateRefreshTokenOutput> {
     const refreshToken = generateRandomToken();
 
     const tokenHash = hashToken(refreshToken);
@@ -24,7 +24,8 @@ export class RefreshTokenService {
       ? this.configService.getOrThrow<StringValue>('REFRESH_TOKEN_REMEMBER_EXPIRES')
       : this.configService.getOrThrow<StringValue>('REFRESH_TOKEN_EXPIRES');
 
-    const expiresAt = new Date(Date.now() + ms(expiresIn));
+    const maxAge = ms(expiresIn);
+    const expiresAt = new Date(Date.now() + maxAge);
 
     await this.refreshTokenRepository.save({
       ...payload.clientInfo,
@@ -33,6 +34,9 @@ export class RefreshTokenService {
       expiresAt,
     });
 
-    return refreshToken;
+    return {
+      token: refreshToken,
+      maxAge,
+    };
   }
 }

@@ -5,3 +5,8 @@ export interface CreateRefreshTokenPayload {
   clientInfo: NormalizedClientInfo;
   remember: boolean;
 }
+
+export interface CreateRefreshTokenOutput {
+  token: string;
+  maxAge: number;
+}
