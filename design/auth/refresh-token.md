@@ -30,30 +30,32 @@ Refresh Token در Database ذخیره می‌شود تا بتوان:
 
 # Fields
 
-| Field     | Type         | Nullable | Description            |
-| --------- | ------------ | -------- | ---------------------- |
-| id        | UUID         | ❌       | Primary Key            |
-| userId    | UUID         | ❌       | FK → User              |
-| tokenHash | varchar(255) | ❌       | Hash شده Refresh Token |
-| deviceId  | varchar(255) | ✅       | شناسه دستگاه           |
-| ipAddress | varchar(45)  | ✅       | IP کاربر               |
-| userAgent | varchar(255) | ✅       | Browser / Device Info  |
-| expiresAt | datetime     | ❌       | زمان انقضا             |
-| revokedAt | datetime     | ✅       | زمان باطل شدن          |
-| createdAt | datetime     | ❌       | زمان ایجاد             |
-| updatedAt | datetime     | ❌       | زمان بروزرسانی         |
-| deletedAt | datetime     | ✅       | Soft Delete            |
+| Field      | Type         | Nullable | Description                  |
+| ---------- | ------------ | -------- | ---------------------------- |
+| id         | UUID         | ❌       | Primary Key                  |
+| userId     | UUID         | ❌       | FK → User                    |
+| tokenHash  | varchar(255) | ❌       | Hashed Refresh Token         |
+| ipAddress  | varchar(45)  | ✅       | User IP Address              |
+| userAgent  | text         | ✅       | Raw Browser User Agent       |
+| browser    | varchar(50)  | ✅       | Browser Name                 |
+| os         | varchar(50)  | ✅       | Operating System             |
+| device     | varchar(50)  | ✅       | Device Type                  |
+| country    | varchar(100) | ✅       | User Country                 |
+| city       | varchar(100) | ✅       | User City                    |
+| expiresAt  | datetime     | ❌       | Token Expiration Time        |
+| revokedAt  | datetime     | ✅       | Token Revoked Time           |
+| lastUsedAt | datetime     | ✅       | Last Token Usage             |
+| createdAt  | datetime     | ❌       | Creation Time                |
+| updatedAt  | datetime     | ❌       | Update Time                  |
 
 ---
 
 # Indexes
 
 ```
-INDEX(userId)
-
 INDEX(expiresAt)
 
-INDEX(deviceId)
+INDEX(userId, revokedAt)
 
 UNIQUE(tokenHash)
 ```
@@ -94,11 +96,11 @@ Nima
 
 RefreshTokens:
 
-Chrome Laptop
+Chrome - Windows
 
-iPhone
+Safari - iPhone
 
-Android
+Chrome - Android
 ```
 
 ---
@@ -121,6 +123,10 @@ Generate Refresh Token
 ↓
 
 Hash Refresh Token
+
+↓
+
+Collect Client Info
 
 ↓
 
@@ -249,3 +255,5 @@ Delete expired tokens
 - Refresh Token Reuse Detection
 - Device Fingerprinting
 - Suspicious Login Detection
+- Session Management
+- Active Device Management
