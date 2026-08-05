@@ -1,8 +1,8 @@
-import { Module, ValidationPipe } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import * as Modules from '@/modules';
 import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
-import { ResponseInterceptor } from '@/common';
+import { ClientInfoMiddleware, ResponseInterceptor } from '@/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
@@ -38,4 +38,8 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(ClientInfoMiddleware).forRoutes('*');
+  }
+}
