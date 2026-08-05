@@ -7,3 +7,12 @@ export type UserAccess = Omit<AccessTokenPayload, 'sub'> & { userId: string };
 export interface AccessRequest extends Request {
   user: UserAccess;
 }
+
+export interface NormalizedClientInfo {
+  ipAddress: string | null;
+  browser: string | null;
+  os: string | null;
+  device: string | null;
+  country: string | null;
+  city: string | null;
+}
