@@ -5,23 +5,27 @@ import type { StringValue } from 'ms';
 import {
   AccessTokenPayload,
   BaseException,
+  CreateRefreshTokenOutput,
   LoginParams,
   LoginResponse,
+  LoginServiceOutput,
   RegisterParams,
   VerifyEmailParams,
 } from '@/types';
-import { checkDatabaseError, compareSecret, generateRandomToken, getSafeUser, hashSecret, hashToken } from '@/lib';
+import { checkDatabaseError, compareSecret, getSafeUser, hashSecret } from '@/lib';
 import { EmailService } from '../email/email.service';
 import { EVENTS } from '@/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UserStatus } from '@/modules/user/enums';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly databaseService: DatabaseService,
+    private readonly refreshTokenService: RefreshTokenService,
     private readonly emailService: EmailService,
     private readonly eventEmitter: EventEmitter2,
     private readonly configService: ConfigService,
@@ -68,7 +72,7 @@ export class AuthService {
     });
   }
 
-  async login(params: LoginParams): Promise<LoginResponse & { refreshToken: string }> {
+  async login(params: LoginParams): Promise<LoginServiceOutput> {
     const user = await this.databaseService.dataSource
       .createQueryBuilder(User, 'user')
       .addSelect('user.password')
@@ -98,8 +102,11 @@ export class AuthService {
 
     const { user: userData } = getSafeUser(user);
 
-    const refreshToken: string = generateRandomToken();
-    const hashedRefreshToken: string = hashToken(refreshToken);
+    const refreshToken: CreateRefreshTokenOutput = await this.refreshTokenService.createRefreshToken({
+      userId: user.id,
+      remember: params.remember ?? false,
+      clientInfo: params.clientInfo,
+    });
 
     const accessTokenPayload: AccessTokenPayload = {
       sub: user.id,

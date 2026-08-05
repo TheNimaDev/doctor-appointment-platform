@@ -1,11 +1,10 @@
 import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto, VerifyEmailDto } from './dto';
-import { ApiResponse, LoginResponse } from '@/types';
+import type { ApiResponse, LoginResponse, NormalizedClientInfo } from '@/types';
 import type { CookieOptions, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
-import type { StringValue } from 'ms';
-import ms from 'ms';
+import { NormalizeClientInfo } from '@/common';
 
 @Controller('auth')
 export class AuthController {
@@ -47,20 +46,15 @@ export class AuthController {
   @Post('login')
   async login(
     @Body() loginDto: LoginDto,
+    @NormalizeClientInfo() clientInfo: NormalizedClientInfo,
     @Res({ passthrough: true }) res: Response,
   ): Promise<ApiResponse<LoginResponse>> {
-    const { refreshToken, ...data } = await this.authService.login(loginDto);
+    const { refreshToken, ...data } = await this.authService.login({ ...loginDto, clientInfo });
 
-    const expiresIn = loginDto.remember
-      ? this.configService.getOrThrow<StringValue>('REFRESH_TOKEN_REMEMBER_EXPIRES')
-      : this.configService.getOrThrow<StringValue>('REFRESH_TOKEN_EXPIRES');
-
-    const maxAge = ms(expiresIn);
-
-    res.cookie('refreshToken', refreshToken, this.getCookieOptions(maxAge));
+    res.cookie('refreshToken', refreshToken.token, this.getCookieOptions(refreshToken.maxAge));
 
     return {
-      message: 'Registration successful. Please verify your email.',
+      message: 'Login successful.',
       data,
     };
   }
