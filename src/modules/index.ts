@@ -4,3 +4,4 @@ export * from './user';
 export * from './auth';
 export * from './email';
 export * from './mail';
+export * from './refresh-token';
