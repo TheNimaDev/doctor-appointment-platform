@@ -10,9 +10,10 @@ export interface AccessRequest extends Request {
 
 export interface NormalizedClientInfo {
   ipAddress: string | null;
+  userAgent: string | null;
   browser: string | null;
   os: string | null;
-  device: string | null;
+  device: string;
   country: string | null;
   city: string | null;
 }

@@ -8,7 +8,7 @@ export class ClientInfoMiddleware implements NestMiddleware {
   use(req: Request, _res: Response, next: NextFunction) {
     const ipAddress = this.getClientIp(req);
 
-    const userAgent = req.headers['user-agent'] ?? '';
+    const userAgent = req.headers['user-agent'] ?? null;
     const ua = new UAParser(userAgent).getResult();
 
     const geo = ipAddress ? geoip.lookup(ipAddress) : null;
@@ -17,6 +17,7 @@ export class ClientInfoMiddleware implements NestMiddleware {
       ipAddress,
       ua,
       geo,
+      userAgent,
     };
 
     next();

@@ -1,10 +1,11 @@
 import { NormalizedClientInfo } from '@/types';
 
 export function normalizeClientInfo(input: Express.Request['clientInfo']): NormalizedClientInfo {
-  const { ipAddress, ua, geo } = input;
+  const { ipAddress, ua, geo, userAgent } = input;
 
   return {
     ipAddress,
+    userAgent,
     browser: ua.browser?.name ?? null,
     os: ua.os?.name ?? null,
     device: ua.device?.type ?? 'desktop',
