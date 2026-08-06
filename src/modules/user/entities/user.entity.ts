@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { UserStatus } from '../enums';
-import { RefreshToken } from '@/modules/refresh-token/entities';
+import { Session } from '@/modules/session/entities';
 
 @Entity('users')
 export class User {
@@ -35,8 +35,8 @@ export class User {
   @Column({ type: 'enum', enum: UserStatus, default: UserStatus.PENDING_VERIFICATION })
   status: UserStatus;
 
-  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
-  refreshTokens: RefreshToken[];
+  @OneToMany(() => Session, (session) => session.user)
+  sessions: Session[];
 
   @Column({ type: 'datetime', nullable: true })
   lastLoginAt: Date | null;
