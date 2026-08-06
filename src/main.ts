@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { DatabaseService } from './modules/database/database.service';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import cookieParser from 'cookie-parser';
 
 let PORT: number;
 let BASE_URL: string;
@@ -19,6 +20,9 @@ async function bootstrap() {
 
   //Base url
   app.setGlobalPrefix(BASE_URL);
+
+  // Enable cookie parsing
+  app.use(cookieParser());
 
   // Cheack DB connection
   const databaseService = app.get(DatabaseService);
