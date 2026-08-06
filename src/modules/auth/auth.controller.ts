@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto, VerifyEmailDto } from './dto';
-import type { ApiResponse, LoginResponse, NormalizedClientInfo } from '@/types';
+import type { ApiResponse, LoginResponse, NormalizedClientInfo, RefreshRequest } from '@/types';
 import type { CookieOptions, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { NormalizeClientInfo } from '@/common';
+import { RefreshTokenGuard } from './guards/refresh-token.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -35,7 +36,7 @@ export class AuthController {
   }
 
   @Get('verify/email')
-  async verifyEmail(@Query() verifyEmailDto: VerifyEmailDto) {
+  async verifyEmail(@Query() verifyEmailDto: VerifyEmailDto): Promise<ApiResponse> {
     await this.authService.verifyEmail(verifyEmailDto);
 
     return {
@@ -56,6 +57,28 @@ export class AuthController {
     return {
       message: 'Login successful.',
       data,
+    };
+  }
+
+  @Post('logout')
+  @UseGuards(RefreshTokenGuard)
+  async logout(@Req() req: RefreshRequest, @Res({ passthrough: true }) res: Response): Promise<ApiResponse> {
+    res.clearCookie('refreshToken', this.getCookieOptions());
+    await this.authService.logout(req.refreshPayload);
+
+    return {
+      message: 'Logout successfully.',
+    };
+  }
+
+  @Post('logout/all')
+  @UseGuards(RefreshTokenGuard)
+  async logoutAll(@Req() req: RefreshRequest, @Res({ passthrough: true }) res: Response): Promise<ApiResponse> {
+    res.clearCookie('refreshToken', this.getCookieOptions());
+    await this.authService.logoutAll(req.refreshPayload);
+
+    return {
+      message: 'Logout from all devices successfully.',
     };
   }
 }
