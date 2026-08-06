@@ -17,7 +17,7 @@ export class RefreshTokenService {
 
   async createRefreshToken(payload: CreateRefreshTokenPayload): Promise<CreateRefreshTokenOutput> {
     const existingToken = await this.findActiveRefreshToken({
-      userId: payload.userId,
+      sessionId: payload.sessionId,
       clientInfo: payload.clientInfo,
     });
 
@@ -38,7 +38,7 @@ export class RefreshTokenService {
 
     await this.refreshTokenRepository.save({
       ...payload.clientInfo,
-      userId: payload.userId,
+      sessionId: payload.sessionId,
       tokenHash,
       expiresAt,
     });
@@ -52,8 +52,7 @@ export class RefreshTokenService {
   async findActiveRefreshToken(payload: FindActiveRefreshTokenPayload): Promise<RefreshToken | null> {
     return this.refreshTokenRepository.findOne({
       where: {
-        userId: payload.userId,
-        userAgent: payload.clientInfo.userAgent,
+        sessionId: payload.sessionId,
         revokedAt: IsNull(),
         expiresAt: MoreThan(new Date()),
       },
@@ -68,7 +67,7 @@ export class RefreshTokenService {
         expiresAt: MoreThan(new Date()),
       },
       relations: {
-        user: true,
+        session: true,
       },
     });
   }
@@ -88,9 +87,20 @@ export class RefreshTokenService {
   }
 
   async revokeAllUserRefreshTokens(userId: string): Promise<void> {
-    await this.revokeByCondition({
-      userId,
-    });
+    await this.refreshTokenRepository
+      .createQueryBuilder()
+      .update(RefreshToken)
+      .set({
+        revokedAt: new Date(),
+      })
+      .where(
+        `sessionId IN (
+        SELECT id FROM sessions WHERE userId = :userId
+      )`,
+        { userId },
+      )
+      .andWhere('revokedAt IS NULL')
+      .execute();
   }
 
   private async revokeByCondition(where: FindOptionsWhere<RefreshToken>): Promise<void> {
