@@ -1,4 +1,4 @@
-import { User } from '@/modules/user/entities';
+import { Session } from '@/modules/session/entities';
 import {
   Column,
   CreateDateColumn,
@@ -11,43 +11,22 @@ import {
 } from 'typeorm';
 
 @Entity('refresh_tokens')
-@Index(['userId', 'revokedAt'])
+@Index(['sessionId', 'revokedAt', 'expiresAt'])
 export class RefreshToken {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ type: 'uuid' })
-  userId: string;
+  sessionId: string;
 
-  @ManyToOne(() => User, (user) => user.refreshTokens, {
+  @ManyToOne(() => Session, (session) => session.refreshTokens, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'userId' })
-  user: User;
+  @JoinColumn({ name: 'sessionId' })
+  session: Session;
 
   @Column({ type: 'varchar', length: 255, unique: true })
   tokenHash: string;
-
-  @Column({ type: 'varchar', length: 45, nullable: true })
-  ipAddress: string | null;
-
-  @Column({ type: 'text', nullable: true })
-  userAgent: string | null;
-
-  @Column({ type: 'varchar', length: 50, nullable: true })
-  browser: string | null;
-
-  @Column({ type: 'varchar', length: 50, nullable: true })
-  os: string | null;
-
-  @Column({ type: 'varchar', length: 50, nullable: true })
-  device: string | null;
-
-  @Column({ type: 'varchar', length: 100, nullable: true })
-  country: string | null;
-
-  @Column({ type: 'varchar', length: 100, nullable: true })
-  city: string | null;
 
   @Index()
   @Column({ type: 'datetime' })
@@ -55,9 +34,6 @@ export class RefreshToken {
 
   @Column({ type: 'datetime', nullable: true })
   revokedAt: Date | null;
-
-  @Column({ type: 'datetime', nullable: true })
-  lastUsedAt: Date | null;
 
   @CreateDateColumn()
   createdAt: Date;
