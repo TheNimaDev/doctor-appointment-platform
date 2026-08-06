@@ -1,16 +1,16 @@
 import { RefreshToken } from '@/modules/refresh-token/entities';
 import { NormalizedClientInfo } from './request.types';
 
-export type SafeRefreshToken = Omit<RefreshToken, 'user' | 'userId'>;
+export type SafeRefreshToken = Omit<RefreshToken, 'session' | 'sessionId'>;
 
 export interface CreateRefreshTokenPayload {
-  userId: string;
+  sessionId: string;
   clientInfo: NormalizedClientInfo;
   remember: boolean;
 }
 
 export interface FindActiveRefreshTokenPayload {
-  userId: string;
+  sessionId: string;
   clientInfo: NormalizedClientInfo;
 }
 
