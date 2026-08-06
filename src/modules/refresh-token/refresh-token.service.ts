@@ -67,6 +67,9 @@ export class RefreshTokenService {
         revokedAt: IsNull(),
         expiresAt: MoreThan(new Date()),
       },
+      relations: {
+        user: true,
+      },
     });
   }
 
