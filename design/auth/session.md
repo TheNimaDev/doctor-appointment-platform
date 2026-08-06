@@ -2,13 +2,15 @@
 
 ## Purpose
 
-مدیریت نشست‌های فعال کاربران و اطلاعات دستگاه‌هایی که با آن‌ها وارد سیستم شده‌اند.
+مدیریت نشست‌های کاربران و اطلاعات دستگاه‌هایی که با آن‌ها وارد سیستم شده‌اند.
 
 Session برای قابلیت‌هایی مثل:
 
 - مشاهده دستگاه‌های فعال
 - Logout از یک دستگاه خاص
+- Logout از تمام دستگاه‌ها
 - مدیریت امنیت حساب
+- مدیریت Refresh Token Rotation
 
 استفاده می‌شود.
 
@@ -16,54 +18,35 @@ Session برای قابلیت‌هایی مثل:
 
 # Fields
 
-| Field          | Type         | Nullable | Description               |
-| -------------- | ------------ | -------- | ------------------------- |
-| id             | UUID         | ❌       | Primary Key               |
-| userId         | UUID         | ❌       | FK → User                 |
-| refreshTokenId | UUID         | ✅       | FK → RefreshToken         |
-| deviceName     | varchar(100) | ✅       | نام دستگاه                |
-| deviceType     | enum         | ❌       | MOBILE / DESKTOP / TABLET |
-| ipAddress      | varchar(45)  | ✅       | IP Address                |
-| userAgent      | varchar(255) | ✅       | Browser Information       |
-| lastActiveAt   | datetime     | ❌       | آخرین فعالیت              |
-| expiresAt      | datetime     | ❌       | زمان پایان Session        |
-| createdAt      | datetime     | ❌       | زمان ایجاد                |
-| updatedAt      | datetime     | ❌       | زمان بروزرسانی            |
-| deletedAt      | datetime     | ✅       | Soft Delete               |
-
----
-
-# Enum
-
-## DeviceType
-
-```ts
-MOBILE;
-
-DESKTOP;
-
-TABLET;
-```
+| Field        | Type         | Nullable | Description              |
+| ------------ | ------------ | -------- | ------------------------ |
+| id           | UUID         | ❌       | Primary Key              |
+| userId       | UUID         | ❌       | FK → User                |
+| ipAddress    | varchar(45)  | ✅       | User IP Address          |
+| userAgent    | text         | ✅       | Raw Browser User Agent   |
+| browser      | varchar(50)  | ✅       | Browser Name             |
+| os           | varchar(50)  | ✅       | Operating System         |
+| device       | varchar(50)  | ✅       | Device Type              |
+| country      | varchar(100) | ✅       | User Country             |
+| city         | varchar(100) | ✅       | User City                |
+| lastActiveAt | datetime     | ❌       | آخرین فعالیت Session     |
+| revokedAt    | datetime     | ✅       | زمان غیرفعال شدن Session |
+| createdAt    | datetime     | ❌       | Creation Time            |
+| updatedAt    | datetime     | ❌       | Update Time              |
 
 ---
 
 # Indexes
 
-```
-INDEX(userId)
+```sql
+INDEX(userId, revokedAt)
 
 INDEX(lastActiveAt)
-
-INDEX(deviceType)
 ```
 
 ---
 
 # Relations
-
-## Many To One
-
----
 
 ## Session → User
 
@@ -79,6 +62,27 @@ N
 User
 ```
 
+### Description
+
+هر User می‌تواند چند Session داشته باشد.
+
+Example:
+
+```
+User:
+
+Nima
+
+
+Sessions:
+
+Chrome Windows
+
+iPhone Safari
+
+Android Chrome
+```
+
 ---
 
 ## Session → RefreshToken
@@ -86,13 +90,86 @@ User
 ```
 Session
 
+1
+
+↓
+
+N
+
+RefreshToken
+```
+
+### Description
+
+هر Session در طول زمان می‌تواند چند Refresh Token داشته باشد.
+
+به دلیل Refresh Token Rotation، توکن‌های قدیمی revoke می‌شوند و توکن جدید به همان Session متصل می‌شود.
+
+Example:
+
+```
+Session:
+
+Chrome Windows
+
+
+RefreshTokens:
+
+Token A (Revoked)
+
+Token B (Revoked)
+
+Token C (Active)
+```
+
+---
+
+# RefreshToken Relation
+
+RefreshToken باید دارای `sessionId` باشد:
+
+```
+RefreshToken
+
 N
 
 ↓
 
 1
 
-RefreshToken
+Session
+```
+
+---
+
+# Token Rotation Flow
+
+```
+Session
+
+↓
+
+Refresh Token A
+
+↓
+
+Refresh Request
+
+↓
+
+Validate Token A
+
+↓
+
+Revoke Token A
+
+↓
+
+Create Token B
+
+↓
+
+Attach Token B to Same Session
 ```
 
 ---
@@ -109,11 +186,13 @@ Sessions:
 
 ```
 ------------------------------------------------
-Device        IP              Last Active
+Device          OS        Last Active
 ------------------------------------------------
-Chrome PC     192.168.1.5     Today
-iPhone        5.34.xx.xx      Yesterday
-Android       10.xx.xx.xx     2 days ago
+Chrome PC       Windows   5 minutes ago
+
+iPhone          iOS       Yesterday
+
+Android         Android   2 days ago
 ------------------------------------------------
 ```
 
@@ -123,7 +202,7 @@ Android       10.xx.xx.xx     2 days ago
 
 ## Rule 1
 
-هر Login یک Session جدید ایجاد می‌کند.
+هر Login از یک Device جدید یک Session جدید ایجاد می‌کند.
 
 Example:
 
@@ -142,11 +221,16 @@ Login From iPhone
 Create Another Session
 ```
 
+Login مجدد از همان Device می‌تواند:
+
+- Session قبلی را ادامه دهد
+- یا Session جدید ایجاد کند
+
 ---
 
 ## Rule 2
 
-Logout فقط یک دستگاه:
+Logout یک دستگاه خاص:
 
 ```
 User
@@ -157,11 +241,19 @@ Select Session
 
 ↓
 
-Delete Session
+Revoke Session
 
 ↓
 
-Revoke RefreshToken
+Revoke Related Refresh Tokens
+```
+
+Database:
+
+```
+Session.revokedAt = now()
+
+RefreshToken.revokedAt = now()
 ```
 
 ---
@@ -175,31 +267,43 @@ User
 
 ↓
 
-Delete All Sessions
+Revoke All Sessions
 
 ↓
 
-Revoke All RefreshTokens
+Revoke All Refresh Tokens
 ```
 
 ---
 
 ## Rule 4
 
-Session فعال باید مرتب بروزرسانی شود.
+Session Activity باید بروزرسانی شود.
 
-هر Request:
+هنگام استفاده از Refresh Token:
 
 ```
-lastActiveAt = now()
+Refresh Request
+
+↓
+
+Update lastActiveAt
 ```
+
+برای جلوگیری از Update زیاد دیتابیس، لازم نیست در هر API Request مقدار `lastActiveAt` تغییر کند.
 
 ---
 
 # Authentication Flow
 
+## Login
+
 ```
-Login
+User Login
+
+↓
+
+Validate Credentials
 
 ↓
 
@@ -207,23 +311,88 @@ Create Session
 
 ↓
 
-Create RefreshToken
+Create Refresh Token
 
 ↓
 
-Return JWT
-
-
-Request
+Store Refresh Token
 
 ↓
 
-Validate Access Token
+Generate Access Token
+
+↓
+
+Return Access Token
+```
+
+---
+
+## Refresh Token
+
+```
+Access Token Expired
+
+↓
+
+Send Refresh Token
+
+↓
+
+Validate Refresh Token
 
 ↓
 
 Update Session Activity
+
+↓
+
+Revoke Old Refresh Token
+
+↓
+
+Create New Refresh Token
+
+↓
+
+Generate New Access Token
 ```
+
+---
+
+## Logout
+
+```
+User Logout
+
+↓
+
+Find Current Session
+
+↓
+
+Revoke Session Refresh Tokens
+
+↓
+
+Revoke Session
+
+↓
+
+Clear Cookie
+```
+
+---
+
+# Security Considerations
+
+- Never store raw Refresh Token
+- Store only hashed Refresh Token
+- Support device-based logout
+- Support logout from all devices
+- Detect suspicious sessions
+- Track login activity
+- Limit active sessions per user
 
 ---
 
@@ -231,6 +400,8 @@ Update Session Activity
 
 - Device Trust
 - Remember Device
-- Location Tracking
 - Login History
+- Location Tracking
 - Security Alerts
+- Suspicious Login Detection
+- Device Fingerprinting

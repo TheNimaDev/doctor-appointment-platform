@@ -24,38 +24,30 @@ Refresh Token در Database ذخیره می‌شود تا بتوان:
 - Logout کرد
 - Token را Revoke کرد
 - Rotation انجام داد
-- Deviceها را مدیریت کرد
+- Session و Device ها را مدیریت کرد
 
 ---
 
 # Fields
 
-| Field      | Type         | Nullable | Description                  |
-| ---------- | ------------ | -------- | ---------------------------- |
-| id         | UUID         | ❌       | Primary Key                  |
-| userId     | UUID         | ❌       | FK → User                    |
-| tokenHash  | varchar(255) | ❌       | Hashed Refresh Token         |
-| ipAddress  | varchar(45)  | ✅       | User IP Address              |
-| userAgent  | text         | ✅       | Raw Browser User Agent       |
-| browser    | varchar(50)  | ✅       | Browser Name                 |
-| os         | varchar(50)  | ✅       | Operating System             |
-| device     | varchar(50)  | ✅       | Device Type                  |
-| country    | varchar(100) | ✅       | User Country                 |
-| city       | varchar(100) | ✅       | User City                    |
-| expiresAt  | datetime     | ❌       | Token Expiration Time        |
-| revokedAt  | datetime     | ✅       | Token Revoked Time           |
-| lastUsedAt | datetime     | ✅       | Last Token Usage             |
-| createdAt  | datetime     | ❌       | Creation Time                |
-| updatedAt  | datetime     | ❌       | Update Time                  |
+| Field     | Type         | Nullable | Description           |
+| --------- | ------------ | -------- | --------------------- |
+| id        | UUID         | ❌       | Primary Key           |
+| sessionId | UUID         | ❌       | FK → Session          |
+| tokenHash | varchar(255) | ❌       | Hashed Refresh Token  |
+| expiresAt | datetime     | ❌       | Token Expiration Time |
+| revokedAt | datetime     | ✅       | Token Revoked Time    |
+| createdAt | datetime     | ❌       | Creation Time         |
+| updatedAt | datetime     | ❌       | Update Time           |
 
 ---
 
 # Indexes
 
-```
-INDEX(expiresAt)
+```sql
+INDEX(sessionId, revokedAt, expiresAt)
 
-INDEX(userId, revokedAt)
+INDEX(expiresAt)
 
 UNIQUE(tokenHash)
 ```
@@ -64,11 +56,7 @@ UNIQUE(tokenHash)
 
 # Relations
 
-## Many To One
-
----
-
-## RefreshToken → User
+## RefreshToken → Session
 
 ```
 RefreshToken
@@ -79,28 +67,30 @@ N
 
 1
 
-User
+Session
 ```
 
 ### Description
 
-یک User می‌تواند چند Refresh Token داشته باشد.
+هر Refresh Token متعلق به یک Session است.
+
+Session مسئول مدیریت Device و نشست کاربر است و RefreshToken فقط مسئول نگهداری Token های مربوط به آن Session است.
 
 Example:
 
 ```
-User:
+Session:
 
-Nima
+Chrome Windows
 
 
 RefreshTokens:
 
-Chrome - Windows
+Token A (Revoked)
 
-Safari - iPhone
+Token B (Revoked)
 
-Chrome - Android
+Token C (Active)
 ```
 
 ---
@@ -114,7 +104,11 @@ User Login
 
 ↓
 
-Generate Access Token
+Validate Credentials
+
+↓
+
+Create Session
 
 ↓
 
@@ -126,11 +120,11 @@ Hash Refresh Token
 
 ↓
 
-Collect Client Info
+Save Refresh Token
 
 ↓
 
-Save In Database
+Generate Access Token
 
 ↓
 
@@ -139,18 +133,22 @@ Return Tokens
 
 ---
 
-## Refresh Token Rotation
+# Refresh Token Rotation
 
 ```
-Old Refresh Token
+Current Refresh Token
 
 ↓
 
-Validate
+Validate Token
 
 ↓
 
-Delete/Revoke Old Token
+Find Related Session
+
+↓
+
+Revoke Old Token
 
 ↓
 
@@ -159,6 +157,32 @@ Generate New Refresh Token
 ↓
 
 Save New Token
+
+↓
+
+Generate New Access Token
+```
+
+Refresh Token جدید به همان Session قبلی متصل می‌شود.
+
+Example:
+
+```
+Session:
+
+Chrome Windows
+
+
+Before:
+
+RefreshToken A (Active)
+
+
+After Refresh:
+
+RefreshToken A (Revoked)
+
+RefreshToken B (Active)
 ```
 
 ---
@@ -172,7 +196,7 @@ Refresh Token به صورت Plain Text ذخیره نمی‌شود.
 Wrong:
 
 ```
-database:
+Database:
 
 eyJhbGciOiJIUzI1...
 ```
@@ -180,7 +204,7 @@ eyJhbGciOiJIUzI1...
 Correct:
 
 ```
-database:
+Database:
 
 $2b$10$8dk....
 ```
@@ -205,27 +229,71 @@ Revoked
 
 ## Rule 3
 
-کاربر می‌تواند از تمام دستگاه‌ها Logout شود.
+هر Session می‌تواند چند Refresh Token داشته باشد.
 
-Flow:
+به دلیل Token Rotation:
 
 ```
-User
+Session
 
 ↓
 
-Delete/Revoke
+RefreshToken A (Revoked)
 
 ↓
 
-All RefreshTokens
+RefreshToken B (Revoked)
+
+↓
+
+RefreshToken C (Active)
 ```
 
 ---
 
 ## Rule 4
 
-Token منقضی شده باید پاکسازی شود.
+Logout یک دستگاه:
+
+```
+User
+
+↓
+
+Select Session
+
+↓
+
+Revoke Session
+
+↓
+
+Revoke Related Refresh Tokens
+```
+
+---
+
+## Rule 5
+
+Logout تمام دستگاه‌ها:
+
+```
+User
+
+↓
+
+Revoke All Sessions
+
+↓
+
+Revoke All Refresh Tokens
+```
+
+---
+
+## Rule 6
+
+Token های منقضی شده باید پاکسازی شوند.
 
 توسط Scheduler:
 
@@ -241,11 +309,13 @@ Delete expired tokens
 
 # Security Considerations
 
-- Store hashed token
+- Store only hashed token
+- Never store raw Refresh Token
 - Rotate token after refresh
 - Detect token reuse
 - Revoke suspicious sessions
-- Limit active devices
+- Limit active sessions
+- Support device based logout
 
 ---
 
@@ -257,3 +327,4 @@ Delete expired tokens
 - Suspicious Login Detection
 - Session Management
 - Active Device Management
+- Token Theft Detection
