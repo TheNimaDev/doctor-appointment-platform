@@ -9,6 +9,7 @@ import {
   LoginParams,
   LoginResponse,
   LoginServiceOutput,
+  RefreshTokenPayload,
   RegisterParams,
   VerifyEmailParams,
 } from '@/types';
@@ -121,6 +122,14 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
+  }
+
+  async logout(params: RefreshTokenPayload): Promise<void> {
+    await this.refreshTokenService.revokeRefreshTokenByHash(params.refreshRecord.tokenHash);
+  }
+
+  async logoutAll(params: RefreshTokenPayload): Promise<void> {
+    await this.refreshTokenService.revokeAllUserRefreshTokens(params.user.id);
   }
 
   /** generate new accessToken with payload */
