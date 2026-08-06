@@ -23,6 +23,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     Modules.EmailModule,
     Modules.MailModule,
     Modules.RefreshTokenModule,
+    Modules.SessionModule,
   ],
   providers: [
     {
