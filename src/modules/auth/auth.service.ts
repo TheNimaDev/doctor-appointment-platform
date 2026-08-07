@@ -7,7 +7,6 @@ import {
   BaseException,
   CreateRefreshTokenOutput,
   LoginParams,
-  LoginResponse,
   LoginServiceOutput,
   RefreshTokenPayload,
   RegisterParams,
@@ -21,12 +20,15 @@ import { UserStatus } from '@/modules/user/enums';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
+import { SessionService } from '../session/session.service';
+import { Session } from '../session/entities';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly refreshTokenService: RefreshTokenService,
+    private readonly sessionService: SessionService,
     private readonly emailService: EmailService,
     private readonly eventEmitter: EventEmitter2,
     private readonly configService: ConfigService,
@@ -103,10 +105,26 @@ export class AuthService {
 
     const { user: userData } = getSafeUser(user);
 
-    const refreshToken: CreateRefreshTokenOutput = await this.refreshTokenService.createRefreshToken({
-      userId: user.id,
-      remember: params.remember ?? false,
+    const isSessionExists = await this.sessionService.findActiveUserSession({
+      userId: userData.id,
       clientInfo: params.clientInfo,
+    });
+
+    let userSession: Session;
+    if (isSessionExists) {
+      await this.sessionService.updateLastActive(isSessionExists.id);
+      userSession = isSessionExists;
+    } else {
+      userSession = await this.sessionService.createSession({
+        userId: userData.id,
+        clientInfo: params.clientInfo,
+      });
+    }
+
+    const refreshToken: CreateRefreshTokenOutput = await this.refreshTokenService.createRefreshToken({
+      sessionId: userSession.id,
+      clientInfo: params.clientInfo,
+      remember: params.remember,
     });
 
     const accessTokenPayload: AccessTokenPayload = {
