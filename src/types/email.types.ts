@@ -1,5 +1,8 @@
+import { EntityManager } from 'typeorm';
+
 export interface CreateEmailParams {
   userId: string;
+  manager?: EntityManager;
 }
 
 export interface VerifyEmailParams {
