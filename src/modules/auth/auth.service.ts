@@ -5,7 +5,6 @@ import type { StringValue } from 'ms';
 import {
   AccessTokenPayload,
   BaseException,
-  CreateRefreshTokenOutput,
   LoginParams,
   LoginServiceOutput,
   RefreshTokenPayload,
@@ -117,28 +116,34 @@ export class AuthService {
 
     const { user: userData } = getSafeUser(user);
 
-    const isSessionExists = await this.sessionService.findActiveUserSession({
-      userId: userData.id,
-      clientInfo: params.clientInfo,
-    });
+    const refreshTokenData = await this.databaseService.dataSource.transaction(async (manager) => {
+      let userSession: Session;
 
-    let userSession: Session;
-    if (isSessionExists) {
-      await this.sessionService.updateLastActive({ sessionId: isSessionExists.id });
-      userSession = isSessionExists;
-    } else {
-      userSession = await this.sessionService.createSession({
+      const existingSession = await this.sessionService.findActiveUserSession({
         userId: userData.id,
         clientInfo: params.clientInfo,
+        manager,
       });
-    }
 
-    const refreshToken: CreateRefreshTokenOutput = await this.refreshTokenService.createRefreshToken({
-      sessionId: userSession.id,
-      clientInfo: params.clientInfo,
-      remember: params.remember,
+      if (existingSession) {
+        await this.sessionService.updateLastActive({ sessionId: existingSession.id, manager });
+
+        userSession = existingSession;
+      } else {
+        userSession = await this.sessionService.createSession({
+          userId: userData.id,
+          clientInfo: params.clientInfo,
+          manager,
+        });
+      }
+
+      return this.refreshTokenService.createRefreshToken({
+        sessionId: userSession.id,
+        clientInfo: params.clientInfo,
+        remember: params.remember,
+        manager,
+      });
     });
-
     const accessTokenPayload: AccessTokenPayload = {
       sub: user.id,
       display_name: `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim(),
@@ -146,11 +151,10 @@ export class AuthService {
       permissions: userData.permissions,
     };
     const accessToken: string = this.generateAccessToken(accessTokenPayload);
-
     return {
       user: userData,
       accessToken,
-      refreshToken,
+      refreshToken: refreshTokenData,
     };
   }
 
