@@ -22,6 +22,7 @@ import { JwtService } from '@nestjs/jwt';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 import { SessionService } from '../session/session.service';
 import { Session } from '../session/entities';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class AuthService {
@@ -29,6 +30,7 @@ export class AuthService {
     private readonly databaseService: DatabaseService,
     private readonly refreshTokenService: RefreshTokenService,
     private readonly sessionService: SessionService,
+    private readonly userService: UserService,
     private readonly emailService: EmailService,
     private readonly eventEmitter: EventEmitter2,
     private readonly configService: ConfigService,
@@ -36,18 +38,23 @@ export class AuthService {
   ) {}
 
   async register(params: RegisterParams): Promise<void> {
-    const safeUser = await this.databaseService.dataSource.transaction(async (manager) => {
+    const result = await this.databaseService.dataSource.transaction(async (manager) => {
       const hashedPassword = await hashSecret(params.password);
 
       try {
-        const user = manager.create(User, {
+        const { user } = await this.userService.createUser({
           ...params,
+          manager,
           password: hashedPassword,
         });
 
-        await manager.save(user);
+        const token = await this.emailService.createEmail({ userId: user.id, manager });
+        console.log(token); // TODO: Remove before production
 
-        return getSafeUser(user).user;
+        return {
+          user,
+          token,
+        };
       } catch (error) {
         checkDatabaseError({
           e: error as Error,
@@ -57,13 +64,10 @@ export class AuthService {
       }
     });
 
-    const token = await this.emailService.create({ userId: safeUser.id });
-    console.log(token); // TODO: Remove before production
-
     try {
       this.eventEmitter.emit(EVENTS.SIGNUP_VERIFICATION, {
-        email: safeUser.email,
-        token,
+        email: result.user.email,
+        token: result.token,
       });
     } catch (_) {}
   }
