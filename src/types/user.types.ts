@@ -2,6 +2,7 @@ import { User } from '@/modules/user/entities';
 import { RolesAndPermissions } from './token.types';
 import { EntityManager } from 'typeorm';
 import { RegisterParams } from './auth.types';
+import { UserStatus } from '@/modules/user/enums';
 
 /** User type without sensitive fields */
 export type SafeUser = Omit<User, 'password' | 'sessions'>;
@@ -15,5 +16,11 @@ export interface UserResponse {
 }
 
 export interface CreateUserPayload extends RegisterParams {
+  manager?: EntityManager;
+}
+
+export interface UpdateUserStatusPayload {
+  userId: string;
+  status: UserStatus;
   manager?: EntityManager;
 }
