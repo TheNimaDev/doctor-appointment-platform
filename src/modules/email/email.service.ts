@@ -14,8 +14,10 @@ export class EmailService {
     private readonly configService: ConfigService,
   ) {}
 
-  async create(params: CreateEmailParams): Promise<string> {
-    await this.emailRepository.delete({
+  async createEmail(params: CreateEmailParams): Promise<string> {
+    const repository = params.manager?.getRepository(Email) ?? this.emailRepository;
+
+    await repository.delete({
       userId: params.userId,
     });
 
@@ -25,13 +27,13 @@ export class EmailService {
 
     const expiresIn = this.configService.get<number>('EMAIL_EXPIRES', 10);
 
-    const emailAction = this.emailRepository.create({
+    const emailAction = repository.create({
       userId: params.userId,
       tokenHash,
       expiresAt: new Date(Date.now() + expiresIn * 60 * 1000),
     });
 
-    await this.emailRepository.save(emailAction);
+    await repository.save(emailAction);
 
     return token;
   }
@@ -63,6 +65,6 @@ export class EmailService {
 
     await this.emailRepository.save(email);
 
-    return email.userId
+    return email.userId;
   }
 }
