@@ -10,15 +10,35 @@ export interface CreateSessionPayload {
   manager?: EntityManager;
 }
 
-export interface UpdateLastActiveSessionPayload {
-  sessionId: string;
+export interface FindUserSessionsPayload {
+  userId: string;
+  manager?: EntityManager;
+}
+
+export interface FindActiveUserSessionPayload {
+  userId: string;
+  clientInfo: NormalizedClientInfo;
+  manager?: EntityManager;
+}
+
+export interface FindSessionByIdPayload {
+  id: string;
   manager?: EntityManager;
 }
 
 export type FindUserSessionsOutput = SafeSession[];
 
-export interface FindActiveUserSessionPayload {
+export interface UpdateLastActiveSessionPayload {
+  sessionId: string;
+  manager?: EntityManager;
+}
+
+export interface RevokeSessionPayload {
+  sessionId: string;
+  manager?: EntityManager;
+}
+
+export interface RevokeUserSessionsPayload {
   userId: string;
-  clientInfo: NormalizedClientInfo;
   manager?: EntityManager;
 }
