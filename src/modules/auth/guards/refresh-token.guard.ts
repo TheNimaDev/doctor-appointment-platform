@@ -26,7 +26,7 @@ export class RefreshTokenGuard implements CanActivate {
       } as BaseException);
     }
 
-    const refreshToken = await this.refreshTokenService.findValidRefreshToken(token);
+    const refreshToken = await this.refreshTokenService.findValidRefreshToken({ token });
 
     if (!refreshToken?.session?.user) {
       throw new UnauthorizedException({

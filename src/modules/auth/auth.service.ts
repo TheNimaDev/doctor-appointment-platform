@@ -124,7 +124,7 @@ export class AuthService {
 
     let userSession: Session;
     if (isSessionExists) {
-      await this.sessionService.updateLastActive(isSessionExists.id);
+      await this.sessionService.updateLastActive({ sessionId: isSessionExists.id });
       userSession = isSessionExists;
     } else {
       userSession = await this.sessionService.createSession({
@@ -155,13 +155,13 @@ export class AuthService {
   }
 
   async logout(params: RefreshTokenPayload): Promise<void> {
-    await this.refreshTokenService.revokeRefreshTokenByHash(params.refreshRecord.tokenHash);
-    await this.sessionService.revokeSession(params.session.id);
+    await this.refreshTokenService.revokeRefreshTokenByHash({ tokenHash: params.refreshRecord.tokenHash });
+    await this.sessionService.revokeSession({ sessionId: params.session.id });
   }
 
   async logoutAll(params: RefreshTokenPayload): Promise<void> {
-    await this.refreshTokenService.revokeAllUserRefreshTokens(params.user.id);
-    await this.sessionService.revokeUserSessions(params.user.id);
+    await this.refreshTokenService.revokeAllUserRefreshTokens({ userId: params.user.id });
+    await this.sessionService.revokeUserSessions({ userId: params.user.id });
   }
 
   /** generate new accessToken with payload */
