@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Repository } from 'typeorm';
 
 import { Session } from './entities';
-import { CreateSessionPayload, FindUserSessionsOutput } from '@/types';
+import { CreateSessionPayload, FindActiveUserSessionPayload, FindUserSessionsOutput } from '@/types';
 
 @Injectable()
 export class SessionService {
@@ -36,13 +36,23 @@ export class SessionService {
     });
   }
 
-  async findAllUserSessions(userId: string): Promise<FindUserSessionsOutput> {
+  async findUserSessions(userId: string): Promise<FindUserSessionsOutput> {
     return this.sessionRepository.find({
       where: {
         userId,
       },
       order: {
         lastActiveAt: 'DESC',
+      },
+    });
+  }
+
+  async findActiveUserSession(payload: FindActiveUserSessionPayload): Promise<Session | null> {
+    return this.sessionRepository.findOne({
+      where: {
+        userId: payload.userId,
+        userAgent: payload.clientInfo.userAgent,
+        revokedAt: IsNull(),
       },
     });
   }
