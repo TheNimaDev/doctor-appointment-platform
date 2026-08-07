@@ -144,10 +144,12 @@ export class AuthService {
 
   async logout(params: RefreshTokenPayload): Promise<void> {
     await this.refreshTokenService.revokeRefreshTokenByHash(params.refreshRecord.tokenHash);
+    await this.sessionService.revokeSession(params.session.id);
   }
 
   async logoutAll(params: RefreshTokenPayload): Promise<void> {
     await this.refreshTokenService.revokeAllUserRefreshTokens(params.user.id);
+    await this.sessionService.revokeUserSessions(params.user.id);
   }
 
   /** generate new accessToken with payload */
