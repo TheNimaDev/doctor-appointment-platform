@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Email } from './entities';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { BaseException, CreateEmailParams, VerifyEmailParams } from '@/types';
 import { generateRandomToken, hashToken } from '@/lib';
 import { ConfigService } from '@nestjs/config';
@@ -38,32 +38,28 @@ export class EmailService {
     return token;
   }
 
-  async verify(params: VerifyEmailParams): Promise<string> {
-    const email = await this.emailRepository.findOne({
+  async verifyEmail(params: VerifyEmailParams): Promise<string> {
+    const repository = params.manager?.getRepository(Email) ?? this.emailRepository;
+
+    const email = await repository.findOne({
       where: {
         tokenHash: hashToken(params.token),
         isVerified: false,
+        expiresAt: MoreThan(new Date()),
       },
     });
 
     if (!email) {
       throw new BadRequestException({
-        message: 'Invalid email verification token',
+        message: 'Invalid or expired email verification token',
         error: 'Invalid Token',
-      } as BaseException);
-    }
-
-    if (email.expiresAt < new Date()) {
-      throw new BadRequestException({
-        message: 'Email verification token expired',
-        error: 'Token Expired',
       } as BaseException);
     }
 
     email.isVerified = true;
     email.verifiedAt = new Date();
 
-    await this.emailRepository.save(email);
+    await repository.save(email);
 
     return email.userId;
   }
