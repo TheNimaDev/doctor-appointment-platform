@@ -7,3 +7,5 @@ export interface CreateSessionPayload {
 }
 
 export type FindUserSessionsOutput = Session[];
+
+export interface FindActiveUserSessionPayload extends CreateSessionPayload {}
