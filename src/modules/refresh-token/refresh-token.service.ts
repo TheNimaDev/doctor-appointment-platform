@@ -1,7 +1,16 @@
 import { generateRandomToken, hashToken } from '@/lib';
-import { CreateRefreshTokenOutput, CreateRefreshTokenPayload } from '@/types';
+import {
+  CreateRefreshTokenOutput,
+  CreateRefreshTokenPayload,
+  FindActiveRefreshTokenPayload,
+  FindValidRefreshTokenPayload,
+  RevokeAllUserRefreshTokensPayload,
+  RevokeRefreshTokenByConditionPayload,
+  RevokeRefreshTokenHashPayload,
+  RevokeRefreshTokenPayload,
+} from '@/types';
 import { Injectable } from '@nestjs/common';
-import { FindOptionsWhere, IsNull, MoreThan, Repository } from 'typeorm';
+import { IsNull, MoreThan, Repository } from 'typeorm';
 import { RefreshToken } from './entities';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
@@ -16,10 +25,12 @@ export class RefreshTokenService {
   ) {}
 
   async createRefreshToken(payload: CreateRefreshTokenPayload): Promise<CreateRefreshTokenOutput> {
-    const existingToken = await this.findActiveRefreshToken(payload.sessionId);
+    const repository = payload.manager?.getRepository(RefreshToken) ?? this.refreshTokenRepository;
+
+    const existingToken = await this.findActiveRefreshToken({ sessionId: payload.sessionId, manager: payload.manager });
 
     if (existingToken) {
-      await this.revokeRefreshTokenByHash(existingToken.tokenHash);
+      await this.revokeRefreshTokenByHash({ tokenHash: existingToken.tokenHash, manager: payload.manager });
     }
 
     const refreshToken = generateRandomToken();
@@ -33,12 +44,14 @@ export class RefreshTokenService {
     const maxAge = ms(expiresIn);
     const expiresAt = new Date(Date.now() + maxAge);
 
-    await this.refreshTokenRepository.save({
+    const refreshTokenEntity = repository.create({
       ...payload.clientInfo,
       sessionId: payload.sessionId,
       tokenHash,
       expiresAt,
     });
+
+    await repository.save(refreshTokenEntity);
 
     return {
       token: refreshToken,
@@ -46,20 +59,24 @@ export class RefreshTokenService {
     };
   }
 
-  async findActiveRefreshToken(sessionId: string): Promise<RefreshToken | null> {
-    return this.refreshTokenRepository.findOne({
+  async findActiveRefreshToken(payload: FindActiveRefreshTokenPayload): Promise<RefreshToken | null> {
+    const repository = payload.manager?.getRepository(RefreshToken) ?? this.refreshTokenRepository;
+
+    return repository.findOne({
       where: {
-        sessionId: sessionId,
+        sessionId: payload.sessionId,
         revokedAt: IsNull(),
         expiresAt: MoreThan(new Date()),
       },
     });
   }
 
-  async findValidRefreshToken(token: string): Promise<RefreshToken | null> {
-    return this.refreshTokenRepository.findOne({
+  async findValidRefreshToken(payload: FindValidRefreshTokenPayload): Promise<RefreshToken | null> {
+    const repository = payload.manager?.getRepository(RefreshToken) ?? this.refreshTokenRepository;
+
+    return repository.findOne({
       where: {
-        tokenHash: hashToken(token),
+        tokenHash: hashToken(payload.token),
         revokedAt: IsNull(),
         expiresAt: MoreThan(new Date()),
       },
@@ -71,22 +88,30 @@ export class RefreshTokenService {
     });
   }
 
-  async revokeRefreshTokenByHash(tokenHash: string): Promise<void> {
-    await this.revokeByCondition({
-      tokenHash,
+  async revokeRefreshTokenByHash(payload: RevokeRefreshTokenHashPayload): Promise<void> {
+    await this.revokeRefreshTokenByCondition({
+      manager: payload.manager,
+      where: {
+        tokenHash: payload.tokenHash,
+      },
     });
   }
 
-  async revokeRefreshToken(token: string): Promise<void> {
-    const tokenHash = hashToken(token);
+  async revokeRefreshToken(payload: RevokeRefreshTokenPayload): Promise<void> {
+    const tokenHash = hashToken(payload.token);
 
-    await this.revokeByCondition({
-      tokenHash,
+    await this.revokeRefreshTokenByCondition({
+      manager: payload.manager,
+      where: {
+        tokenHash: tokenHash,
+      },
     });
   }
 
-  async revokeAllUserRefreshTokens(userId: string): Promise<void> {
-    await this.refreshTokenRepository
+  async revokeAllUserRefreshTokens(payload: RevokeAllUserRefreshTokensPayload): Promise<void> {
+    const repository = payload.manager?.getRepository(RefreshToken) ?? this.refreshTokenRepository;
+
+    await repository
       .createQueryBuilder()
       .update(RefreshToken)
       .set({
@@ -96,16 +121,18 @@ export class RefreshTokenService {
         `sessionId IN (
         SELECT id FROM sessions WHERE userId = :userId
       )`,
-        { userId },
+        { userId: payload.userId },
       )
       .andWhere('revokedAt IS NULL')
       .execute();
   }
 
-  private async revokeByCondition(where: FindOptionsWhere<RefreshToken>): Promise<void> {
-    await this.refreshTokenRepository.update(
+  private async revokeRefreshTokenByCondition(payload: RevokeRefreshTokenByConditionPayload): Promise<void> {
+    const repository = payload.manager?.getRepository(RefreshToken) ?? this.refreshTokenRepository;
+
+    await repository.update(
       {
-        ...where,
+        ...payload.where,
         revokedAt: IsNull(),
       },
       {
