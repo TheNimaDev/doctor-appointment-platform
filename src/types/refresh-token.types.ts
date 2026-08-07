@@ -1,7 +1,7 @@
 import { RefreshToken } from '@/modules/refresh-token/entities';
 import { NormalizedClientInfo } from './request.types';
 
-export type SafeRefreshToken = Omit<RefreshToken, 'session' | 'sessionId'>;
+export type SafeRefreshToken = Omit<RefreshToken, 'session' >;
 
 export interface CreateRefreshTokenPayload {
   sessionId: string;
