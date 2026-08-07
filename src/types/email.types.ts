@@ -7,6 +7,7 @@ export interface CreateEmailParams {
 
 export interface VerifyEmailParams {
   token: string;
+  manager?: EntityManager;
 }
 
 export interface SignupVerificationEvent {
