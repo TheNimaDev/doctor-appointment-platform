@@ -1,4 +1,5 @@
 import { SafeRefreshToken } from './refresh-token.types';
+import { SafeSession } from './session.types';
 import { UserResponse } from './user.types';
 
 /** Base token types */
@@ -18,4 +19,5 @@ export interface AccessTokenPayload extends RolesAndPermissions {
 /** JWT refresh token payload */
 export interface RefreshTokenPayload extends UserResponse {
   refreshRecord: SafeRefreshToken;
+  session: SafeSession;
 }
