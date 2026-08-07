@@ -28,18 +28,20 @@ export class RefreshTokenGuard implements CanActivate {
 
     const refreshToken = await this.refreshTokenService.findValidRefreshToken(token);
 
-    if (!refreshToken) {
+    if (!refreshToken?.session?.user) {
       throw new UnauthorizedException({
         message: 'Invalid or expired refresh token',
         error: 'Invalid refreshToken',
       } as BaseException);
     }
 
-    const { user, ...refreshRecord } = refreshToken;
+    const { user: _sessionUser, refreshTokens: _refreshTokens, ...safeSession } = refreshToken.session;
+    const { session: _session, ...safeRefreshToken } = refreshToken;
 
     req.refreshPayload = {
-      refreshRecord,
-      user: getSafeUser(user).user,
+      refreshRecord: safeRefreshToken,
+      session: safeSession,
+      user: getSafeUser(refreshToken.session.user).user,
     };
 
     return true;
