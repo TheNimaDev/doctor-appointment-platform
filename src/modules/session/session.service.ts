@@ -14,7 +14,8 @@ export class SessionService {
 
   async createSession(payload: CreateSessionPayload): Promise<Session> {
     const session = this.sessionRepository.create({
-      ...payload,
+      userId: payload.userId,
+      ...payload.clientInfo,
       lastActiveAt: new Date(),
     });
 
