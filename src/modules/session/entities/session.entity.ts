@@ -26,7 +26,7 @@ export class Session {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'userId' })
-  user: User;
+  user?: User;
 
   @Column({ type: 'varchar', length: 45, nullable: true })
   ipAddress: string | null;
@@ -56,7 +56,7 @@ export class Session {
   revokedAt: Date | null;
 
   @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.session)
-  refreshTokens: RefreshToken[];
+  refreshTokens?: RefreshToken[];
 
   @CreateDateColumn()
   createdAt: Date;

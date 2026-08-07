@@ -11,7 +11,7 @@ export class Email {
 
   @OneToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
-  user: User;
+  user?: User;
 
   @Column({ type: 'varchar', length: 255 })
   tokenHash: string;

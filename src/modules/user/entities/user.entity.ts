@@ -36,7 +36,7 @@ export class User {
   status: UserStatus;
 
   @OneToMany(() => Session, (session) => session.user)
-  sessions: Session[];
+  sessions?: Session[];
 
   @Column({ type: 'datetime', nullable: true })
   lastLoginAt: Date | null;

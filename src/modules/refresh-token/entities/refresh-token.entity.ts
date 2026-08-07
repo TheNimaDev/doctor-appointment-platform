@@ -23,7 +23,7 @@ export class RefreshToken {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'sessionId' })
-  session: Session;
+  session?: Session;
 
   @Column({ type: 'varchar', length: 255, unique: true })
   tokenHash: string;
