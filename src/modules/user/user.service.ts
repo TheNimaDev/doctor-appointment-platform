@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { User } from './entities';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BaseException, CreateUserPayload, UserResponse } from '@/types';
+import { BaseException, CreateUserPayload, UpdateUserStatusPayload, UserResponse } from '@/types';
 import { getSafeUser } from '@/lib';
 
 @Injectable()
@@ -25,6 +25,18 @@ export class UserService {
     return getSafeUser(await repository.save(user));
   }
 
+  async updateUserStatus(payload: UpdateUserStatusPayload): Promise<void> {
+    const repository = payload.manager?.getRepository(User) ?? this.userRepository;
+
+    await repository.update(
+      {
+        id: payload.userId,
+      },
+      {
+        status: payload.status,
+      },
+    );
+  }
   /**
    * Get user by id
    * - Throws NotFoundException if user does not exist
