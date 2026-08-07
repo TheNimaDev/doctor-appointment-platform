@@ -3,7 +3,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Repository } from 'typeorm';
 
 import { Session } from './entities';
-import { CreateSessionPayload, FindActiveUserSessionPayload, FindUserSessionsOutput } from '@/types';
+import {
+  CreateSessionPayload,
+  FindActiveUserSessionPayload,
+  FindSessionByIdPayload,
+  FindUserSessionsOutput,
+  FindUserSessionsPayload,
+  RevokeSessionPayload,
+  RevokeUserSessionsPayload,
+  UpdateLastActiveSessionPayload,
+} from '@/types';
 
 @Injectable()
 export class SessionService {
@@ -13,19 +22,23 @@ export class SessionService {
   ) {}
 
   async createSession(payload: CreateSessionPayload): Promise<Session> {
-    const session = this.sessionRepository.create({
+    const repository = payload.manager?.getRepository(Session) ?? this.sessionRepository;
+
+    const session = repository.create({
       userId: payload.userId,
       ...payload.clientInfo,
       lastActiveAt: new Date(),
     });
 
-    return this.sessionRepository.save(session);
+    return repository.save(session);
   }
 
-  async findActiveUserSessions(userId: string): Promise<FindUserSessionsOutput> {
-    return this.sessionRepository.find({
+  async findActiveUserSessions(payload: FindUserSessionsPayload): Promise<FindUserSessionsOutput> {
+    const repository = payload.manager?.getRepository(Session) ?? this.sessionRepository;
+
+    return repository.find({
       where: {
-        userId,
+        userId: payload.userId,
         revokedAt: IsNull(),
       },
       relations: {
@@ -37,10 +50,12 @@ export class SessionService {
     });
   }
 
-  async findUserSessions(userId: string): Promise<FindUserSessionsOutput> {
-    return this.sessionRepository.find({
+  async findUserSessions(payload: FindUserSessionsPayload): Promise<FindUserSessionsOutput> {
+    const repository = payload.manager?.getRepository(Session) ?? this.sessionRepository;
+
+    return repository.find({
       where: {
-        userId,
+        userId: payload.userId,
       },
       order: {
         lastActiveAt: 'DESC',
@@ -49,7 +64,9 @@ export class SessionService {
   }
 
   async findActiveUserSession(payload: FindActiveUserSessionPayload): Promise<Session | null> {
-    return this.sessionRepository.findOne({
+    const repository = payload.manager?.getRepository(Session) ?? this.sessionRepository;
+
+    return repository.findOne({
       where: {
         userId: payload.userId,
         userAgent: payload.clientInfo.userAgent,
@@ -58,19 +75,23 @@ export class SessionService {
     });
   }
 
-  async findById(id: string): Promise<Session | null> {
-    return this.sessionRepository.findOne({
+  async findById(payload: FindSessionByIdPayload): Promise<Session | null> {
+    const repository = payload.manager?.getRepository(Session) ?? this.sessionRepository;
+
+    return repository.findOne({
       where: {
-        id,
+        id: payload.id,
         revokedAt: IsNull(),
       },
     });
   }
 
-  async updateLastActive(sessionId: string): Promise<void> {
-    await this.sessionRepository.update(
+  async updateLastActive(payload: UpdateLastActiveSessionPayload): Promise<void> {
+    const repository = payload.manager?.getRepository(Session) ?? this.sessionRepository;
+
+    await repository.update(
       {
-        id: sessionId,
+        id: payload.sessionId,
         revokedAt: IsNull(),
       },
       {
@@ -79,10 +100,12 @@ export class SessionService {
     );
   }
 
-  async revokeSession(sessionId: string): Promise<void> {
-    await this.sessionRepository.update(
+  async revokeSession(payload: RevokeSessionPayload): Promise<void> {
+    const repository = payload.manager?.getRepository(Session) ?? this.sessionRepository;
+
+    await repository.update(
       {
-        id: sessionId,
+        id: payload.sessionId,
         revokedAt: IsNull(),
       },
       {
@@ -91,10 +114,12 @@ export class SessionService {
     );
   }
 
-  async revokeUserSessions(userId: string): Promise<void> {
-    await this.sessionRepository.update(
+  async revokeUserSessions(payload: RevokeUserSessionsPayload): Promise<void> {
+    const repository = payload.manager?.getRepository(Session) ?? this.sessionRepository;
+
+    await repository.update(
       {
-        userId,
+        userId: payload.userId,
         revokedAt: IsNull(),
       },
       {
