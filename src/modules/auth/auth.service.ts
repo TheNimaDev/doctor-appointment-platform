@@ -73,9 +73,17 @@ export class AuthService {
   }
 
   async verifyEmail(params: VerifyEmailParams): Promise<void> {
-    const userId = await this.emailService.verify(params);
-    await this.databaseService.dataSource.manager.update(User, userId, {
-      status: UserStatus.ACTIVE,
+    await this.databaseService.dataSource.transaction(async (manager) => {
+      const userId = await this.emailService.verifyEmail({
+        ...params,
+        manager,
+      });
+
+      await this.userService.updateUserStatus({
+        manager,
+        userId,
+        status: UserStatus.ACTIVE,
+      });
     });
   }
 
