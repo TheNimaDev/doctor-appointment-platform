@@ -9,11 +9,6 @@ export interface CreateRefreshTokenPayload {
   remember: boolean;
 }
 
-export interface FindActiveRefreshTokenPayload {
-  sessionId: string;
-  clientInfo: NormalizedClientInfo;
-}
-
 export interface CreateRefreshTokenOutput {
   token: string;
   maxAge: number;

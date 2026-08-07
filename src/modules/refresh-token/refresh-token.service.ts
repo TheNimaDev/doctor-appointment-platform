@@ -1,5 +1,5 @@
 import { generateRandomToken, hashToken } from '@/lib';
-import { CreateRefreshTokenOutput, CreateRefreshTokenPayload, FindActiveRefreshTokenPayload } from '@/types';
+import { CreateRefreshTokenOutput, CreateRefreshTokenPayload } from '@/types';
 import { Injectable } from '@nestjs/common';
 import { FindOptionsWhere, IsNull, MoreThan, Repository } from 'typeorm';
 import { RefreshToken } from './entities';
@@ -16,10 +16,7 @@ export class RefreshTokenService {
   ) {}
 
   async createRefreshToken(payload: CreateRefreshTokenPayload): Promise<CreateRefreshTokenOutput> {
-    const existingToken = await this.findActiveRefreshToken({
-      sessionId: payload.sessionId,
-      clientInfo: payload.clientInfo,
-    });
+    const existingToken = await this.findActiveRefreshToken(payload.sessionId);
 
     if (existingToken) {
       await this.revokeRefreshTokenByHash(existingToken.tokenHash);
@@ -49,10 +46,10 @@ export class RefreshTokenService {
     };
   }
 
-  async findActiveRefreshToken(payload: FindActiveRefreshTokenPayload): Promise<RefreshToken | null> {
+  async findActiveRefreshToken(sessionId: string): Promise<RefreshToken | null> {
     return this.refreshTokenRepository.findOne({
       where: {
-        sessionId: payload.sessionId,
+        sessionId: sessionId,
         revokedAt: IsNull(),
         expiresAt: MoreThan(new Date()),
       },
@@ -67,7 +64,9 @@ export class RefreshTokenService {
         expiresAt: MoreThan(new Date()),
       },
       relations: {
-        session: true,
+        session: {
+          user: true,
+        },
       },
     });
   }
