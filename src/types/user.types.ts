@@ -38,3 +38,10 @@ export interface FindUserByEmailPayload {
   email: string;
   manager?: EntityManager;
 }
+
+/** Parameters required to update a user's password. */
+export interface UpdatePasswordParams {
+  userId: string;
+  password: string;
+  manager?: EntityManager;
+}
