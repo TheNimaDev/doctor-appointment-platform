@@ -24,6 +24,11 @@ export class RefreshTokenService {
     private readonly configService: ConfigService,
   ) {}
 
+  /**
+   * Create a new refresh token for a session.
+   * - Revokes the existing active refresh token for the session.
+   * - Returns the raw token and its maximum age.
+   */
   async createRefreshToken(payload: CreateRefreshTokenPayload): Promise<CreateRefreshTokenOutput> {
     const repository = payload.manager?.getRepository(RefreshToken) ?? this.refreshTokenRepository;
 
@@ -59,6 +64,10 @@ export class RefreshTokenService {
     };
   }
 
+  /**
+   * Find the active and non-expired refresh token for a session.
+   * - Returns null if no active refresh token is found.
+   */
   async findActiveRefreshToken(payload: FindActiveRefreshTokenPayload): Promise<RefreshToken | null> {
     const repository = payload.manager?.getRepository(RefreshToken) ?? this.refreshTokenRepository;
 
@@ -71,6 +80,11 @@ export class RefreshTokenService {
     });
   }
 
+  /**
+   * Find a valid refresh token by its raw token.
+   * - The token must be active and non-expired.
+   * - Includes the associated session and user.
+   */
   async findValidRefreshToken(payload: FindValidRefreshTokenPayload): Promise<RefreshToken | null> {
     const repository = payload.manager?.getRepository(RefreshToken) ?? this.refreshTokenRepository;
 
@@ -88,6 +102,10 @@ export class RefreshTokenService {
     });
   }
 
+  /**
+   * Revoke a refresh token using its existing hash.
+   * - Does nothing if the token is already revoked or does not exist.
+   */
   async revokeRefreshTokenByHash(payload: RevokeRefreshTokenHashPayload): Promise<void> {
     await this.revokeRefreshTokenByCondition({
       manager: payload.manager,
@@ -97,17 +115,25 @@ export class RefreshTokenService {
     });
   }
 
+  /**
+   * Revoke a refresh token using its raw token.
+   * - The raw token is hashed before querying the database.
+   */
   async revokeRefreshToken(payload: RevokeRefreshTokenPayload): Promise<void> {
     const tokenHash = hashToken(payload.token);
 
     await this.revokeRefreshTokenByCondition({
       manager: payload.manager,
       where: {
-        tokenHash: tokenHash,
+        tokenHash,
       },
     });
   }
 
+  /**
+   * Revoke all active refresh tokens belonging to a user.
+   * - Does nothing if the user has no active refresh tokens.
+   */
   async revokeAllUserRefreshTokens(payload: RevokeAllUserRefreshTokensPayload): Promise<void> {
     const repository = payload.manager?.getRepository(RefreshToken) ?? this.refreshTokenRepository;
 
@@ -127,6 +153,10 @@ export class RefreshTokenService {
       .execute();
   }
 
+  /**
+   * Revoke an active refresh token using the provided conditions.
+   * - Only non-revoked tokens are updated.
+   */
   private async revokeRefreshTokenByCondition(payload: RevokeRefreshTokenByConditionPayload): Promise<void> {
     const repository = payload.manager?.getRepository(RefreshToken) ?? this.refreshTokenRepository;
 
