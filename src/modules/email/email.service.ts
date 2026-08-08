@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Email } from './entities';
 import { MoreThan, Repository } from 'typeorm';
-import { BaseException, CreateEmailParams, VerifyEmailParams } from '@/types';
+import { BaseException, CreateEmailParams, FindActiveEmailParams, VerifyEmailParams } from '@/types';
 import { generateRandomToken, hashToken } from '@/lib';
 import { ConfigService } from '@nestjs/config';
 import ms, { StringValue } from 'ms';
@@ -14,6 +14,23 @@ export class EmailService {
     private readonly emailRepository: Repository<Email>,
     private readonly configService: ConfigService,
   ) {}
+
+  /**
+   * Find the active email verification token for a user.
+   * - Returns null if no active verification token exists.
+   * - Only returns unverified and non-expired tokens.
+   */
+  async findActiveEmail(params: FindActiveEmailParams): Promise<Email | null> {
+    const repository = params.manager?.getRepository(Email) ?? this.emailRepository;
+
+    return repository.findOne({
+      where: {
+        userId: params.userId,
+        isVerified: false,
+        expiresAt: MoreThan(new Date()),
+      },
+    });
+  }
 
   /**
    * Create a new email verification token for a user.
