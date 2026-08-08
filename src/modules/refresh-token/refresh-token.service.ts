@@ -4,7 +4,7 @@ import {
   CreateRefreshTokenPayload,
   FindActiveRefreshTokenPayload,
   FindValidRefreshTokenPayload,
-  RevokeAllUserRefreshTokensPayload,
+  RevokeUserRefreshTokensPayload,
   RevokeRefreshTokenByConditionPayload,
   RevokeRefreshTokenHashPayload,
   RevokeRefreshTokenPayload,
@@ -134,7 +134,7 @@ export class RefreshTokenService {
    * Revoke all active refresh tokens belonging to a user.
    * - Does nothing if the user has no active refresh tokens.
    */
-  async revokeAllUserRefreshTokens(payload: RevokeAllUserRefreshTokensPayload): Promise<void> {
+  async revokeUserRefreshTokens(payload: RevokeUserRefreshTokensPayload): Promise<void> {
     const repository = payload.manager?.getRepository(RefreshToken) ?? this.refreshTokenRepository;
 
     await repository
