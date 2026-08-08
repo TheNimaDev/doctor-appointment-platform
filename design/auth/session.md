@@ -18,21 +18,22 @@ Session برای قابلیت‌هایی مثل:
 
 # Fields
 
-| Field        | Type         | Nullable | Description              |
-| ------------ | ------------ | -------- | ------------------------ |
-| id           | UUID         | ❌       | Primary Key              |
-| userId       | UUID         | ❌       | FK → User                |
-| ipAddress    | varchar(45)  | ✅       | User IP Address          |
-| userAgent    | text         | ✅       | Raw Browser User Agent   |
-| browser      | varchar(50)  | ✅       | Browser Name             |
-| os           | varchar(50)  | ✅       | Operating System         |
-| device       | varchar(50)  | ✅       | Device Type              |
-| country      | varchar(100) | ✅       | User Country             |
-| city         | varchar(100) | ✅       | User City                |
-| lastActiveAt | datetime     | ❌       | آخرین فعالیت Session     |
-| revokedAt    | datetime     | ✅       | زمان غیرفعال شدن Session |
-| createdAt    | datetime     | ❌       | Creation Time            |
-| updatedAt    | datetime     | ❌       | Update Time              |
+| Field        | Type         | Nullable | Description                                                |
+| ------------ | ------------ | -------- | ---------------------------------------------------------- |
+| id           | UUID         | ❌       | Primary Key                                                |
+| userId       | UUID         | ❌       | FK → User                                                  |
+| ipAddress    | varchar(45)  | ✅       | User IP Address                                            |
+| userAgent    | text         | ✅       | Raw Browser User Agent                                     |
+| browser      | varchar(50)  | ✅       | Browser Name                                               |
+| os           | varchar(50)  | ✅       | Operating System                                           |
+| device       | varchar(50)  | ✅       | Device Type                                                |
+| country      | varchar(100) | ✅       | User Country                                               |
+| city         | varchar(100) | ✅       | User City                                                  |
+| remember     | boolean      | ❌       | Whether the session uses extended refresh-token expiration |
+| lastActiveAt | datetime     | ❌       | آخرین فعالیت Session                                       |
+| revokedAt    | datetime     | ✅       | زمان غیرفعال شدن Session                                   |
+| createdAt    | datetime     | ❌       | Creation Time                                              |
+| updatedAt    | datetime     | ❌       | Update Time                                                |
 
 ---
 
@@ -204,6 +205,8 @@ Android         Android   2 days ago
 
 هر Login از یک Device جدید یک Session جدید ایجاد می‌کند.
 
+اگر Session فعال مربوط به همان Client قبلاً وجود داشته باشد، می‌توان همان Session را مجدداً استفاده کرد و `lastActiveAt` را بروزرسانی کرد.
+
 Example:
 
 ```
@@ -211,24 +214,47 @@ Login From Chrome
 
 ↓
 
-Create Session
-
-
-Login From iPhone
+Find Active Session
 
 ↓
 
-Create Another Session
+Session Found
+    ↓
+Update lastActiveAt
+
+OR
+
+Session Not Found
+    ↓
+Create Session
 ```
-
-Login مجدد از همان Device می‌تواند:
-
-- Session قبلی را ادامه دهد
-- یا Session جدید ایجاد کند
 
 ---
 
 ## Rule 2
+
+مقدار `remember` متعلق به Session است و مدت اعتبار Refresh Token را تعیین می‌کند.
+
+```
+remember = false
+
+↓
+
+Normal Refresh Token expiration
+
+
+remember = true
+
+↓
+
+Extended Refresh Token expiration
+```
+
+در زمان Refresh Token Rotation، Refresh Token جدید به همان Session متصل می‌شود و مقدار `remember` از Session فعلی استفاده می‌شود.
+
+---
+
+## Rule 3
 
 Logout یک دستگاه خاص:
 
@@ -258,7 +284,7 @@ RefreshToken.revokedAt = now()
 
 ---
 
-## Rule 3
+## Rule 4
 
 Logout All Devices:
 
@@ -276,11 +302,11 @@ Revoke All Refresh Tokens
 
 ---
 
-## Rule 4
+## Rule 5
 
 Session Activity باید بروزرسانی شود.
 
-هنگام استفاده از Refresh Token:
+هنگام استفاده موفق از Refresh Token:
 
 ```
 Refresh Request
@@ -307,7 +333,14 @@ Validate Credentials
 
 ↓
 
-Create Session
+Find Active Session
+
+↓
+
+Session Found?
+    ├── Yes → Update lastActiveAt
+    │
+    └── No → Create Session
 
 ↓
 
@@ -340,6 +373,10 @@ Send Refresh Token
 ↓
 
 Validate Refresh Token
+
+↓
+
+Validate Session
 
 ↓
 
@@ -390,6 +427,7 @@ Clear Cookie
 - Store only hashed Refresh Token
 - Support device-based logout
 - Support logout from all devices
+- Validate Session status during Refresh
 - Detect suspicious sessions
 - Track login activity
 - Limit active sessions per user
@@ -399,9 +437,9 @@ Clear Cookie
 # Future Improvements
 
 - Device Trust
-- Remember Device
 - Login History
 - Location Tracking
 - Security Alerts
 - Suspicious Login Detection
 - Device Fingerprinting
+- Active Session Limit
