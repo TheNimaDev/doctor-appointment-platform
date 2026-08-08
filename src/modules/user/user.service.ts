@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { User } from './entities';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,16 +7,19 @@ import {
   CreateUserPayload,
   FindUserByEmailPayload,
   GetUserByIdPayload,
+  UpdatePasswordParams,
   UpdateUserStatusPayload,
   UserResponse,
 } from '@/types';
 import { checkDatabaseError, getSafeUser } from '@/lib';
+import { DatabaseService } from '@/modules/database/database.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly databaseService: DatabaseService,
   ) {}
 
   /**
@@ -120,5 +123,62 @@ export class UserService {
     }
 
     return getSafeUser(user);
+  }
+
+  /**
+   * Find a user by email with the password hash.
+   *
+   * - Returns the user including the password hash.
+   * - Throws UnauthorizedException if the user does not exist.
+   */
+  async findByEmailWithPassword(email: string): Promise<User> {
+    const user = await this.databaseService.dataSource
+      .createQueryBuilder(User, 'user')
+      .addSelect('user.password')
+      .where('user.email = :email', { email })
+      .getOne();
+
+    if (!user) {
+      throw new UnauthorizedException({
+        message: 'Invalid user credentials',
+        error: 'Invalid Credentials',
+      } as BaseException);
+    }
+
+    return user;
+  }
+
+  /**
+   * Find a user by ID with the password hash.
+   *
+   * - Returns the user including the password hash.
+   * - Throws UnauthorizedException if the user does not exist.
+   */
+  async findByIdWithPassword(userId: string): Promise<User> {
+    const user = await this.databaseService.dataSource
+      .createQueryBuilder(User, 'user')
+      .addSelect('user.password')
+      .where('user.id = :userId', { userId })
+      .getOne();
+
+    if (!user) {
+      throw new UnauthorizedException({
+        message: 'Invalid user credentials',
+        error: 'Invalid Credentials',
+      } as BaseException);
+    }
+
+    return user;
+  }
+
+  /**
+   * Update a user's password.
+   *
+   * - Updates the user's password hash.
+   */
+  async updatePassword(params: UpdatePasswordParams): Promise<void> {
+    const repository = params.manager?.getRepository(User) ?? this.userRepository;
+
+    await repository.update({ id: params.userId }, { password: params.password });
   }
 }
