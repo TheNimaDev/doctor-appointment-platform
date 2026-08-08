@@ -19,6 +19,10 @@ export class UserService {
     private readonly userRepository: Repository<User>,
   ) {}
 
+  /**
+   * Create a new user.
+   * - Throws ConflictException if the email already exists.
+   */
   async createUser(payload: CreateUserPayload): Promise<UserResponse> {
     try {
       const repository = payload.manager?.getRepository(User) ?? this.userRepository;
@@ -40,6 +44,10 @@ export class UserService {
     }
   }
 
+  /**
+   * Update the status of a user.
+   * - Throws NotFoundException if the user does not exist.
+   */
   async updateUserStatus(payload: UpdateUserStatusPayload): Promise<void> {
     try {
       const repository = payload.manager?.getRepository(User) ?? this.userRepository;
@@ -72,8 +80,8 @@ export class UserService {
   }
 
   /**
-   * Get user by id
-   * - Throws NotFoundException if user does not exist
+   * Get user by id.
+   * - Throws NotFoundException if the user does not exist.
    */
   async getById(payload: GetUserByIdPayload): Promise<UserResponse> {
     const repository = payload.manager?.getRepository(User) ?? this.userRepository;
@@ -95,8 +103,8 @@ export class UserService {
   }
 
   /**
-   * Find user by email
-   * - Used to check if email exists
+   * Find user by email.
+   * - Returns null if the user does not exist.
    */
   async findByEmail(payload: FindUserByEmailPayload): Promise<UserResponse | null> {
     const repository = payload.manager?.getRepository(User) ?? this.userRepository;
