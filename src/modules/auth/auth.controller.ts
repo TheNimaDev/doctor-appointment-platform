@@ -4,7 +4,7 @@ import { ChangePasswordDto, LoginDto, RegisterDto, ResendVerificationEmailDto, V
 import type { AccessRequest, ApiResponse, LoginResponse, NormalizedClientInfo, RefreshRequest } from '@/types';
 import type { CookieOptions, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
-import { AccessTokenGuard, NormalizeClientInfo } from '@/common';
+import { NormalizeClientInfo, Public } from '@/common';
 import { RefreshTokenGuard } from './guards/refresh-token.guard';
 
 @Controller('auth')
@@ -36,6 +36,7 @@ export class AuthController {
    */
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
+  @Public()
   async register(@Body() registerDto: RegisterDto): Promise<ApiResponse> {
     await this.authService.register(registerDto);
 
@@ -49,6 +50,7 @@ export class AuthController {
    */
   @Get('verify/email')
   @HttpCode(HttpStatus.OK)
+  @Public()
   async verifyEmail(@Query() verifyEmailDto: VerifyEmailDto): Promise<ApiResponse> {
     await this.authService.verifyEmail(verifyEmailDto);
 
@@ -63,6 +65,7 @@ export class AuthController {
    */
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @Public()
   async login(
     @Body() loginDto: LoginDto,
     @NormalizeClientInfo() clientInfo: NormalizedClientInfo,
@@ -84,6 +87,7 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RefreshTokenGuard)
+  @Public()
   async logout(@Req() req: RefreshRequest, @Res({ passthrough: true }) res: Response): Promise<ApiResponse> {
     res.clearCookie('refreshToken', this.getCookieOptions());
     await this.authService.logout(req.refreshPayload);
@@ -99,6 +103,7 @@ export class AuthController {
   @Post('logout/all')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RefreshTokenGuard)
+  @Public()
   async logoutAll(@Req() req: RefreshRequest, @Res({ passthrough: true }) res: Response): Promise<ApiResponse> {
     res.clearCookie('refreshToken', this.getCookieOptions());
     await this.authService.logoutAll(req.refreshPayload);
@@ -113,6 +118,7 @@ export class AuthController {
    */
   @Post('verify/email/resend')
   @HttpCode(HttpStatus.OK)
+  @Public()
   async resendVerificationEmail(@Body() resendVerificationEmailDto: ResendVerificationEmailDto): Promise<ApiResponse> {
     await this.authService.resendVerificationEmail(resendVerificationEmailDto);
 
@@ -130,6 +136,7 @@ export class AuthController {
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RefreshTokenGuard)
+  @Public()
   async refresh(
     @Req() req: RefreshRequest,
     @Res({ passthrough: true }) res: Response,
