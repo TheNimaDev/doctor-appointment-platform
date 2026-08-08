@@ -36,6 +36,11 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
+  /**
+   * Register a new user and create an email verification token.
+   * - Creates the user and verification token within a transaction.
+   * - Emits a signup verification event after the transaction succeeds.
+   */
   async register(params: RegisterParams): Promise<void> {
     const result = await this.databaseService.dataSource.transaction(async (manager) => {
       const hashedPassword = await hashSecret(params.password);
@@ -63,6 +68,10 @@ export class AuthService {
     } catch (_) {}
   }
 
+  /**
+   * Verify a user's email and activate their account.
+   * - Verifies the email token and activates the user within a transaction.
+   */
   async verifyEmail(params: VerifyEmailParams): Promise<void> {
     await this.databaseService.dataSource.transaction(async (manager) => {
       const userId = await this.emailService.verifyEmail({
@@ -78,6 +87,12 @@ export class AuthService {
     });
   }
 
+  /**
+   * Authenticate a user and issue access and refresh tokens.
+   * - Validates the user's credentials and account status.
+   * - Creates or updates the user's active session.
+   * - Creates a new refresh token within a transaction.
+   */
   async login(params: LoginParams): Promise<LoginServiceOutput> {
     const user = await this.databaseService.dataSource
       .createQueryBuilder(User, 'user')
@@ -150,6 +165,10 @@ export class AuthService {
     };
   }
 
+  /**
+   * Log out the current session.
+   * - Revokes the current refresh token and its associated session atomically.
+   */
   async logout(params: RefreshTokenPayload): Promise<void> {
     await this.databaseService.dataSource.transaction(async (manager) => {
       await this.refreshTokenService.revokeRefreshTokenByHash({
@@ -164,6 +183,10 @@ export class AuthService {
     });
   }
 
+  /**
+   * Log out the user from all active sessions.
+   * - Revokes all user refresh tokens and active sessions atomically.
+   */
   async logoutAll(params: RefreshTokenPayload): Promise<void> {
     await this.databaseService.dataSource.transaction(async (manager) => {
       await this.refreshTokenService.revokeAllUserRefreshTokens({
@@ -178,7 +201,9 @@ export class AuthService {
     });
   }
 
-  /** generate new accessToken with payload */
+  /**
+   * Generate a new access token from the given payload.
+   */
   generateAccessToken(payload: AccessTokenPayload): string {
     return this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_TOKEN_SECRET'),
