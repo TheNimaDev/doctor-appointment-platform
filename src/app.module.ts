@@ -7,16 +7,16 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
-    // Config service for environment
+    // Load environment configuration
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
     }),
 
-    // Config Event Emitter
+    // Configure event emitter
     EventEmitterModule.forRoot(),
 
-    // Core App Modules
+    // Application modules
     Modules.DatabaseModule,
     Modules.UserModule,
     Modules.AuthModule,

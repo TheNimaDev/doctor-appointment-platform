@@ -12,27 +12,28 @@ let APP_NAME: string;
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Use environment
+  // Load environment configuration
   const configService = app.get(ConfigService);
   PORT = configService.get<number>('PORT', 3001);
   BASE_URL = configService.get<string>('BASE_URL', 'api/v1');
   APP_NAME = configService.get<string>('APP_NAME', 'Doctor Appointment Platform');
 
-  //Base url
+  // Set global API prefix
   app.setGlobalPrefix(BASE_URL);
 
   // Enable cookie parsing
   app.use(cookieParser());
 
-  // Cheack DB connection
+  // Check database connection before starting the server
   const databaseService = app.get(DatabaseService);
   const isConnected: boolean = await databaseService.isConnected();
+
   if (!isConnected) {
     await app.close();
     throw new Error('❌ Database connection failed');
   }
 
-  // Listen app
+  // Start HTTP server
   await app.listen(PORT);
 }
 
