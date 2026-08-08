@@ -159,13 +159,31 @@ export class AuthService {
   }
 
   async logout(params: RefreshTokenPayload): Promise<void> {
-    await this.refreshTokenService.revokeRefreshTokenByHash({ tokenHash: params.refreshRecord.tokenHash });
-    await this.sessionService.revokeSession({ sessionId: params.session.id });
+    await this.databaseService.dataSource.transaction(async (manager) => {
+      await this.refreshTokenService.revokeRefreshTokenByHash({
+        tokenHash: params.refreshRecord.tokenHash,
+        manager,
+      });
+
+      await this.sessionService.revokeSession({
+        sessionId: params.session.id,
+        manager,
+      });
+    });
   }
 
   async logoutAll(params: RefreshTokenPayload): Promise<void> {
-    await this.refreshTokenService.revokeAllUserRefreshTokens({ userId: params.user.id });
-    await this.sessionService.revokeUserSessions({ userId: params.user.id });
+    await this.databaseService.dataSource.transaction(async (manager) => {
+      await this.refreshTokenService.revokeAllUserRefreshTokens({
+        userId: params.user.id,
+        manager,
+      });
+
+      await this.sessionService.revokeUserSessions({
+        userId: params.user.id,
+        manager,
+      });
+    });
   }
 
   /** generate new accessToken with payload */
