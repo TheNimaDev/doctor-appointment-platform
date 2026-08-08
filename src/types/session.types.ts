@@ -8,6 +8,7 @@ export type SafeSession = Omit<Session, 'user' | 'refreshTokens'>;
 /** Payload required to create a session. */
 export interface CreateSessionPayload {
   userId: string;
+  remember: boolean;
   clientInfo: NormalizedClientInfo;
   manager?: EntityManager;
 }
@@ -34,9 +35,10 @@ export interface FindSessionByIdPayload {
 /** List of sessions belonging to a user. */
 export type FindUserSessionsOutput = SafeSession[];
 
-/** Payload required to update a session's last active time. */
-export interface UpdateLastActiveSessionPayload {
+/** Payload required to update a session's activity and remember preference. */
+export interface UpdateSessionPayload {
   sessionId: string;
+  remember?: boolean;
   manager?: EntityManager;
 }
 
