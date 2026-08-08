@@ -8,6 +8,9 @@ import type { SignupVerificationEvent } from '@/types';
 export class EmailListener {
   constructor(private readonly mailService: MailService) {}
 
+  /**
+   * Handle signup verification events and send the verification email.
+   */
   @OnEvent(EVENTS.SIGNUP_VERIFICATION)
   async handleSignupVerification(payload: SignupVerificationEvent): Promise<void> {
     const verifyUrl = `http://localhost:3000/api/v1/auth/verify/email?token=${payload.token}`;
