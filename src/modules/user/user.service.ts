@@ -2,8 +2,15 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { User } from './entities';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BaseException, CreateUserPayload, UpdateUserStatusPayload, UserResponse } from '@/types';
-import { getSafeUser } from '@/lib';
+import {
+  BaseException,
+  CreateUserPayload,
+  FindUserByEmailPayload,
+  GetUserByIdPayload,
+  UpdateUserStatusPayload,
+  UserResponse,
+} from '@/types';
+import { checkDatabaseError, getSafeUser } from '@/lib';
 
 @Injectable()
 export class UserService {
@@ -13,46 +20,76 @@ export class UserService {
   ) {}
 
   async createUser(payload: CreateUserPayload): Promise<UserResponse> {
-    const repository = payload.manager?.getRepository(User) ?? this.userRepository;
+    try {
+      const repository = payload.manager?.getRepository(User) ?? this.userRepository;
 
-    const user = repository.create({
-      email: payload.email,
-      firstName: payload.firstName,
-      lastName: payload.lastName,
-      password: payload.password,
-    });
+      const user = repository.create({
+        email: payload.email,
+        firstName: payload.firstName,
+        lastName: payload.lastName,
+        password: payload.password,
+      });
 
-    return getSafeUser(await repository.save(user));
+      return getSafeUser(await repository.save(user));
+    } catch (error) {
+      checkDatabaseError({
+        e: error as Error,
+        mainResource: 'User',
+        conflictField: 'email',
+      });
+    }
   }
 
   async updateUserStatus(payload: UpdateUserStatusPayload): Promise<void> {
-    const repository = payload.manager?.getRepository(User) ?? this.userRepository;
+    try {
+      const repository = payload.manager?.getRepository(User) ?? this.userRepository;
 
-    await repository.update(
-      {
-        id: payload.userId,
-      },
-      {
-        status: payload.status,
-      },
-    );
+      const result = await repository.update(
+        {
+          id: payload.userId,
+        },
+        {
+          status: payload.status,
+        },
+      );
+
+      if (result.affected === 0) {
+        throw new NotFoundException({
+          message: 'User not found in database',
+          error: 'User Not Found',
+        } as BaseException);
+      }
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      checkDatabaseError({
+        e: error as Error,
+        mainResource: 'User',
+      });
+    }
   }
+
   /**
    * Get user by id
    * - Throws NotFoundException if user does not exist
    */
-  async getById(id: string): Promise<UserResponse> {
-    const user = await this.userRepository.findOne({
+  async getById(payload: GetUserByIdPayload): Promise<UserResponse> {
+    const repository = payload.manager?.getRepository(User) ?? this.userRepository;
+
+    const user = await repository.findOne({
       where: {
-        id,
+        id: payload.id,
       },
     });
 
-    if (!user)
+    if (!user) {
       throw new NotFoundException({
-        message: 'User not exist in database',
+        message: 'User not found in database',
         error: 'User Not Found',
       } as BaseException);
+    }
 
     return getSafeUser(user);
   }
@@ -61,14 +98,18 @@ export class UserService {
    * Find user by email
    * - Used to check if email exists
    */
-  async findByEmail(email: string): Promise<UserResponse | null> {
-    const user = await this.userRepository.findOne({
+  async findByEmail(payload: FindUserByEmailPayload): Promise<UserResponse | null> {
+    const repository = payload.manager?.getRepository(User) ?? this.userRepository;
+
+    const user = await repository.findOne({
       where: {
-        email,
+        email: payload.email,
       },
     });
 
-    if (!user) return null;
+    if (!user) {
+      return null;
+    }
 
     return getSafeUser(user);
   }
