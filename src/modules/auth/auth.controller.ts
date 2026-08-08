@@ -114,4 +114,26 @@ export class AuthController {
       message: 'Verification email sent successfully.',
     };
   }
+
+  /**
+   * Refresh the user's access and refresh tokens.
+   * - Validates the current refresh token using the refresh token guard.
+   * - Rotates the refresh token and stores the new token in an HTTP-only cookie.
+   * - Returns a new access token and user data.
+   */
+  @Post('refresh')
+  @UseGuards(RefreshTokenGuard)
+  async refresh(
+    @Req() req: RefreshRequest,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<ApiResponse<LoginResponse>> {
+    const { refreshToken, ...data } = await this.authService.refresh(req.refreshPayload);
+
+    res.cookie('refreshToken', refreshToken.token, this.getCookieOptions(refreshToken.maxAge));
+
+    return {
+      message: 'Token refreshed successfully.',
+      data,
+    };
+  }
 }
