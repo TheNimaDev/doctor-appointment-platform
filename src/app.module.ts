@@ -1,8 +1,8 @@
 import { MiddlewareConsumer, Module, NestModule, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import * as Modules from '@/modules';
-import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
-import { ClientInfoMiddleware, ResponseInterceptor } from '@/common';
+import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { AccessTokenGuard, ClientInfoMiddleware, ResponseInterceptor } from '@/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
@@ -37,6 +37,10 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     {
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: AccessTokenGuard
     },
   ],
 })
