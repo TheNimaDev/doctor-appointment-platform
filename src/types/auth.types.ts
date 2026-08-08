@@ -27,3 +27,9 @@ export interface LoginParams {
 export interface LoginServiceOutput extends LoginResponse {
   refreshToken: CreateRefreshTokenOutput;
 }
+
+/** Resend email verification parameters */
+export interface ResendVerificationEmailPayload {
+  email: string;
+  password: string;
+}
