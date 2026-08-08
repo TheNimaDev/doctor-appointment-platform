@@ -1,18 +1,22 @@
 import { Request } from 'express';
 import { AccessTokenPayload, RefreshTokenPayload } from './token.types';
 
-/** Authenticated user data extracted from access token */
-export type UserAccess = Omit<AccessTokenPayload, 'sub'> & { userId: string };
+/** Authenticated user data extracted from the access token. */
+export type UserAccess = Omit<AccessTokenPayload, 'sub'> & {
+  userId: string;
+};
 
-/** HTTP request with authenticated user information */
+/** HTTP request containing authenticated user information. */
 export interface AccessRequest extends Request {
   user: UserAccess;
 }
 
+/** HTTP request containing authenticated refresh token information. */
 export interface RefreshRequest extends Request {
   refreshPayload: RefreshTokenPayload;
 }
 
+/** Normalized client information extracted from the incoming request. */
 export interface NormalizedClientInfo {
   ipAddress: string | null;
   userAgent: string | null;

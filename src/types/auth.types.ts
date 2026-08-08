@@ -2,12 +2,12 @@ import { CreateRefreshTokenOutput } from './refresh-token.types';
 import { NormalizedClientInfo } from './request.types';
 import { UserResponse } from './user.types';
 
-/** Login response payload */
+/** Response returned after a successful login. */
 export interface LoginResponse extends UserResponse {
   accessToken: string;
 }
 
-/** Register service parameters */
+/** Parameters required to register a new user. */
 export interface RegisterParams {
   email: string;
   password: string;
@@ -15,7 +15,7 @@ export interface RegisterParams {
   lastName: string;
 }
 
-/** Login service parameters */
+/** Parameters required to authenticate a user. */
 export interface LoginParams {
   email: string;
   password: string;
@@ -23,7 +23,7 @@ export interface LoginParams {
   clientInfo: NormalizedClientInfo;
 }
 
-
+/** Result returned by the login service. */
 export interface LoginServiceOutput extends LoginResponse {
   refreshToken: CreateRefreshTokenOutput;
 }
