@@ -1,7 +1,7 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { DatabaseService } from '@/modules/database/database.service';
 import { User } from '@/modules/user/entities';
-import type { StringValue } from 'ms';
+import ms, { StringValue } from 'ms';
 import {
   AccessTokenPayload,
   BaseException,
@@ -9,6 +9,7 @@ import {
   LoginServiceOutput,
   RefreshTokenPayload,
   RegisterParams,
+  ResendVerificationEmailPayload,
   VerifyEmailParams,
 } from '@/types';
 import { compareSecret, getSafeUser, hashSecret } from '@/lib';
@@ -199,6 +200,78 @@ export class AuthService {
         manager,
       });
     });
+  }
+
+  /**
+   * Resend the email verification token for a pending user.
+   * - Validates the user's email and password.
+   * - Enforces the email verification resend cooldown.
+   * - Creates a new verification token within a transaction.
+   * - Emits a signup verification event after the transaction succeeds.
+   */
+  async resendVerificationEmail(params: ResendVerificationEmailPayload): Promise<void> {
+    const user = await this.databaseService.dataSource
+      .createQueryBuilder(User, 'user')
+      .addSelect('user.password')
+      .where('user.email = :email', { email: params.email })
+      .getOne();
+
+    if (!user) {
+      throw new UnauthorizedException({
+        message: 'Invalid user credentials',
+        error: 'Invalid Credentials',
+      } as BaseException);
+    }
+
+    const isValidPassword = await compareSecret(params.password, user.password);
+
+    if (!isValidPassword) {
+      throw new UnauthorizedException({
+        message: 'Invalid user credentials',
+        error: 'Invalid Credentials',
+      } as BaseException);
+    }
+
+    if (user.status !== UserStatus.PENDING_VERIFICATION) {
+      throw new BadRequestException({
+        message: 'Email verification is not required for this account',
+        error: 'Email Verification Not Required',
+      } as BaseException);
+    }
+
+    const result = await this.databaseService.dataSource.transaction(async (manager) => {
+      const existingEmail = await this.emailService.findActiveEmail({
+        userId: user.id,
+        manager,
+      });
+
+      if (existingEmail) {
+        const cooldownMinutes = this.configService.get<number>('EMAIL_COOLDOWN');
+
+        const nextAllowedAt = existingEmail.createdAt.getTime() + cooldownMinutes * 60 * 1000;
+
+        if (Date.now() < nextAllowedAt) {
+          throw new BadRequestException({
+            message: 'Please wait before requesting another verification email',
+            error: 'Resend Cooldown',
+          } as BaseException);
+        }
+      }
+
+      const token = await this.emailService.createEmail({
+        userId: user.id,
+        manager,
+      });
+
+      return {
+        email: user.email,
+        token,
+      };
+    });
+
+    try {
+      this.eventEmitter.emit(EVENTS.SIGNUP_VERIFICATION, result);
+    } catch (_) {}
   }
 
   /**
