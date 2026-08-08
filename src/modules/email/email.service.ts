@@ -5,6 +5,7 @@ import { MoreThan, Repository } from 'typeorm';
 import { BaseException, CreateEmailParams, VerifyEmailParams } from '@/types';
 import { generateRandomToken, hashToken } from '@/lib';
 import { ConfigService } from '@nestjs/config';
+import ms, { StringValue } from 'ms';
 
 @Injectable()
 export class EmailService {
@@ -14,6 +15,11 @@ export class EmailService {
     private readonly configService: ConfigService,
   ) {}
 
+  /**
+   * Create a new email verification token for a user.
+   * - Removes any existing verification token before creating a new one.
+   * - Stores only the hashed token in the database.
+   */
   async createEmail(params: CreateEmailParams): Promise<string> {
     const repository = params.manager?.getRepository(Email) ?? this.emailRepository;
 
@@ -25,12 +31,15 @@ export class EmailService {
 
     const tokenHash = hashToken(token);
 
-    const expiresIn = this.configService.get<number>('EMAIL_EXPIRES', 10);
+    const expiresIn = this.configService.getOrThrow<StringValue>('EMAIL_EXPIRES');
+
+    const maxAge = ms(expiresIn);
+    const expiresAt = new Date(Date.now() + maxAge);
 
     const emailAction = repository.create({
       userId: params.userId,
       tokenHash,
-      expiresAt: new Date(Date.now() + expiresIn * 60 * 1000),
+      expiresAt,
     });
 
     await repository.save(emailAction);
@@ -38,6 +47,11 @@ export class EmailService {
     return token;
   }
 
+  /**
+   * Verify a user's email using a valid verification token.
+   * - Rejects invalid, expired, or already verified tokens.
+   * - Marks the email verification token as verified.
+   */
   async verifyEmail(params: VerifyEmailParams): Promise<string> {
     const repository = params.manager?.getRepository(Email) ?? this.emailRepository;
 
