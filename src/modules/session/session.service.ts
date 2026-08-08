@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Repository } from 'typeorm';
 
 import { Session } from './entities';
 import {
+  BaseException,
   CreateSessionPayload,
   FindActiveUserSessionPayload,
   FindSessionByIdPayload,
@@ -21,6 +22,9 @@ export class SessionService {
     private readonly sessionRepository: Repository<Session>,
   ) {}
 
+  /**
+   * Create a new session for a user.
+   */
   async createSession(payload: CreateSessionPayload): Promise<Session> {
     const repository = payload.manager?.getRepository(Session) ?? this.sessionRepository;
 
@@ -33,6 +37,10 @@ export class SessionService {
     return repository.save(session);
   }
 
+  /**
+   * Find all active sessions for a user.
+   * - Includes associated refresh tokens.
+   */
   async findActiveUserSessions(payload: FindUserSessionsPayload): Promise<FindUserSessionsOutput> {
     const repository = payload.manager?.getRepository(Session) ?? this.sessionRepository;
 
@@ -50,6 +58,10 @@ export class SessionService {
     });
   }
 
+  /**
+   * Find all sessions for a user.
+   * - Includes active and revoked sessions.
+   */
   async findUserSessions(payload: FindUserSessionsPayload): Promise<FindUserSessionsOutput> {
     const repository = payload.manager?.getRepository(Session) ?? this.sessionRepository;
 
@@ -63,6 +75,10 @@ export class SessionService {
     });
   }
 
+  /**
+   * Find an active session for a user by client information.
+   * - Returns null if no active session is found.
+   */
   async findActiveUserSession(payload: FindActiveUserSessionPayload): Promise<Session | null> {
     const repository = payload.manager?.getRepository(Session) ?? this.sessionRepository;
 
@@ -75,6 +91,10 @@ export class SessionService {
     });
   }
 
+  /**
+   * Find an active session by id.
+   * - Returns null if the session does not exist or has been revoked.
+   */
   async findById(payload: FindSessionByIdPayload): Promise<Session | null> {
     const repository = payload.manager?.getRepository(Session) ?? this.sessionRepository;
 
@@ -86,10 +106,14 @@ export class SessionService {
     });
   }
 
+  /**
+   * Update the last active time of a session.
+   * - Throws NotFoundException if the active session does not exist.
+   */
   async updateLastActive(payload: UpdateLastActiveSessionPayload): Promise<void> {
     const repository = payload.manager?.getRepository(Session) ?? this.sessionRepository;
 
-    await repository.update(
+    const result = await repository.update(
       {
         id: payload.sessionId,
         revokedAt: IsNull(),
@@ -98,12 +122,23 @@ export class SessionService {
         lastActiveAt: new Date(),
       },
     );
+
+    if (result.affected === 0) {
+      throw new NotFoundException({
+        message: 'Active session not found in database',
+        error: 'Session Not Found',
+      } as BaseException);
+    }
   }
 
+  /**
+   * Revoke an active session.
+   * - Throws NotFoundException if the active session does not exist.
+   */
   async revokeSession(payload: RevokeSessionPayload): Promise<void> {
     const repository = payload.manager?.getRepository(Session) ?? this.sessionRepository;
 
-    await repository.update(
+    const result = await repository.update(
       {
         id: payload.sessionId,
         revokedAt: IsNull(),
@@ -112,8 +147,18 @@ export class SessionService {
         revokedAt: new Date(),
       },
     );
+
+    if (result.affected === 0) {
+      throw new NotFoundException({
+        message: 'Active session not found in database',
+        error: 'Session Not Found',
+      } as BaseException);
+    }
   }
 
+  /**
+   * Revoke all active sessions belonging to a user.
+   */
   async revokeUserSessions(payload: RevokeUserSessionsPayload): Promise<void> {
     const repository = payload.manager?.getRepository(Session) ?? this.sessionRepository;
 
