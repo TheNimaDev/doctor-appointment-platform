@@ -12,7 +12,7 @@ import {
   FindUserSessionsPayload,
   RevokeSessionPayload,
   RevokeUserSessionsPayload,
-  UpdateLastActiveSessionPayload,
+  UpdateSessionPayload,
 } from '@/types';
 
 @Injectable()
@@ -30,6 +30,7 @@ export class SessionService {
 
     const session = repository.create({
       userId: payload.userId,
+      remember: payload.remember,
       ...payload.clientInfo,
       lastActiveAt: new Date(),
     });
@@ -107,10 +108,10 @@ export class SessionService {
   }
 
   /**
-   * Update the last active time of a session.
+   * Update an active session's last active time and optional remember preference.
    * - Throws NotFoundException if the active session does not exist.
    */
-  async updateLastActive(payload: UpdateLastActiveSessionPayload): Promise<void> {
+  async updateSession(payload: UpdateSessionPayload): Promise<void> {
     const repository = payload.manager?.getRepository(Session) ?? this.sessionRepository;
 
     const result = await repository.update(
@@ -119,6 +120,9 @@ export class SessionService {
         revokedAt: IsNull(),
       },
       {
+        ...(payload.remember !== undefined && {
+          remember: payload.remember,
+        }),
         lastActiveAt: new Date(),
       },
     );
