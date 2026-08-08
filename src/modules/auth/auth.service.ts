@@ -11,7 +11,7 @@ import {
   RegisterParams,
   VerifyEmailParams,
 } from '@/types';
-import { checkDatabaseError, compareSecret, getSafeUser, hashSecret } from '@/lib';
+import { compareSecret, getSafeUser, hashSecret } from '@/lib';
 import { EmailService } from '../email/email.service';
 import { EVENTS } from '@/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -40,27 +40,19 @@ export class AuthService {
     const result = await this.databaseService.dataSource.transaction(async (manager) => {
       const hashedPassword = await hashSecret(params.password);
 
-      try {
-        const { user } = await this.userService.createUser({
-          ...params,
-          manager,
-          password: hashedPassword,
-        });
+      const { user } = await this.userService.createUser({
+        ...params,
+        manager,
+        password: hashedPassword,
+      });
 
-        const token = await this.emailService.createEmail({ userId: user.id, manager });
-        console.log(token); // TODO: Remove before production
+      const token = await this.emailService.createEmail({ userId: user.id, manager });
+      console.log(token); // TODO: Remove before production
 
-        return {
-          user,
-          token,
-        };
-      } catch (error) {
-        checkDatabaseError({
-          e: error as Error,
-          mainResource: 'User',
-          conflictField: 'email',
-        });
-      }
+      return {
+        user,
+        token,
+      };
     });
 
     try {
