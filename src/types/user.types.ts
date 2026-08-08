@@ -24,3 +24,13 @@ export interface UpdateUserStatusPayload {
   status: UserStatus;
   manager?: EntityManager;
 }
+
+export interface GetUserByIdPayload {
+  id: string;
+  manager?: EntityManager;
+}
+
+export interface FindUserByEmailPayload {
+  email: string;
+  manager?: EntityManager;
+}
