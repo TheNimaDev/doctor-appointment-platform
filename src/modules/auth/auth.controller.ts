@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto, ResendVerificationEmailDto, VerifyEmailDto } from './dto';
 import type { ApiResponse, LoginResponse, NormalizedClientInfo, RefreshRequest } from '@/types';
@@ -35,6 +35,7 @@ export class AuthController {
    * - Sends an email verification request after successful registration.
    */
   @Post('register')
+  @HttpCode(HttpStatus.CREATED)
   async register(@Body() registerDto: RegisterDto): Promise<ApiResponse> {
     await this.authService.register(registerDto);
 
@@ -47,6 +48,7 @@ export class AuthController {
    * Verify a user's email address using the provided verification token.
    */
   @Get('verify/email')
+  @HttpCode(HttpStatus.OK)
   async verifyEmail(@Query() verifyEmailDto: VerifyEmailDto): Promise<ApiResponse> {
     await this.authService.verifyEmail(verifyEmailDto);
 
@@ -60,6 +62,7 @@ export class AuthController {
    * - Stores the refresh token in an HTTP-only cookie.
    */
   @Post('login')
+  @HttpCode(HttpStatus.OK)
   async login(
     @Body() loginDto: LoginDto,
     @NormalizeClientInfo() clientInfo: NormalizedClientInfo,
@@ -79,6 +82,7 @@ export class AuthController {
    * Log out the current session and revoke its refresh token.
    */
   @Post('logout')
+  @HttpCode(HttpStatus.OK)
   @UseGuards(RefreshTokenGuard)
   async logout(@Req() req: RefreshRequest, @Res({ passthrough: true }) res: Response): Promise<ApiResponse> {
     res.clearCookie('refreshToken', this.getCookieOptions());
@@ -93,6 +97,7 @@ export class AuthController {
    * Log out the user from all active sessions and revoke all refresh tokens.
    */
   @Post('logout/all')
+  @HttpCode(HttpStatus.OK)
   @UseGuards(RefreshTokenGuard)
   async logoutAll(@Req() req: RefreshRequest, @Res({ passthrough: true }) res: Response): Promise<ApiResponse> {
     res.clearCookie('refreshToken', this.getCookieOptions());
@@ -107,6 +112,7 @@ export class AuthController {
    * Resend the email verification link for a pending user.
    */
   @Post('verify/email/resend')
+  @HttpCode(HttpStatus.OK)
   async resendVerificationEmail(@Body() resendVerificationEmailDto: ResendVerificationEmailDto): Promise<ApiResponse> {
     await this.authService.resendVerificationEmail(resendVerificationEmailDto);
 
@@ -122,6 +128,7 @@ export class AuthController {
    * - Returns a new access token and user data.
    */
   @Post('refresh')
+  @HttpCode(HttpStatus.OK)
   @UseGuards(RefreshTokenGuard)
   async refresh(
     @Req() req: RefreshRequest,
