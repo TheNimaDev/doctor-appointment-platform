@@ -17,3 +17,9 @@ export interface SignupVerificationEvent {
   email: string;
   token: string;
 }
+
+/** Find active email verification parameters */
+export interface FindActiveEmailParams {
+  userId: string;
+  manager?: EntityManager;
+}
