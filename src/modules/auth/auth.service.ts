@@ -126,6 +126,7 @@ export class AuthService {
 
     const refreshTokenData = await this.databaseService.dataSource.transaction(async (manager) => {
       let userSession: Session;
+      const remember = params.remember ?? false;
 
       const existingSession = await this.sessionService.findActiveUserSession({
         userId: userData.id,
@@ -134,7 +135,11 @@ export class AuthService {
       });
 
       if (existingSession) {
-        await this.sessionService.updateLastActive({ sessionId: existingSession.id, manager });
+        await this.sessionService.updateSession({
+          sessionId: existingSession.id,
+          remember,
+          manager,
+        });
 
         userSession = existingSession;
       } else {
@@ -142,13 +147,14 @@ export class AuthService {
           userId: userData.id,
           clientInfo: params.clientInfo,
           manager,
+          remember,
         });
       }
 
       return this.refreshTokenService.createRefreshToken({
         sessionId: userSession.id,
         clientInfo: params.clientInfo,
-        remember: params.remember,
+        remember,
         manager,
       });
     });
