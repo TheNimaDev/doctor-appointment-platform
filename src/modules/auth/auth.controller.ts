@@ -1,10 +1,10 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto, ResendVerificationEmailDto, VerifyEmailDto } from './dto';
-import type { ApiResponse, LoginResponse, NormalizedClientInfo, RefreshRequest } from '@/types';
+import { ChangePasswordDto, LoginDto, RegisterDto, ResendVerificationEmailDto, VerifyEmailDto } from './dto';
+import type { AccessRequest, ApiResponse, LoginResponse, NormalizedClientInfo, RefreshRequest } from '@/types';
 import type { CookieOptions, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
-import { NormalizeClientInfo } from '@/common';
+import { AccessTokenGuard, NormalizeClientInfo } from '@/common';
 import { RefreshTokenGuard } from './guards/refresh-token.guard';
 
 @Controller('auth')
@@ -141,6 +141,25 @@ export class AuthController {
     return {
       message: 'Token refreshed successfully.',
       data,
+    };
+  }
+
+  /**
+   * Change the authenticated user's password.
+   * - Requires a valid access token.
+   * - Validates the current password before updating it.
+   * - Revokes active sessions after a successful password change.
+   */
+  @Post('password/change')
+  @HttpCode(HttpStatus.OK)
+  async changePassword(@Req() req: AccessRequest, @Body() changePasswordDto: ChangePasswordDto): Promise<ApiResponse> {
+    await this.authService.changePassword({
+      userId: req.user.userId,
+      ...changePasswordDto,
+    });
+
+    return {
+      message: 'Password changed successfully.',
     };
   }
 }
