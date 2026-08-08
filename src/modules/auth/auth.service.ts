@@ -246,9 +246,9 @@ export class AuthService {
       });
 
       if (existingEmail) {
-        const cooldownMinutes = this.configService.get<number>('EMAIL_COOLDOWN');
+        const cooldown = this.configService.getOrThrow<StringValue>('EMAIL_COOLDOWN');
 
-        const nextAllowedAt = existingEmail.createdAt.getTime() + cooldownMinutes * 60 * 1000;
+        const nextAllowedAt = existingEmail.createdAt.getTime() + ms(cooldown);
 
         if (Date.now() < nextAllowedAt) {
           throw new BadRequestException({
