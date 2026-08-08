@@ -49,6 +49,9 @@ export class Session {
   @Column({ type: 'varchar', length: 100, nullable: true })
   city: string | null;
 
+  @Column({ type: 'boolean', default: false })
+  remember: boolean;
+
   @Column({ type: 'datetime' })
   lastActiveAt: Date;
 
