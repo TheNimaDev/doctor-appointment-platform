@@ -38,7 +38,7 @@ export interface RevokeRefreshTokenPayload {
 }
 
 /** Payload required to revoke all refresh tokens belonging to a user. */
-export interface RevokeAllUserRefreshTokensPayload {
+export interface RevokeUserRefreshTokensPayload {
   userId: string;
   manager?: EntityManager;
 }
