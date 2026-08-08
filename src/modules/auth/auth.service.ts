@@ -5,6 +5,7 @@ import ms, { StringValue } from 'ms';
 import {
   AccessTokenPayload,
   BaseException,
+  ChangePasswordParams,
   LoginParams,
   LoginServiceOutput,
   RefreshTokenPayload,
@@ -196,7 +197,7 @@ export class AuthService {
    */
   async logoutAll(params: RefreshTokenPayload): Promise<void> {
     await this.databaseService.dataSource.transaction(async (manager) => {
-      await this.refreshTokenService.revokeAllUserRefreshTokens({
+      await this.refreshTokenService.revokeUserRefreshTokens({
         userId: params.user.id,
         manager,
       });
@@ -329,6 +330,53 @@ export class AuthService {
       accessToken,
       refreshToken: refreshTokenData,
     };
+  }
+
+  /**
+   * Change the authenticated user's password.
+   *
+   * - Validates the current password.
+   * - Ensures the new password is different.
+   * - Updates the user's password hash.
+   * - Revokes all active sessions and refresh tokens.
+   */
+  async changePassword(params: ChangePasswordParams): Promise<void> {
+    const user = await this.userService.findByIdWithPassword(params.userId);
+
+    const isValidPassword = await compareSecret(params.currentPassword, user.password);
+    if (!isValidPassword) {
+      throw new UnauthorizedException({
+        message: 'Invalid current password',
+        error: 'Invalid Credentials',
+      } as BaseException);
+    }
+
+    const isSamePassword = await compareSecret(params.newPassword, user.password);
+    if (isSamePassword) {
+      throw new BadRequestException({
+        message: 'New password must be different from the current password',
+        error: 'Same Password',
+      } as BaseException);
+    }
+
+    await this.databaseService.dataSource.transaction(async (manager) => {
+      const passwordHash = await hashSecret(params.newPassword);
+
+      await this.userService.updatePassword({
+        userId: params.userId,
+        password: passwordHash,
+        manager,
+      });
+
+      await this.sessionService.revokeUserSessions({
+        userId: params.userId,
+        manager,
+      });
+      await this.refreshTokenService.revokeUserRefreshTokens({
+        userId: params.userId,
+        manager,
+      });
+    });
   }
 
   /**
