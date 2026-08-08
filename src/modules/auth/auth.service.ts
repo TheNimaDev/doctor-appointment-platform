@@ -281,6 +281,57 @@ export class AuthService {
   }
 
   /**
+   * Rotate the current refresh token and issue a new access token.
+   * - Revokes the current refresh token.
+   * - Updates the session's last active time.
+   * - Creates a new refresh token for the same session.
+   * - Preserves the session's remember preference.
+   */
+  async refresh(params: RefreshTokenPayload): Promise<LoginServiceOutput> {
+    const refreshTokenData = await this.databaseService.dataSource.transaction(async (manager) => {
+      await this.refreshTokenService.revokeRefreshTokenByHash({
+        tokenHash: params.refreshRecord.tokenHash,
+        manager,
+      });
+
+      await this.sessionService.updateSession({
+        sessionId: params.session.id,
+        manager,
+      });
+
+      return this.refreshTokenService.createRefreshToken({
+        sessionId: params.session.id,
+        clientInfo: {
+          ipAddress: params.session.ipAddress,
+          userAgent: params.session.userAgent,
+          browser: params.session.browser,
+          os: params.session.os,
+          device: params.session.device,
+          country: params.session.country,
+          city: params.session.city,
+        },
+        remember: params.session.remember,
+        manager,
+      });
+    });
+
+    const accessTokenPayload: AccessTokenPayload = {
+      sub: params.user.id,
+      display_name: `${params.user.firstName ?? ''} ${params.user.lastName ?? ''}`.trim(),
+      roles: params.user.roles,
+      permissions: params.user.permissions,
+    };
+
+    const accessToken = this.generateAccessToken(accessTokenPayload);
+
+    return {
+      user: params.user,
+      accessToken,
+      refreshToken: refreshTokenData,
+    };
+  }
+
+  /**
    * Generate a new access token from the given payload.
    */
   generateAccessToken(payload: AccessTokenPayload): string {
