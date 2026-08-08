@@ -33,3 +33,10 @@ export interface ResendVerificationEmailPayload {
   email: string;
   password: string;
 }
+
+/** Parameters required to change an authenticated user's password. */
+export interface ChangePasswordParams {
+  userId: string;
+  currentPassword: string;
+  newPassword: string;
+}
