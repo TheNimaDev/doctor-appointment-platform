@@ -14,6 +14,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
+  /**
+   * Validate the JWT payload and return the authenticated user access data.
+   */
   validate(payload: AccessTokenPayload): UserAccess {
     return {
       userId: payload.sub,
