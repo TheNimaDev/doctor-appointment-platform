@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto, VerifyEmailDto } from './dto';
+import { LoginDto, RegisterDto, ResendVerificationEmailDto, VerifyEmailDto } from './dto';
 import type { ApiResponse, LoginResponse, NormalizedClientInfo, RefreshRequest } from '@/types';
 import type { CookieOptions, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
@@ -100,6 +100,18 @@ export class AuthController {
 
     return {
       message: 'Logout from all devices successfully.',
+    };
+  }
+
+  /**
+   * Resend the email verification link for a pending user.
+   */
+  @Post('verify/email/resend')
+  async resendVerificationEmail(@Body() resendVerificationEmailDto: ResendVerificationEmailDto): Promise<ApiResponse> {
+    await this.authService.resendVerificationEmail(resendVerificationEmailDto);
+
+    return {
+      message: 'Verification email sent successfully.',
     };
   }
 }
