@@ -14,6 +14,10 @@ export class AuthController {
     private readonly configService: ConfigService,
   ) {}
 
+  /**
+   * Build secure cookie options for the refresh token.
+   * - Enables strict security settings in production.
+   */
   getCookieOptions(maxAge?: number): CookieOptions {
     const isProduction: boolean = this.configService.get<string>('NODE_ENV') === 'production';
 
@@ -26,6 +30,10 @@ export class AuthController {
     };
   }
 
+  /**
+   * Register a new user account.
+   * - Sends an email verification request after successful registration.
+   */
   @Post('register')
   async register(@Body() registerDto: RegisterDto): Promise<ApiResponse> {
     await this.authService.register(registerDto);
@@ -35,6 +43,9 @@ export class AuthController {
     };
   }
 
+  /**
+   * Verify a user's email address using the provided verification token.
+   */
   @Get('verify/email')
   async verifyEmail(@Query() verifyEmailDto: VerifyEmailDto): Promise<ApiResponse> {
     await this.authService.verifyEmail(verifyEmailDto);
@@ -44,6 +55,10 @@ export class AuthController {
     };
   }
 
+  /**
+   * Authenticate a user and issue access and refresh tokens.
+   * - Stores the refresh token in an HTTP-only cookie.
+   */
   @Post('login')
   async login(
     @Body() loginDto: LoginDto,
@@ -60,6 +75,9 @@ export class AuthController {
     };
   }
 
+  /**
+   * Log out the current session and revoke its refresh token.
+   */
   @Post('logout')
   @UseGuards(RefreshTokenGuard)
   async logout(@Req() req: RefreshRequest, @Res({ passthrough: true }) res: Response): Promise<ApiResponse> {
@@ -71,6 +89,9 @@ export class AuthController {
     };
   }
 
+  /**
+   * Log out the user from all active sessions and revoke all refresh tokens.
+   */
   @Post('logout/all')
   @UseGuards(RefreshTokenGuard)
   async logoutAll(@Req() req: RefreshRequest, @Res({ passthrough: true }) res: Response): Promise<ApiResponse> {
