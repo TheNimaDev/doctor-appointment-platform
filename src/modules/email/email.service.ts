@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Email } from './entities';
 import { EmailStatus } from './enums';
-import { MoreThan, Repository } from 'typeorm';
+import { IsNull, MoreThan, Repository } from 'typeorm';
 import { BaseException, CreateEmailParams, FindActiveEmailParams, ValidateEmailTokenParams } from '@/types';
 import { generateRandomToken, hashToken } from '@/lib';
 import { ConfigService } from '@nestjs/config';
@@ -30,8 +30,8 @@ export class EmailService {
       where: {
         userId: params.userId,
         type: params.type,
-        usedAt: null,
-        revokedAt: null,
+        usedAt: IsNull(),
+        revokedAt: IsNull(),
       },
     });
 
@@ -70,8 +70,8 @@ export class EmailService {
       where: {
         userId: params.userId,
         type: params.type,
-        usedAt: null,
-        revokedAt: null,
+        usedAt: IsNull(),
+        revokedAt: IsNull(),
         expiresAt: MoreThan(new Date()),
       },
     });
@@ -87,8 +87,8 @@ export class EmailService {
       where: {
         tokenHash: hashToken(params.token),
         type: params.type,
-        usedAt: null,
-        revokedAt: null,
+        usedAt: IsNull(),
+        revokedAt: IsNull(),
         expiresAt: MoreThan(new Date()),
       },
     });
