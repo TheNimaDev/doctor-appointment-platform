@@ -93,7 +93,7 @@ status = PENDING_VERIFICATION
 
 ↓
 
-Create EmailVerification
+Create Email
 
 ↓
 
@@ -113,8 +113,8 @@ Validate Token
 
 ↓
 
-EmailVerification.verifiedAt = NOW()
-EmailVerification.isVerified = True
+Email.verifiedAt = NOW()
+Email.isVerified = True
 
 ↓
 
@@ -169,7 +169,7 @@ Patient
 
 ---
 
-## User → EmailVerification
+## User → Email
 
 ```
 User
@@ -180,25 +180,25 @@ User
 
 1
 
-EmailVerification
+Email
 ```
 
 ### Description
 
 هر User فقط یک Email Verification فعال دارد.
 
-Relation توسط `EmailVerification.userId` برقرار می‌شود.
+Relation توسط `Email.userId` برقرار می‌شود.
 
 Constraint:
 
 ```
-EmailVerification.userId UNIQUE
+Email.userId UNIQUE
 ```
 
 در صورت درخواست مجدد تایید ایمیل:
 
-- EmailVerification قبلی حذف می‌شود.
-- EmailVerification جدید ایجاد می‌شود.
+- Email قبلی حذف می‌شود.
+- Email جدید ایجاد می‌شود.
 - Token جدید تولید می‌شود.
 - Email تایید دوباره ارسال می‌شود.
 
