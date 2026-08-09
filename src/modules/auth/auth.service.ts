@@ -96,17 +96,7 @@ export class AuthService {
    * - Creates a new refresh token within a transaction.
    */
   async login(params: LoginParams): Promise<LoginServiceOutput> {
-    const user = await this.databaseService.dataSource
-      .createQueryBuilder(User, 'user')
-      .addSelect('user.password')
-      .where('user.email = :email', { email: params.email })
-      .getOne();
-
-    if (!user)
-      throw new UnauthorizedException({
-        message: 'Invalid user credentials',
-        error: 'Invalid Credentials',
-      } as BaseException);
+    const user = await this.userService.findByEmailWithPassword(params.email);
 
     const isValidPassword: boolean = await compareSecret(params.password, user.password);
 
