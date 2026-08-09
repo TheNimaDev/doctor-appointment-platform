@@ -8,6 +8,12 @@ export interface CreateEmailParams {
   type: EmailType;
 }
 
+/** Result returned after creating an email token. */
+export interface CreateEmailOutput {
+  token: string;
+  emailId: string;
+}
+
 /** Parameters required to validate an email token. */
 export interface ValidateEmailTokenParams {
   token: string;
