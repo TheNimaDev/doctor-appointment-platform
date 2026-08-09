@@ -5,6 +5,7 @@ import { EmailStatus } from './enums';
 import { IsNull, MoreThan, Repository } from 'typeorm';
 import {
   BaseException,
+  CreateEmailOutput,
   CreateEmailParams,
   FindActiveEmailParams,
   UpdateEmailStatusParams,
@@ -29,7 +30,7 @@ export class EmailService {
    * - Generates a new random token.
    * - Stores only the hashed token.
    */
-  async createEmail(params: CreateEmailParams): Promise<string> {
+  async createEmail(params: CreateEmailParams): Promise<CreateEmailOutput> {
     const repository = params.manager?.getRepository(Email) ?? this.emailRepository;
 
     const existingEmail = await repository.findOne({
@@ -63,7 +64,10 @@ export class EmailService {
 
     await repository.save(email);
 
-    return token;
+    return {
+      token,
+      emailId: email.id,
+    };
   }
 
   /**
