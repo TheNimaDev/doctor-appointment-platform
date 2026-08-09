@@ -3,7 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Email } from './entities';
 import { EmailStatus } from './enums';
 import { IsNull, MoreThan, Repository } from 'typeorm';
-import { BaseException, CreateEmailParams, FindActiveEmailParams, ValidateEmailTokenParams } from '@/types';
+import {
+  BaseException,
+  CreateEmailParams,
+  FindActiveEmailParams,
+  UpdateEmailStatusParams,
+  ValidateEmailTokenParams,
+} from '@/types';
 import { generateRandomToken, hashToken } from '@/lib';
 import { ConfigService } from '@nestjs/config';
 import ms, { StringValue } from 'ms';
@@ -122,5 +128,30 @@ export class EmailService {
     email.revokedAt = new Date();
 
     await repository.save(email);
+  }
+
+  /**
+   * Update the delivery status of an email.
+   *
+   * - Marks the email as sent and records the send time on success.
+   * - Marks the email as failed and stores the failure details on error.
+   */
+  async updateEmailStatus(params: UpdateEmailStatusParams): Promise<void> {
+    const updateData: Partial<Email> = {
+      status: params.status,
+    };
+
+    if (params.status === EmailStatus.SENT) {
+      updateData.sentAt = new Date();
+      updateData.failedAt = null;
+      updateData.errorMessage = null;
+    }
+
+    if (params.status === EmailStatus.FAILED) {
+      updateData.failedAt = new Date();
+      updateData.errorMessage = params.errorMessage ?? null;
+    }
+
+    await this.emailRepository.update(params.emailId, updateData);
   }
 }
