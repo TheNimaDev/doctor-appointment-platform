@@ -70,7 +70,8 @@ export class AuthService {
     try {
       this.eventEmitter.emit(EVENTS.SIGNUP_VERIFICATION, {
         email: result.user.email,
-        token: result.token,
+        emailId: result.token.emailId,
+        token: result.token.token,
       });
     } catch (_) {}
   }
@@ -271,7 +272,8 @@ export class AuthService {
 
       return {
         email: user.email,
-        token,
+        token: token.token,
+        emailId: token.emailId,
       };
     });
 
