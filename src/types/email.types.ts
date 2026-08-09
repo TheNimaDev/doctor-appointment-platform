@@ -1,25 +1,29 @@
+import { EmailType } from '@/modules/email/enums';
 import { EntityManager } from 'typeorm';
 
-/** Parameters required to create an email verification token. */
+/** Parameters required to create an email token. */
 export interface CreateEmailParams {
   userId: string;
   manager?: EntityManager;
+  type: EmailType;
 }
 
-/** Parameters required to verify an email verification token. */
-export interface VerifyEmailParams {
+/** Parameters required to validate an email token. */
+export interface ValidateEmailTokenParams {
   token: string;
   manager?: EntityManager;
+  type: EmailType;
 }
 
-/** Payload emitted when a signup email verification is requested. */
+/** Payload emitted when signup email verification is requested. */
 export interface SignupVerificationEvent {
   email: string;
   token: string;
 }
 
-/** Find active email verification parameters */
+/** Parameters required to find an active email token. */
 export interface FindActiveEmailParams {
   userId: string;
   manager?: EntityManager;
+  type: EmailType;
 }
