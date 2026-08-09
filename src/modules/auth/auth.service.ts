@@ -24,6 +24,7 @@ import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.servi
 import { SessionService } from '../session/session.service';
 import { Session } from '../session/entities';
 import { UserService } from '../user/user.service';
+import { EmailType } from '../email/enums';
 
 @Injectable()
 export class AuthService {
@@ -53,7 +54,11 @@ export class AuthService {
         password: hashedPassword,
       });
 
-      const token = await this.emailService.createEmail({ userId: user.id, manager });
+      const token = await this.emailService.createEmail({
+        userId: user.id,
+        manager,
+        type: EmailType.EMAIL_VERIFICATION,
+      });
       console.log(token); // TODO: Remove before production
 
       return {
@@ -76,9 +81,11 @@ export class AuthService {
    */
   async verifyEmail(params: VerifyEmailParams): Promise<void> {
     await this.databaseService.dataSource.transaction(async (manager) => {
-      const userId = await this.emailService.verifyEmail({
+      const userId = await this.emailService.validateEmailToken({
         ...params,
         manager,
+        type: EmailType.EMAIL_VERIFICATION,
+        token: params.token,
       });
 
       await this.userService.updateUserStatus({
@@ -240,6 +247,7 @@ export class AuthService {
       const existingEmail = await this.emailService.findActiveEmail({
         userId: user.id,
         manager,
+        type: EmailType.EMAIL_VERIFICATION,
       });
 
       if (existingEmail) {
@@ -258,6 +266,7 @@ export class AuthService {
       const token = await this.emailService.createEmail({
         userId: user.id,
         manager,
+        type: EmailType.EMAIL_VERIFICATION,
       });
 
       return {
