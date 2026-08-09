@@ -1,4 +1,4 @@
-import { EmailType } from '@/modules/email/enums';
+import { EmailStatus, EmailType } from '@/modules/email/enums';
 import { EntityManager } from 'typeorm';
 
 /** Parameters required to create an email token. */
@@ -26,4 +26,11 @@ export interface FindActiveEmailParams {
   userId: string;
   manager?: EntityManager;
   type: EmailType;
+}
+
+/** Parameters required to update an email delivery status. */
+export interface UpdateEmailStatusParams {
+  emailId: string;
+  status: EmailStatus;
+  errorMessage?: string;
 }
