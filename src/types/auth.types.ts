@@ -15,6 +15,11 @@ export interface RegisterParams {
   lastName: string;
 }
 
+/** Parameters required to validate an email verification token. */
+export interface VerifyEmailParams {
+  token: string;
+}
+
 /** Parameters required to authenticate a user. */
 export interface LoginParams {
   email: string;
