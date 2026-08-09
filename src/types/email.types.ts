@@ -25,6 +25,7 @@ export interface ValidateEmailTokenParams {
 export interface SignupVerificationEvent {
   email: string;
   token: string;
+  emailId: string;
 }
 
 /** Parameters required to find an active email token. */
