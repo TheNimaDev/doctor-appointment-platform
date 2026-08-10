@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { DatabaseService } from './modules/database/database.service';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
+import { join } from 'node:path';
 
 let PORT: number;
 let BASE_URL: string;
@@ -20,6 +21,9 @@ async function bootstrap() {
 
   // Set global API prefix
   app.setGlobalPrefix(BASE_URL);
+
+  // Serve static files from the public directory.
+  app.useStaticAssets(join(process.cwd(), 'public'));
 
   // Enable cookie parsing
   app.use(cookieParser());
