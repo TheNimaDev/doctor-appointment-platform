@@ -84,6 +84,31 @@
 
     </div>
 
+    <div id="change-email" class="card hidden">
+      <div class="header">
+        <h1>Change Your Email</h1>
+
+        <p>
+          Enter your new email address below.
+        </p>
+      </div>
+
+      <form id="changeEmailForm">
+        <div class="field">
+          <label for="newEmail">
+            New Email
+          </label>
+
+          <input type="email" id="newEmail" maxlength="255" autocomplete="email" required />
+        </div>
+
+        <p id="changeEmailMessage" class="message"></p>
+
+        <button type="submit">
+          Change Email
+        </button>
+      </form>
+    </div>
   </div>
 
   <script src="./script.js"></script>
