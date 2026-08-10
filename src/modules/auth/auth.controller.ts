@@ -1,6 +1,14 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { ChangePasswordDto, ForgotPasswordDto, LoginDto, RegisterDto, ResendVerificationEmailDto, VerifyEmailDto } from './dto';
+import {
+  ChangePasswordDto,
+  ForgotPasswordDto,
+  LoginDto,
+  RegisterDto,
+  ResendVerificationEmailDto,
+  ResetPasswordDto,
+  VerifyEmailDto,
+} from './dto';
 import type { AccessRequest, ApiResponse, LoginResponse, NormalizedClientInfo, RefreshRequest } from '@/types';
 import type { CookieOptions, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
@@ -183,6 +191,24 @@ export class AuthController {
 
     return {
       message: 'If the email exists, a password reset link has been sent.',
+    };
+  }
+
+  /**
+   * Reset a user's password using a valid password reset token.
+   *
+   * - Validates the reset token.
+   * - Updates the user's password.
+   * - Revokes all active sessions.
+   */
+  @Post('password/reset')
+  @HttpCode(HttpStatus.OK)
+  @Public()
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<ApiResponse> {
+    await this.authService.resetPassword(resetPasswordDto);
+
+    return {
+      message: 'Password reset successfully.',
     };
   }
 }
