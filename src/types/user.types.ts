@@ -45,3 +45,10 @@ export interface UpdatePasswordParams {
   password: string;
   manager?: EntityManager;
 }
+
+/** Parameters required to update a user's profile. */
+export interface UpdateProfileParams {
+  userId: string;
+  firstName?: string;
+  lastName?: string;
+}
