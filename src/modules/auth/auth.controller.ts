@@ -1,6 +1,7 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
+  ChangeEmailDto,
   ChangePasswordDto,
   ForgotPasswordDto,
   LoginDto,
@@ -209,6 +210,25 @@ export class AuthController {
 
     return {
       message: 'Password reset successfully.',
+    };
+  }
+
+  /**
+   * Request an email address change.
+   *
+   * - Requires the current password.
+   * - Sends a verification link to the current email address.
+   */
+  @Post('email/change')
+  @HttpCode(HttpStatus.OK)
+  async changeEmail(@Req() req: AccessRequest, @Body() changeEmailDto: ChangeEmailDto): Promise<ApiResponse> {
+    await this.authService.changeEmail({
+      userId: req.user.userId,
+      password: changeEmailDto.password,
+    });
+
+    return {
+      message: 'A verification email has been sent to your current email address.',
     };
   }
 }
