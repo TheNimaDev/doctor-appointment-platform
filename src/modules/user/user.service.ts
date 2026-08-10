@@ -8,6 +8,7 @@ import {
   FindUserByEmailPayload,
   GetUserByIdPayload,
   UpdatePasswordParams,
+  UpdateProfileParams,
   UpdateUserStatusPayload,
   UserResponse,
 } from '@/types';
@@ -180,5 +181,32 @@ export class UserService {
     const repository = params.manager?.getRepository(User) ?? this.userRepository;
 
     await repository.update({ id: params.userId }, { password: params.password });
+  }
+
+  /**
+   * Update a user's profile.
+   *
+   * - Updates the provided profile fields.
+   * - Returns the updated safe user.
+   */
+  async updateProfile(params: UpdateProfileParams): Promise<UserResponse> {
+    const user = await this.userRepository.preload({
+      id: params.userId,
+      ...(params.firstName !== undefined && {
+        firstName: params.firstName,
+      }),
+      ...(params.lastName !== undefined && {
+        lastName: params.lastName,
+      }),
+    });
+
+    if (!user) {
+      throw new NotFoundException({
+        message: 'User not found in database',
+        error: 'User Not Found',
+      } as BaseException);
+    }
+
+    return getSafeUser(await this.userRepository.save(user));
   }
 }
