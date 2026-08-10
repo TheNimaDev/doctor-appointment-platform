@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import {
   ChangeEmailDto,
   ChangePasswordDto,
+  ConfirmChangeEmailDto,
   ForgotPasswordDto,
   LoginDto,
   RegisterDto,
@@ -229,6 +230,23 @@ export class AuthController {
 
     return {
       message: 'A verification email has been sent to your current email address.',
+    };
+  }
+
+  /**
+   * Confirm an email address change.
+   *
+   * - Validates the email change verification token.
+   * - Updates the user's email address.
+   * - Revokes all active sessions.
+   */
+  @Post('email/change/confirm')
+  @HttpCode(HttpStatus.OK)
+  async confirmChangeEmail(@Body() confirmChangeEmailDto: ConfirmChangeEmailDto): Promise<ApiResponse> {
+    await this.authService.confirmChangeEmail(confirmChangeEmailDto);
+
+    return {
+      message: 'Email address changed successfully.',
     };
   }
 }
