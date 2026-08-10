@@ -1,10 +1,17 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { DatabaseService } from '@/modules/database/database.service';
 import { User } from '@/modules/user/entities';
 import ms, { StringValue } from 'ms';
 import {
   AccessTokenPayload,
   BaseException,
+  ChangeEmailParams,
   ChangePasswordParams,
   ForgotPasswordParams,
   LoginParams,
@@ -471,6 +478,39 @@ export class AuthService {
         manager,
       });
     });
+  }
+
+  /**
+   * Request an email address change.
+   *
+   * - Validates the current password.
+   * - Creates an email change verification token.
+   * - Sends the verification link to the current email address.
+   */
+  async changeEmail(params: ChangeEmailParams): Promise<void> {
+    const user = await this.userService.findByIdWithPassword(params.userId);
+
+    const isPasswordValid = await compareSecret(params.password, user.password);
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException({
+        message: 'Current password is incorrect.',
+        error: 'Invalid Current Password',
+      } as BaseException);
+    }
+
+    const token = await this.emailService.createEmail({
+      userId: params.userId,
+      type: EmailType.EMAIL_CHANGE_VERIFICATION,
+    });
+
+    try {
+      this.eventEmitter.emit(EVENTS.EMAIL_CHANGE_VERIFICATION, {
+        email: user.email,
+        token: token.token,
+        emailId: token.emailId,
+      });
+    } catch (_) {}
   }
 
   /**
