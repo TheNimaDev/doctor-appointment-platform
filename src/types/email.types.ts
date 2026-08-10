@@ -48,3 +48,10 @@ export interface PasswordResetEvent {
   token: string;
   emailId: string;
 }
+
+/** Payload for email change verification events. */
+export interface EmailChangeVerificationEvent {
+  email: string;
+  token: string;
+  emailId: string;
+}
