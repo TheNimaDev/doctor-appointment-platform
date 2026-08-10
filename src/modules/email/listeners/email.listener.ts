@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { MailService } from '@/modules/mail/mail.service';
 import { EVENTS } from '@/common';
-import type { PasswordResetEvent, SignupVerificationEvent } from '@/types';
+import type { EmailChangeVerificationEvent, PasswordResetEvent, SignupVerificationEvent } from '@/types';
 import { EmailService } from '../email.service';
 import { EmailStatus } from '../enums';
 
@@ -74,6 +74,51 @@ export class EmailListener {
 
           <p>This link expires in 10 minutes.</p>
         `,
+      });
+
+      await this.emailService.updateEmailStatus({
+        emailId: payload.emailId,
+        status: EmailStatus.SENT,
+      });
+    } catch (error) {
+      await this.emailService.updateEmailStatus({
+        emailId: payload.emailId,
+        status: EmailStatus.FAILED,
+        errorMessage: error instanceof Error ? error.message : 'Unknown email error',
+      });
+    }
+  }
+
+  /**
+   * Handle email change verification events and send the email change verification email.
+   */
+  @OnEvent(EVENTS.EMAIL_CHANGE_VERIFICATION)
+  async handleEmailChangeVerification(payload: EmailChangeVerificationEvent): Promise<void> {
+    const changeEmailUrl = `http://localhost:3000/account-action?action=change-email&token=${payload.token}`;
+
+    try {
+      await this.mailService.send({
+        to: payload.email,
+        subject: 'Verify your email change request',
+        html: `
+        <h2>Email Change Verification</h2>
+
+        <p>You requested to change your email address.</p>
+
+        <p>
+          Please click the link below to continue changing your email address:
+        </p>
+
+        <a href="${changeEmailUrl}">
+          Change Email Address
+        </a>
+
+        <p>This link expires in 10 minutes.</p>
+
+        <p>
+          If you did not request this change, you can safely ignore this email.
+        </p>
+      `,
       });
 
       await this.emailService.updateEmailStatus({
