@@ -62,3 +62,9 @@ export interface ChangeEmailParams {
   userId: string;
   password: string;
 }
+
+/** Parameters required to confirm an email address change. */
+export interface ConfirmChangeEmailParams {
+  token: string;
+  newEmail: string;
+}
