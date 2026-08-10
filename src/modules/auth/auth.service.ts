@@ -12,6 +12,7 @@ import {
   RefreshTokenPayload,
   RegisterParams,
   ResendVerificationEmailPayload,
+  ResetPasswordParams,
   VerifyEmailParams,
 } from '@/types';
 import { compareSecret, getSafeUser, hashSecret } from '@/lib';
@@ -435,6 +436,41 @@ export class AuthService {
         emailId: result.emailId,
       });
     } catch (_) {}
+  }
+
+  /**
+   * Reset a user's password using a valid password reset token.
+   *
+   * - Validates and consumes the password reset token.
+   * - Updates the user's password.
+   * - Revokes all active sessions and refresh tokens.
+   */
+  async resetPassword(params: ResetPasswordParams): Promise<void> {
+    await this.databaseService.dataSource.transaction(async (manager) => {
+      const userId = await this.emailService.validateEmailToken({
+        token: params.token,
+        manager,
+        type: EmailType.PASSWORD_RESET,
+      });
+
+      const passwordHash = await hashSecret(params.newPassword);
+
+      await this.userService.updatePassword({
+        userId,
+        password: passwordHash,
+        manager,
+      });
+
+      await this.sessionService.revokeUserSessions({
+        userId,
+        manager,
+      });
+
+      await this.refreshTokenService.revokeUserRefreshTokens({
+        userId,
+        manager,
+      });
+    });
   }
 
   /**
