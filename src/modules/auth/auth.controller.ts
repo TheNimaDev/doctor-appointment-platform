@@ -242,6 +242,7 @@ export class AuthController {
    */
   @Post('email/change/confirm')
   @HttpCode(HttpStatus.OK)
+  @Public()
   async confirmChangeEmail(@Body() confirmChangeEmailDto: ConfirmChangeEmailDto): Promise<ApiResponse> {
     await this.authService.confirmChangeEmail(confirmChangeEmailDto);
 
