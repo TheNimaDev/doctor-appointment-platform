@@ -13,6 +13,7 @@ import {
   BaseException,
   ChangeEmailParams,
   ChangePasswordParams,
+  ConfirmChangeEmailParams,
   ForgotPasswordParams,
   LoginParams,
   LoginServiceOutput,
@@ -511,6 +512,52 @@ export class AuthService {
         emailId: token.emailId,
       });
     } catch (_) {}
+  }
+
+  /**
+   * Confirm an email address change.
+   *
+   * - Validates the email change verification token.
+   * - Checks that the new email is not already in use.
+   * - Updates the user's email address.
+   * - Revokes all active sessions and refresh tokens.
+   */
+  async confirmChangeEmail(params: ConfirmChangeEmailParams): Promise<void> {
+    await this.databaseService.dataSource.transaction(async (manager) => {
+      const userId = await this.emailService.validateEmailToken({
+        token: params.token,
+        manager,
+        type: EmailType.EMAIL_CHANGE_VERIFICATION,
+      });
+
+      const existingUser = await this.userService.findByEmail({
+        email: params.newEmail,
+        manager,
+      });
+
+      if (existingUser && existingUser.user.id !== userId) {
+        throw new ConflictException({
+          message: 'Email address is already in use.',
+          error: 'Email Already Exists',
+        } as BaseException);
+      }
+
+      await this.userService.updateEmail({
+        userId,
+        email: params.newEmail,
+        manager,
+      });
+
+      await this.sessionService.revokeUserSessions({
+        userId,
+        manager,
+      });
+
+      await this.refreshTokenService.revokeUserRefreshTokens({
+        userId,
+        manager,
+      });
+    });
   }
 
   /**
