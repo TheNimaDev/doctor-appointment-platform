@@ -7,6 +7,7 @@ import {
   CreateUserPayload,
   FindUserByEmailPayload,
   GetUserByIdPayload,
+  UpdateEmailParams,
   UpdatePasswordParams,
   UpdateProfileParams,
   UpdateUserStatusPayload,
@@ -208,5 +209,31 @@ export class UserService {
     }
 
     return getSafeUser(await this.userRepository.save(user));
+  }
+
+  /**
+   * Update a user's email address.
+   *
+   * - Updates the user's email.
+   * - Throws NotFoundException if the user does not exist.
+   */
+  async updateEmail(params: UpdateEmailParams): Promise<void> {
+    const repository = params.manager?.getRepository(User) ?? this.userRepository;
+
+    const result = await repository.update(
+      {
+        id: params.userId,
+      },
+      {
+        email: params.email,
+      },
+    );
+
+    if (result.affected === 0) {
+      throw new NotFoundException({
+        message: 'User not found in database',
+        error: 'User Not Found',
+      } as BaseException);
+    }
   }
 }
