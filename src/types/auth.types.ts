@@ -50,3 +50,9 @@ export interface ChangePasswordParams {
 export interface ForgotPasswordParams {
   email: string;
 }
+
+/** Parameters required to reset a user's password. */
+export interface ResetPasswordParams {
+  token: string;
+  newPassword: string;
+}
