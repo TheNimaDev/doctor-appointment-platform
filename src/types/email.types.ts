@@ -41,3 +41,10 @@ export interface UpdateEmailStatusParams {
   status: EmailStatus;
   errorMessage?: string;
 }
+
+/** Payload emitted when a password reset email is requested. */
+export interface PasswordResetEvent {
+  email: string;
+  token: string;
+  emailId: string;
+}
