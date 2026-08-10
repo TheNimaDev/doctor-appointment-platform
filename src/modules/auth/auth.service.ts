@@ -60,7 +60,7 @@ export class AuthService {
         manager,
         type: EmailType.EMAIL_VERIFICATION,
       });
-      console.log(token); // TODO: Remove before production
+      console.log(token.token); // TODO: Remove before production
 
       return {
         user,
@@ -385,6 +385,7 @@ export class AuthService {
    * Request a password reset email.
    *
    * - Finds the user by email.
+   * - Enforces the password reset email cooldown.
    * - Creates a password reset email token.
    * - Emits a password reset event after the token is created.
    */
@@ -397,16 +398,41 @@ export class AuthService {
       return;
     }
 
-    const token = await this.emailService.createEmail({
-      userId: user.user.id,
-      type: EmailType.PASSWORD_RESET,
+    const result = await this.databaseService.dataSource.transaction(async (manager) => {
+      const existingEmail = await this.emailService.findActiveEmail({
+        userId: user.user.id,
+        type: EmailType.PASSWORD_RESET,
+        manager,
+      });
+
+      if (existingEmail) {
+        const cooldown = this.configService.getOrThrow<StringValue>('EMAIL_COOLDOWN');
+
+        const nextAllowedAt = existingEmail.createdAt.getTime() + ms(cooldown);
+
+        if (Date.now() < nextAllowedAt) {
+          throw new BadRequestException({
+            message: 'Please wait before requesting another password reset email',
+            error: 'Resend Cooldown',
+          } as BaseException);
+        }
+      }
+
+      const token = await this.emailService.createEmail({
+        userId: user.user.id,
+        type: EmailType.PASSWORD_RESET,
+        manager,
+      });
+      console.log(token.token); // TODO: Remove before production
+
+      return token;
     });
 
     try {
       this.eventEmitter.emit(EVENTS.PASSWORD_RESET, {
         email: user.user.email,
-        token: token.token,
-        emailId: token.emailId,
+        token: result.token,
+        emailId: result.emailId,
       });
     } catch (_) {}
   }
