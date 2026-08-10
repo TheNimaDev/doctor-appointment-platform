@@ -52,3 +52,10 @@ export interface UpdateProfileParams {
   firstName?: string;
   lastName?: string;
 }
+
+/** Parameters required to update a user's email address. */
+export interface UpdateEmailParams {
+  userId: string;
+  email: string;
+  manager?: EntityManager;
+}
