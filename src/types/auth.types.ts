@@ -56,3 +56,9 @@ export interface ResetPasswordParams {
   token: string;
   newPassword: string;
 }
+
+/** Parameters required to request an email address change. */
+export interface ChangeEmailParams {
+  userId: string;
+  password: string;
+}
