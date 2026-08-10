@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { DatabaseService } from '@/modules/database/database.service';
 import { User } from '@/modules/user/entities';
 import ms, { StringValue } from 'ms';
@@ -6,6 +6,7 @@ import {
   AccessTokenPayload,
   BaseException,
   ChangePasswordParams,
+  ForgotPasswordParams,
   LoginParams,
   LoginServiceOutput,
   RefreshTokenPayload,
@@ -378,6 +379,36 @@ export class AuthService {
         manager,
       });
     });
+  }
+
+  /**
+   * Request a password reset email.
+   *
+   * - Finds the user by email.
+   * - Creates a password reset email token.
+   * - Emits a password reset event after the token is created.
+   */
+  async forgotPassword(params: ForgotPasswordParams): Promise<void> {
+    const user = await this.userService.findByEmail({
+      email: params.email,
+    });
+
+    if (!user) {
+      return;
+    }
+
+    const token = await this.emailService.createEmail({
+      userId: user.user.id,
+      type: EmailType.PASSWORD_RESET,
+    });
+
+    try {
+      this.eventEmitter.emit(EVENTS.PASSWORD_RESET, {
+        email: user.user.email,
+        token: token.token,
+        emailId: token.emailId,
+      });
+    } catch (_) {}
   }
 
   /**
