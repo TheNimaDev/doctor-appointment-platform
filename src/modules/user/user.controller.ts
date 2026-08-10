@@ -1,13 +1,14 @@
-import { Controller, Get, HttpCode, HttpStatus, Req } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Req } from '@nestjs/common';
 import { UserService } from './user.service';
 import type { AccessRequest, ApiResponse, UserResponse } from '@/types';
+import { UpdateProfileDto } from './dto';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   /**
-   *  Get current user profile.
+   * Get current user profile.
    */
   @Get('me')
   @HttpCode(HttpStatus.OK)
@@ -18,6 +19,26 @@ export class UserController {
 
     return {
       message: 'User retrieved successfully.',
+      data: user,
+    };
+  }
+
+  /**
+   * Update current user profile.
+   */
+  @Patch('me')
+  @HttpCode(HttpStatus.OK)
+  async updateMe(
+    @Req() req: AccessRequest,
+    @Body() updateProfileDto: UpdateProfileDto,
+  ): Promise<ApiResponse<UserResponse>> {
+    const user = await this.userService.updateProfile({
+      userId: req.user.userId,
+      ...updateProfileDto,
+    });
+
+    return {
+      message: 'Profile updated successfully.',
       data: user,
     };
   }
