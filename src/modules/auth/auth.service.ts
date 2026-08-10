@@ -535,11 +535,18 @@ export class AuthService {
         manager,
       });
 
-      if (existingUser && existingUser.user.id !== userId) {
-        throw new ConflictException({
-          message: 'Email address is already in use.',
-          error: 'Email Already Exists',
-        } as BaseException);
+      if (existingUser) {
+        if (existingUser.user.id !== userId) {
+          throw new ConflictException({
+            message: 'Email address is already in use.',
+            error: 'Email Already Exists',
+          } as BaseException);
+        } else {
+          throw new BadRequestException({
+            message: 'New email must be different from the current email',
+            error: 'Same Email',
+          } as BaseException);
+        }
       }
 
       await this.userService.updateEmail({
