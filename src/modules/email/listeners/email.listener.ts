@@ -18,7 +18,7 @@ export class EmailListener {
    */
   @OnEvent(EVENTS.SIGNUP_VERIFICATION)
   async handleSignupVerification(payload: SignupVerificationEvent): Promise<void> {
-    const verifyUrl = `http://localhost:3000/api/v1/auth/verify/email?token=${payload.token}`;
+    const verifyUrl = `http://localhost:3000/account-action?action=verify-email&token=${payload.token}`;
 
     try {
       await this.mailService.send({
@@ -55,7 +55,7 @@ export class EmailListener {
    */
   @OnEvent(EVENTS.PASSWORD_RESET)
   async handlePasswordReset(payload: PasswordResetEvent): Promise<void> {
-    const resetUrl = `http://localhost:3000/api/v1/auth/password/reset?token=${payload.token}`;
+    const resetUrl = `http://localhost:3000/account-action?action=reset-password&token=${payload.token}`;
 
     try {
       await this.mailService.send({
