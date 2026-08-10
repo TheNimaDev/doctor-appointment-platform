@@ -45,3 +45,8 @@ export interface ChangePasswordParams {
   currentPassword: string;
   newPassword: string;
 }
+
+/** Parameters required to request a password reset email. */
+export interface ForgotPasswordParams {
+  email: string;
+}
