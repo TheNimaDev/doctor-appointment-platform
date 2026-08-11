@@ -1,11 +1,14 @@
-import { getSafeUser } from '@/lib';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
+import { UserService } from '@/modules/user/user.service';
 import { BaseException, RefreshRequest } from '@/types';
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 
 @Injectable()
 export class RefreshTokenGuard implements CanActivate {
-  constructor(private readonly refreshTokenService: RefreshTokenService) {}
+  constructor(
+    private readonly refreshTokenService: RefreshTokenService,
+    private readonly userService: UserService,
+  ) {}
 
   /**
    * Extract the refresh token from the request.
@@ -49,10 +52,14 @@ export class RefreshTokenGuard implements CanActivate {
     const { user: _sessionUser, refreshTokens: _refreshTokens, ...safeSession } = refreshToken.session;
     const { session: _session, ...safeRefreshToken } = refreshToken;
 
+    const { user } = await this.userService.getById({
+      id: refreshToken.session.user.id,
+    });
+
     req.refreshPayload = {
       refreshRecord: safeRefreshToken,
       session: safeSession,
-      user: getSafeUser(refreshToken.session.user).user,
+      user,
     };
 
     return true;
