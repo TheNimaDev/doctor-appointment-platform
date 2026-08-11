@@ -21,6 +21,7 @@ import {
   RegisterParams,
   ResendVerificationEmailPayload,
   ResetPasswordParams,
+  UserRoleIncludeType,
   VerifyEmailParams,
 } from '@/types';
 import { compareSecret, getSafeUser, hashSecret } from '@/lib';
@@ -131,7 +132,11 @@ export class AuthService {
       } as BaseException);
     }
 
-    const { user: userData } = getSafeUser(user);
+    const userResponse = await this.userService.getById({
+      id: user.id,
+    });
+
+    const userData = userResponse.user;
 
     const refreshTokenData = await this.databaseService.dataSource.transaction(async (manager) => {
       let userSession: Session;
