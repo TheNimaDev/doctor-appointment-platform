@@ -59,3 +59,9 @@ export interface UpdateEmailParams {
   email: string;
   manager?: EntityManager;
 }
+
+/** Parameters required to delete the current user's account. */
+export interface DeleteUserParams {
+  userId: string;
+  password: string;
+}
