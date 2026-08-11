@@ -247,6 +247,8 @@ export class UserService {
    *
    * - Validates the current password.
    * - Soft-deletes the user account.
+   * - Revokes all active refresh tokens.
+   * - Revokes all active sessions.
    * - Preserves the user's data for recovery or auditing.
    */
   async deleteUser(params: DeleteUserParams): Promise<void> {
