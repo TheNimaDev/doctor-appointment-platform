@@ -3,12 +3,29 @@ import { RolesAndPermissions } from './token.types';
 import { EntityManager } from 'typeorm';
 import { RegisterParams } from './auth.types';
 import { UserStatus } from '@/modules/user/enums';
+import { Role, RolePermission, UserRole } from '@/modules/role/entities';
+import { Permission } from '@/modules/permission/entities';
 
 /** User type without sensitive fields. */
 export type SafeUser = Omit<User, 'password' | 'sessions'>;
 
-/** User data combined with roles and permissions. */
-export type UserRolePermission = SafeUser & RolesAndPermissions;
+/** User data exposed in API responses. */
+export type UserRolePermission = Omit<SafeUser, 'userRoles'> & RolesAndPermissions;
+
+/** User loaded with roles and permissions relations. */
+export type UserRoleIncludeType = SafeUser & {
+  userRoles: Array<
+    UserRole & {
+      role: Role & {
+        rolePermissions: Array<
+          RolePermission & {
+            permission: Permission;
+          }
+        >;
+      };
+    }
+  >;
+};
 
 /** User response payload. */
 export interface UserResponse {
