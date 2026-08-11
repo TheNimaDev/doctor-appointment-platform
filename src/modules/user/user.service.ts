@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import {
   BaseException,
   CreateUserPayload,
+  DeleteUserParams,
   FindUserByEmailPayload,
   GetUserByIdPayload,
   UpdateEmailParams,
@@ -13,8 +14,10 @@ import {
   UpdateUserStatusPayload,
   UserResponse,
 } from '@/types';
-import { checkDatabaseError, getSafeUser } from '@/lib';
+import { checkDatabaseError, compareSecret, getSafeUser } from '@/lib';
 import { DatabaseService } from '@/modules/database/database.service';
+import { SessionService } from '../session/session.service';
+import { RefreshTokenService } from '../refresh-token/refresh-token.service';
 
 @Injectable()
 export class UserService {
@@ -22,6 +25,8 @@ export class UserService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly databaseService: DatabaseService,
+    private readonly sessionService: SessionService,
+    private readonly refreshTokenService: RefreshTokenService,
   ) {}
 
   /**
@@ -235,5 +240,50 @@ export class UserService {
         error: 'User Not Found',
       } as BaseException);
     }
+  }
+
+  /**
+   * Delete the current user's account.
+   *
+   * - Validates the current password.
+   * - Soft-deletes the user account.
+   * - Preserves the user's data for recovery or auditing.
+   */
+  async deleteUser(params: DeleteUserParams): Promise<void> {
+    const user = await this.findByIdWithPassword(params.userId);
+
+    const isPasswordValid = await compareSecret(params.password, user.password);
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException({
+        message: 'Current password is incorrect.',
+        error: 'Invalid Current Password',
+      } as BaseException);
+    }
+
+    await this.databaseService.dataSource.transaction(async (manager) => {
+      const repository = manager.getRepository(User);
+
+      const result = await repository.softDelete({
+        id: params.userId,
+      });
+
+      if (result.affected === 0) {
+        throw new NotFoundException({
+          message: 'User not found in database.',
+          error: 'User Not Found',
+        } as BaseException);
+      }
+
+      await this.refreshTokenService.revokeUserRefreshTokens({
+        userId: params.userId,
+        manager,
+      });
+
+      await this.sessionService.revokeUserSessions({
+        userId: params.userId,
+        manager,
+      });
+    });
   }
 }
