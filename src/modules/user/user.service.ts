@@ -13,6 +13,7 @@ import {
   UpdateProfileParams,
   UpdateUserStatusPayload,
   UserResponse,
+  UserRoleIncludeType,
 } from '@/types';
 import { checkDatabaseError, compareSecret, getSafeUser } from '@/lib';
 import { DatabaseService } from '@/modules/database/database.service';
@@ -31,7 +32,10 @@ export class UserService {
 
   /**
    * Create a new user.
-   * - Throws ConflictException if the email already exists.
+   *
+   * - Creates the user account.
+   * - Persists the user in the database.
+   * - Returns the created user with roles and permissions.
    */
   async createUser(payload: CreateUserPayload): Promise<UserResponse> {
     try {
@@ -44,7 +48,12 @@ export class UserService {
         password: payload.password,
       });
 
-      return getSafeUser(await repository.save(user));
+      const savedUser = await repository.save(user);
+
+      return this.getById({
+        id: savedUser.id,
+        manager: payload.manager,
+      });
     } catch (error) {
       checkDatabaseError({
         e: error as Error,
@@ -56,6 +65,8 @@ export class UserService {
 
   /**
    * Update the status of a user.
+   *
+   * - Updates the user's account status.
    * - Throws NotFoundException if the user does not exist.
    */
   async updateUserStatus(payload: UpdateUserStatusPayload): Promise<void> {
@@ -100,6 +111,15 @@ export class UserService {
       where: {
         id: payload.id,
       },
+      relations: {
+        userRoles: {
+          role: {
+            rolePermissions: {
+              permission: true,
+            },
+          },
+        },
+      },
     });
 
     if (!user) {
@@ -109,7 +129,7 @@ export class UserService {
       } as BaseException);
     }
 
-    return getSafeUser(user);
+    return getSafeUser(user as UserRoleIncludeType);
   }
 
   /**
@@ -123,13 +143,22 @@ export class UserService {
       where: {
         email: payload.email,
       },
+      relations: {
+        userRoles: {
+          role: {
+            rolePermissions: {
+              permission: true,
+            },
+          },
+        },
+      },
     });
 
     if (!user) {
       return null;
     }
 
-    return getSafeUser(user);
+    return getSafeUser(user as UserRoleIncludeType);
   }
 
   /**
@@ -190,10 +219,11 @@ export class UserService {
   }
 
   /**
-   * Update a user's profile.
+   * Update the current user's profile.
    *
-   * - Updates the provided profile fields.
-   * - Returns the updated safe user.
+   * - Updates only provided profile fields.
+   * - Validates that the user exists.
+   * - Returns the updated user with roles and permissions.
    */
   async updateProfile(params: UpdateProfileParams): Promise<UserResponse> {
     const user = await this.userRepository.preload({
@@ -213,7 +243,11 @@ export class UserService {
       } as BaseException);
     }
 
-    return getSafeUser(await this.userRepository.save(user));
+    await this.userRepository.save(user);
+
+    return this.getById({
+      id: params.userId,
+    });
   }
 
   /**
