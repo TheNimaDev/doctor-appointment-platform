@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { UserStatus } from '../enums';
 import { Session } from '@/modules/session/entities';
+import { UserRole } from '@/modules/role/entities/user-role.entity';
 
 @Entity('users')
 export class User {
@@ -37,6 +38,9 @@ export class User {
 
   @OneToMany(() => Session, (session) => session.user)
   sessions?: Session[];
+
+  @OneToMany(() => UserRole, (userRole) => userRole.user)
+  userRoles: UserRole[];
 
   @Column({ type: 'datetime', nullable: true })
   lastLoginAt: Date | null;
