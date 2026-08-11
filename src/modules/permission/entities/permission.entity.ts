@@ -1,9 +1,11 @@
+import { RolePermission } from '@/modules/role/entities/role-permission.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
   Index,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -26,6 +28,9 @@ export class Permission {
 
   @Column({ type: 'varchar', length: 100 })
   action: string;
+
+  @OneToMany(() => RolePermission, (rolePermission) => rolePermission.permission)
+  rolePermissions: RolePermission[];
 
   @CreateDateColumn()
   createdAt: Date;
