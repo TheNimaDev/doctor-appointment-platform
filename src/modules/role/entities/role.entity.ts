@@ -1,4 +1,5 @@
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { UserRole } from './user-role.entity';
 
 @Entity('roles')
 export class Role {
@@ -10,6 +11,9 @@ export class Role {
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   description: string | null;
+
+  @OneToMany(() => UserRole, (userRole) => userRole.role)
+  userRoles: UserRole[];
 
   @CreateDateColumn()
   createdAt: Date;
