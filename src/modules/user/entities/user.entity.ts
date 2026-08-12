@@ -5,12 +5,14 @@ import {
   Entity,
   Index,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { UserStatus } from '../enums';
 import { Session } from '@/modules/session/entities';
 import { UserRole } from '@/modules/role/entities/user-role.entity';
+import { Doctor } from '@/modules/doctor/entities';
 
 @Entity('users')
 export class User {
@@ -41,6 +43,9 @@ export class User {
 
   @OneToMany(() => UserRole, (userRole) => userRole.user)
   userRoles: UserRole[];
+
+  @OneToOne(() => Doctor, (doctor) => doctor.user)
+  doctor: Doctor;
 
   @Column({ type: 'datetime', nullable: true })
   lastLoginAt: Date | null;

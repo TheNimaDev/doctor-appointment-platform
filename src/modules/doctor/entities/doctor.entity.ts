@@ -6,8 +6,11 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
 import { DoctorStatus } from '../enums';
+import { User } from '@/modules/user/entities';
 
 @Entity('doctors')
 @Index(['status'])
@@ -18,6 +21,12 @@ export class Doctor {
 
   @Column({ type: 'uuid', unique: true })
   userId: string;
+
+  @OneToOne(() => User, (user) => user.doctor, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'userId' })
+  user: User;
 
   @Column({ type: 'varchar', length: 50, unique: true })
   medicalCode: string;
