@@ -7,7 +7,7 @@ import { Role, RolePermission, UserRole } from '@/modules/role/entities';
 import { Permission } from '@/modules/permission/entities';
 
 /** User type without sensitive fields. */
-export type SafeUser = Omit<User, 'password' | 'sessions'>;
+export type SafeUser = Omit<User, 'password' | 'sessions' | 'doctor'>;
 
 /** User data exposed in API responses. */
 export type UserRolePermission = Omit<SafeUser, 'userRoles'> & RolesAndPermissions;
