@@ -8,9 +8,11 @@ import {
   DeleteDateColumn,
   OneToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { DoctorStatus } from '../enums';
 import { User } from '@/modules/user/entities';
+import { DoctorSpecialty } from './doctor-specialty.entity';
 
 @Entity('doctors')
 @Index(['status'])
@@ -27,6 +29,9 @@ export class Doctor {
   })
   @JoinColumn({ name: 'userId' })
   user: User;
+
+  @OneToMany(() => DoctorSpecialty, (doctorSpecialty) => doctorSpecialty.doctor)
+  doctorSpecialties: DoctorSpecialty[];
 
   @Column({ type: 'varchar', length: 50, unique: true })
   medicalCode: string;
