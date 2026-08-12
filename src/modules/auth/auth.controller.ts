@@ -97,7 +97,6 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RefreshTokenGuard)
-  @Public()
   async logout(@Req() req: RefreshRequest, @Res({ passthrough: true }) res: Response): Promise<ApiResponse> {
     res.clearCookie('refreshToken', this.getCookieOptions());
     await this.authService.logout(req.refreshPayload);
@@ -113,7 +112,6 @@ export class AuthController {
   @Post('logout/all')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RefreshTokenGuard)
-  @Public()
   async logoutAll(@Req() req: RefreshRequest, @Res({ passthrough: true }) res: Response): Promise<ApiResponse> {
     res.clearCookie('refreshToken', this.getCookieOptions());
     await this.authService.logoutAll(req.refreshPayload);
@@ -146,7 +144,6 @@ export class AuthController {
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RefreshTokenGuard)
-  @Public()
   async refresh(
     @Req() req: RefreshRequest,
     @Res({ passthrough: true }) res: Response,
