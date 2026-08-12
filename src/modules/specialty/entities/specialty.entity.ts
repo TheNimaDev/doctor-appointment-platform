@@ -4,10 +4,12 @@ import {
   DeleteDateColumn,
   Entity,
   Index,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { SpecialtyStatus } from '../enums';
+import { DoctorSpecialty } from '@/modules/doctor/entities';
 
 @Entity('specialties')
 @Index(['status'])
@@ -29,6 +31,9 @@ export class Specialty {
 
   @Column({ type: 'enum', enum: SpecialtyStatus, default: SpecialtyStatus.ACTIVE })
   status: SpecialtyStatus;
+
+  @OneToMany(() => DoctorSpecialty, (doctorSpecialty) => doctorSpecialty.specialty)
+  doctorSpecialties: DoctorSpecialty[];
 
   @CreateDateColumn()
   createdAt: Date;
