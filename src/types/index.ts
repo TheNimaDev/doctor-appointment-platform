@@ -10,3 +10,4 @@ export * from './refresh-token.types';
 export * from './session.types';
 export * from './doctor.types';
 export * from './specialty.types';
+export * from './doctor-specialty.types';
