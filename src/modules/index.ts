@@ -7,3 +7,4 @@ export * from './mail';
 export * from './refresh-token';
 export * from './session';
 export * from './doctor';
+export * from './specialty';
