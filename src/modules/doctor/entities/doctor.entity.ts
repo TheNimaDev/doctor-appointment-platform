@@ -13,6 +13,7 @@ import {
 import { DoctorStatus } from '../enums';
 import { User } from '@/modules/user/entities';
 import { DoctorSpecialty } from './doctor-specialty.entity';
+import { Clinic } from '@/modules/clinic/entities';
 
 @Entity('doctors')
 @Index(['status'])
@@ -32,6 +33,9 @@ export class Doctor {
 
   @OneToMany(() => DoctorSpecialty, (doctorSpecialty) => doctorSpecialty.doctor)
   doctorSpecialties: DoctorSpecialty[];
+
+  @OneToMany(() => Clinic, (clinic) => clinic.doctor)
+  clinics: Clinic[];
 
   @Column({ type: 'varchar', length: 50, unique: true })
   medicalCode: string;
