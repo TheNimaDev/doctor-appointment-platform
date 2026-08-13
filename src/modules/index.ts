@@ -8,3 +8,4 @@ export * from './refresh-token';
 export * from './session';
 export * from './doctor';
 export * from './specialty';
+export * from './doctor-specialty';

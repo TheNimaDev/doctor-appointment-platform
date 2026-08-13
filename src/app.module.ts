@@ -26,6 +26,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     Modules.SessionModule,
     Modules.DoctorModule,
     Modules.SpecialtyModule,
+    Modules.DoctorSpecialtyModule,
   ],
   providers: [
     {
