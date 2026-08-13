@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { SpecialtyStatus } from '../enums';
-import { DoctorSpecialty } from '@/modules/doctor/entities';
+import { DoctorSpecialty } from '@/modules/doctor-specialty/entities';
 
 @Entity('specialties')
 @Index(['status'])

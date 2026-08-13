@@ -12,7 +12,7 @@ import {
 } from 'typeorm';
 import { DoctorStatus } from '../enums';
 import { User } from '@/modules/user/entities';
-import { DoctorSpecialty } from './doctor-specialty.entity';
+import { DoctorSpecialty } from '@/modules/doctor-specialty/entities';
 import { Clinic } from '@/modules/clinic/entities';
 
 @Entity('doctors')
