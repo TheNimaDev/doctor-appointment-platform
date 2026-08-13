@@ -8,3 +8,4 @@ export * from './token.types';
 export * from './request.types';
 export * from './refresh-token.types';
 export * from './session.types';
+export * from './doctor.types';
