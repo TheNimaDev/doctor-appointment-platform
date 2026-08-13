@@ -5,7 +5,7 @@ import type { BaseException } from '@/types';
 interface CheckDatabaseErrorParams {
   e: Error;
   mainResource: string;
-  conflictField?: string;
+  conflictField?: string | string[];
   notFoundField?: string;
   notFoundResource?: string;
 }
@@ -20,8 +20,10 @@ export function checkDatabaseError(data: CheckDatabaseErrorParams): never {
 
     switch (driverError.code) {
       case 'ER_DUP_ENTRY': {
+        const fields = Array.isArray(conflictField) ? conflictField.join(' or ') : conflictField;
+
         throw new ConflictException({
-          message: `${mainResource} already exists in database, please change ${conflictField}`,
+          message: `${mainResource} already exists in database${fields ? `, please change ${fields}` : '.'}`,
           error: `${mainResource} already exists`,
         } as BaseException);
       }
