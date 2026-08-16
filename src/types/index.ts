@@ -11,3 +11,4 @@ export * from './session.types';
 export * from './doctor.types';
 export * from './specialty.types';
 export * from './doctor-specialty.types';
+export * from './clinic.types';
