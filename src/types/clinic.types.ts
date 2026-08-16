@@ -45,6 +45,7 @@ export interface UpdateClinicPayload {
 /** Parameters for updating clinic status. */
 export interface UpdateClinicStatusPayload {
   id: string;
+  doctorId: string;
   status: ClinicStatus;
   manager?: EntityManager;
 }
