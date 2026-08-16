@@ -27,6 +27,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     Modules.DoctorModule,
     Modules.SpecialtyModule,
     Modules.DoctorSpecialtyModule,
+    Modules.ClinicModule,
   ],
   providers: [
     {
@@ -43,11 +44,11 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     },
     {
       provide: APP_GUARD,
-      useClass: AccessTokenGuard
+      useClass: AccessTokenGuard,
     },
     {
       provide: APP_GUARD,
-      useClass: PermissionsGuard
+      useClass: PermissionsGuard,
     },
   ],
 })
