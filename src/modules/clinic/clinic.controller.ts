@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 import { ClinicService } from './clinic.service';
-import { CreateClinicDto, UpdateClinicDto } from './dto';
+import { CreateClinicDto, UpdateClinicDto, UpdateClinicStatusDto } from './dto';
 import type { ApiResponse, ClinicResponse, ClinicsResponse } from '@/types';
 
 @Controller('doctors/:doctorId/clinics')
@@ -110,6 +110,30 @@ export class ClinicController {
 
     return {
       message: 'Clinic deleted successfully.',
+    };
+  }
+
+  /**
+   * Update the status of a clinic.
+   *
+   * - Updates the clinic status.
+   * - Ensures the clinic belongs to the specified doctor.
+   */
+  @Patch(':clinicId/status')
+  @HttpCode(HttpStatus.OK)
+  async updateStatus(
+    @Param('doctorId') doctorId: string,
+    @Param('clinicId') clinicId: string,
+    @Body() updateClinicStatusDto: UpdateClinicStatusDto,
+  ): Promise<ApiResponse> {
+    await this.clinicService.updateStatus({
+      id: clinicId,
+      doctorId,
+      ...updateClinicStatusDto,
+    });
+
+    return {
+      message: 'Clinic status updated successfully.',
     };
   }
 }
