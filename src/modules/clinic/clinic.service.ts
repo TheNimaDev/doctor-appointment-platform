@@ -11,6 +11,7 @@ import {
   FindClinicsByDoctorIdPayload,
   FindClinicsPayload,
   UpdateClinicPayload,
+  UpdateClinicStatusPayload,
 } from '@/types';
 import { BaseException } from '@/types';
 import { checkDatabaseError } from '@/lib';
@@ -207,5 +208,44 @@ export class ClinicService {
     });
 
     await repository.softRemove(clinic);
+  }
+
+  /**
+   * Update the status of a clinic.
+   *
+   * - Updates the status of the specified clinic.
+   * - Ensures the clinic belongs to the specified doctor.
+   * - Throws NotFoundException if the clinic does not exist.
+   */
+  async updateStatus(payload: UpdateClinicStatusPayload): Promise<void> {
+    const repository = this.getRepository(payload.manager);
+
+    try {
+      const result = await repository.update(
+        {
+          id: payload.id,
+          doctorId: payload.doctorId,
+        },
+        {
+          status: payload.status,
+        },
+      );
+
+      if (result.affected === 0) {
+        throw new NotFoundException({
+          message: 'Clinic not found in database.',
+          error: 'Clinic Not Found',
+        } as BaseException);
+      }
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      checkDatabaseError({
+        e: error as Error,
+        mainResource: 'Clinic',
+      });
+    }
   }
 }
