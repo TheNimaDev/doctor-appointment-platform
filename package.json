@@ -25,7 +25,8 @@
     "migration:generate": "ts-node scripts/run-migration.ts",
     "migration:run": "npm run typeorm -- migration:run -d db/data-source.ts",
     "migration:revert": "npm run typeorm -- migration:revert -d db/data-source.ts",
-    "migration:show": "npm run typeorm -- migration:show -d db/data-source.ts"
+    "migration:show": "npm run typeorm -- migration:show -d db/data-source.ts",
+    "seed": "ts-node scripts/seed.ts"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^2.3.7",
