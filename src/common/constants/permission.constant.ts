@@ -9,9 +9,15 @@ export type PermissionStructure = Record<
 
 export const BASE_PERMISSIONS = {
   OWNER_ALL: {
-    name: 'owner.all',
+    name: 'owner:all',
     module: 'owner',
     action: 'all',
+  },
+
+  USER_SELF: {
+    name: 'user:self',
+    module: 'user',
+    action: 'self',
   },
 } as const satisfies PermissionStructure;
 
