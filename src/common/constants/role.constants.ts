@@ -1,9 +1,9 @@
 export const ROLES = {
-  OWNER: 'owner',
-  SELF: 'self',
-  USER_MANAGER: 'user-manager',
-  DOCTOR_MANAGER: 'doctor-manager',
-  CLINIC_MANAGER: 'clinic-manager',
+  SUPER_ADMIN: 'SUPER_ADMIN',
+  CLINIC_ADMIN: 'CLINIC_ADMIN',
+  DOCTOR: 'DOCTOR',
+  ASSISTANT: 'ASSISTANT',
+  PATIENT: 'PATIENT',
 } as const;
 
 export type RolesType = (typeof ROLES)[keyof typeof ROLES];
