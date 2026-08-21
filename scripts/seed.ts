@@ -97,33 +97,40 @@ async function seedRole(manager: EntityManager, data: SeedRoleParams): Promise<v
 
 async function seedRoles(manager: EntityManager): Promise<void> {
   await seedRole(manager, {
-    role: ROLES.OWNER,
-    description: 'System owner with full access to all resources.',
+    role: ROLES.SUPER_ADMIN,
+    description: 'System administrator with full access to all resources.',
     permissions: [PERMISSIONS.OWNER_ALL],
   });
 
   await seedRole(manager, {
-    role: ROLES.SELF,
-    description: 'Basic role for authenticated users.',
-    permissions: [PERMISSIONS.USER_SELF],
+    role: ROLES.CLINIC_ADMIN,
+    description: 'Administrator responsible for managing clinics and related resources.',
+    permissions: [
+      PERMISSIONS.USER_READ,
+      PERMISSIONS.USER_UPDATE,
+
+      ...Object.values(DOCTOR_PERMISSIONS).map((permission) => permission.name),
+
+      ...Object.values(CLINIC_PERMISSIONS).map((permission) => permission.name),
+    ],
   });
 
   await seedRole(manager, {
-    role: ROLES.USER_MANAGER,
-    description: 'Manage users in the system.',
-    permissions: Object.values(USER_PERMISSIONS).map((permission) => permission.name),
+    role: ROLES.DOCTOR,
+    description: 'Doctor with access to doctor-related resources.',
+    permissions: [PERMISSIONS.DOCTOR_READ, PERMISSIONS.DOCTOR_UPDATE],
   });
 
   await seedRole(manager, {
-    role: ROLES.DOCTOR_MANAGER,
-    description: 'Manage doctors in the system.',
-    permissions: Object.values(DOCTOR_PERMISSIONS).map((permission) => permission.name),
+    role: ROLES.ASSISTANT,
+    description: 'Assistant with limited access to assigned resources.',
+    permissions: [PERMISSIONS.DOCTOR_READ, PERMISSIONS.CLINIC_READ],
   });
 
   await seedRole(manager, {
-    role: ROLES.CLINIC_MANAGER,
-    description: 'Manage clinics in the system.',
-    permissions: Object.values(CLINIC_PERMISSIONS).map((permission) => permission.name),
+    role: ROLES.PATIENT,
+    description: 'Patient with access to personal user resources.',
+    permissions: [PERMISSIONS.USER_READ, PERMISSIONS.USER_UPDATE],
   });
 }
 
