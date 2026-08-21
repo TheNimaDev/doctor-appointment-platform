@@ -13,12 +13,6 @@ export const BASE_PERMISSIONS = {
     module: 'owner',
     action: 'all',
   },
-
-  USER_SELF: {
-    name: 'user:self',
-    module: 'user',
-    action: 'self',
-  },
 } as const satisfies PermissionStructure;
 
 export const USER_PERMISSIONS = {
