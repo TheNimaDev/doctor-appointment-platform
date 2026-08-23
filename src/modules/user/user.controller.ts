@@ -8,7 +8,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   /**
-   * Get current user profile.
+   * Get the current user's profile.
    */
   @Get('me')
   @HttpCode(HttpStatus.OK)
@@ -24,7 +24,10 @@ export class UserController {
   }
 
   /**
-   * Update current user profile.
+   * Update the current user's profile.
+   *
+   * - Updates only the provided profile fields.
+   * - Returns the updated user profile.
    */
   @Patch('me')
   @HttpCode(HttpStatus.OK)
@@ -48,6 +51,7 @@ export class UserController {
    *
    * - Requires the current password.
    * - Soft-deletes the authenticated user's account.
+   * - Revokes all active refresh tokens and sessions.
    */
   @Delete('me')
   @HttpCode(HttpStatus.OK)

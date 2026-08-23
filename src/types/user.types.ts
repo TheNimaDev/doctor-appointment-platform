@@ -57,28 +57,29 @@ export interface FindUserByEmailPayload {
 }
 
 /** Parameters required to update a user's password. */
-export interface UpdatePasswordParams {
+export interface UpdatePasswordPayload {
   userId: string;
   password: string;
   manager?: EntityManager;
 }
 
 /** Parameters required to update a user's profile. */
-export interface UpdateProfileParams {
+export interface UpdateProfilePayload {
   userId: string;
   firstName?: string;
   lastName?: string;
+  manager?: EntityManager;
 }
 
 /** Parameters required to update a user's email address. */
-export interface UpdateEmailParams {
+export interface UpdateEmailPayload {
   userId: string;
   email: string;
   manager?: EntityManager;
 }
 
 /** Parameters required to delete the current user's account. */
-export interface DeleteUserParams {
+export interface DeleteUserPayload {
   userId: string;
   password: string;
 }
