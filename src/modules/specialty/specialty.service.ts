@@ -29,7 +29,7 @@ export class SpecialtyService {
    * Get the appropriate Specialty repository.
    *
    * - Uses the transaction manager repository when provided.
-   * - Falls back to the default Specialty repository otherwise.
+   * - Falls back to the default repository otherwise.
    */
   private getRepository(manager?: EntityManager): Repository<Specialty> {
     return manager?.getRepository(Specialty) ?? this.specialtyRepository;
@@ -81,8 +81,6 @@ export class SpecialtyService {
 
   /**
    * Get a specialty by ID.
-   *
-   * - Throws NotFoundException if the specialty does not exist.
    */
   async getById(payload: FindSpecialtyByIdPayload): Promise<SpecialtyResponse> {
     const repository = this.getRepository(payload.manager);
@@ -107,8 +105,6 @@ export class SpecialtyService {
 
   /**
    * Find a specialty by slug.
-   *
-   * - Throws NotFoundException if the specialty does not exist.
    */
   async findBySlug(payload: FindSpecialtyBySlugPayload): Promise<SpecialtyResponse> {
     const repository = this.getRepository(payload.manager);
@@ -133,9 +129,6 @@ export class SpecialtyService {
 
   /**
    * Update a specialty.
-   *
-   * - Updates the specialty name, slug, and/or description.
-   * - Throws NotFoundException if the specialty does not exist.
    */
   async updateSpecialty(payload: UpdateSpecialtyPayload): Promise<SpecialtyResponse> {
     const repository = this.getRepository(payload.manager);
@@ -181,21 +174,30 @@ export class SpecialtyService {
 
   /**
    * Soft-delete a specialty.
-   *
-   * - Throws NotFoundException if the specialty does not exist.
    */
   async deleteSpecialty(payload: DeleteSpecialtyPayload): Promise<void> {
     const repository = this.getRepository(payload.manager);
 
-    const result = await repository.softDelete({
-      id: payload.id,
-    });
+    try {
+      const result = await repository.softDelete({
+        id: payload.id,
+      });
 
-    if (result.affected === 0) {
-      throw new NotFoundException({
-        message: 'Specialty not found in database.',
-        error: 'Specialty Not Found',
-      } as BaseException);
+      if (result.affected === 0) {
+        throw new NotFoundException({
+          message: 'Specialty not found in database.',
+          error: 'Specialty Not Found',
+        } as BaseException);
+      }
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      checkDatabaseError({
+        e: error as Error,
+        mainResource: 'Specialty',
+      });
     }
   }
 }
