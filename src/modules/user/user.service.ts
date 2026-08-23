@@ -79,26 +79,30 @@ export class UserService {
    *
    * - Updates the user's account status.
    * - Throws NotFoundException if the user does not exist.
+   * - Returns the updated user with roles and permissions.
    */
-  async updateUserStatus(payload: UpdateUserStatusPayload): Promise<void> {
+  async updateUserStatus(payload: UpdateUserStatusPayload): Promise<UserResponse> {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const result = await repository.update(
-        {
-          id: payload.userId,
-        },
-        {
-          status: payload.status,
-        },
-      );
+      const user = await repository.preload({
+        id: payload.userId,
+        status: payload.status,
+      });
 
-      if (result.affected === 0) {
+      if (!user) {
         throw new NotFoundException({
           message: 'User not found in database.',
           error: 'User Not Found',
         } as BaseException);
       }
+
+      await repository.save(user);
+
+      return this.getById({
+        id: payload.userId,
+        manager: payload.manager,
+      });
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
@@ -226,53 +230,81 @@ export class UserService {
    * Update a user's password.
    *
    * - Updates the user's password hash.
+   * - Throws NotFoundException if the user does not exist.
    */
   async updatePassword(payload: UpdatePasswordPayload): Promise<void> {
     const repository = this.getRepository(payload.manager);
 
-    await repository.update(
-      {
+    try {
+      const user = await repository.preload({
         id: payload.userId,
-      },
-      {
         password: payload.password,
-      },
-    );
+      });
+
+      if (!user) {
+        throw new NotFoundException({
+          message: 'User not found in database.',
+          error: 'User Not Found',
+        } as BaseException);
+      }
+
+      await repository.save(user);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      checkDatabaseError({
+        e: error as Error,
+        mainResource: 'User',
+      });
+    }
   }
 
   /**
    * Update the current user's profile.
    *
-   * - Updates only provided profile fields.
-   * - Validates that the user exists.
+   * - Updates the provided profile fields.
+   * - Throws NotFoundException if the user does not exist.
    * - Returns the updated user with roles and permissions.
    */
   async updateProfile(payload: UpdateProfilePayload): Promise<UserResponse> {
     const repository = this.getRepository(payload.manager);
 
-    const user = await repository.preload({
-      id: payload.userId,
-      ...(payload.firstName !== undefined && {
-        firstName: payload.firstName,
-      }),
-      ...(payload.lastName !== undefined && {
-        lastName: payload.lastName,
-      }),
-    });
+    try {
+      const user = await repository.preload({
+        id: payload.userId,
+        ...(payload.firstName !== undefined && {
+          firstName: payload.firstName,
+        }),
+        ...(payload.lastName !== undefined && {
+          lastName: payload.lastName,
+        }),
+      });
 
-    if (!user) {
-      throw new NotFoundException({
-        message: 'User not found in database.',
-        error: 'User Not Found',
-      } as BaseException);
+      if (!user) {
+        throw new NotFoundException({
+          message: 'User not found in database.',
+          error: 'User Not Found',
+        } as BaseException);
+      }
+
+      await repository.save(user);
+
+      return this.getById({
+        id: payload.userId,
+        manager: payload.manager,
+      });
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      checkDatabaseError({
+        e: error as Error,
+        mainResource: 'User',
+      });
     }
-
-    await repository.save(user);
-
-    return this.getById({
-      id: payload.userId,
-      manager: payload.manager,
-    });
   }
 
   /**
@@ -280,26 +312,31 @@ export class UserService {
    *
    * - Updates the user's email.
    * - Throws NotFoundException if the user does not exist.
+   * - Handles duplicate email conflicts.
+   * - Returns the updated user with roles and permissions.
    */
-  async updateEmail(payload: UpdateEmailPayload): Promise<void> {
+  async updateEmail(payload: UpdateEmailPayload): Promise<UserResponse> {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const result = await repository.update(
-        {
-          id: payload.userId,
-        },
-        {
-          email: payload.email,
-        },
-      );
+      const user = await repository.preload({
+        id: payload.userId,
+        email: payload.email,
+      });
 
-      if (result.affected === 0) {
+      if (!user) {
         throw new NotFoundException({
           message: 'User not found in database.',
           error: 'User Not Found',
         } as BaseException);
       }
+
+      await repository.save(user);
+
+      return this.getById({
+        id: payload.userId,
+        manager: payload.manager,
+      });
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
