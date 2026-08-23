@@ -2,16 +2,17 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Email } from './entities';
 import { EmailStatus } from './enums';
-import { IsNull, MoreThan, Repository } from 'typeorm';
+import { EntityManager, IsNull, MoreThan, Repository } from 'typeorm';
 import {
   BaseException,
-  CreateEmailOutput,
-  CreateEmailParams,
-  FindActiveEmailParams,
-  UpdateEmailStatusParams,
-  ValidateEmailTokenParams,
+  CreateEmailPayload,
+  CreateEmailResponse,
+  EmailResponse,
+  FindActiveEmailPayload,
+  UpdateEmailStatusPayload,
+  ValidateEmailTokenPayload,
 } from '@/types';
-import { generateRandomToken, hashToken } from '@/lib';
+import { checkDatabaseError, generateRandomToken, hashToken } from '@/lib';
 import { ConfigService } from '@nestjs/config';
 import ms, { StringValue } from 'ms';
 
@@ -24,79 +25,75 @@ export class EmailService {
   ) {}
 
   /**
-   * Create a new email token.
+   * Get the appropriate Email repository.
    *
-   * - Revokes the existing active token of the same type.
-   * - Generates a new random token.
-   * - Stores only the hashed token.
+   * - Uses the transaction manager repository when provided.
+   * - Falls back to the default repository otherwise.
    */
-  async createEmail(params: CreateEmailParams): Promise<CreateEmailOutput> {
-    const repository = params.manager?.getRepository(Email) ?? this.emailRepository;
+  private getRepository(manager?: EntityManager): Repository<Email> {
+    return manager?.getRepository(Email) ?? this.emailRepository;
+  }
 
-    const existingEmail = await repository.findOne({
-      where: {
-        userId: params.userId,
-        type: params.type,
-        usedAt: IsNull(),
-        revokedAt: IsNull(),
-      },
-    });
+  /**
+   * Create a new email token.
+   */
+  async createEmail(payload: CreateEmailPayload): Promise<CreateEmailResponse> {
+    const repository = this.getRepository(payload.manager);
 
-    if (existingEmail) {
-      existingEmail.revokedAt = new Date();
-      await repository.save(existingEmail);
+    try {
+      const existingEmail = await repository.findOne({
+        where: {
+          userId: payload.userId,
+          type: payload.type,
+          usedAt: IsNull(),
+          revokedAt: IsNull(),
+        },
+      });
+
+      if (existingEmail) {
+        existingEmail.revokedAt = new Date();
+        await repository.save(existingEmail);
+      }
+
+      const token = generateRandomToken();
+      const tokenHash = hashToken(token);
+
+      const expiresIn = this.configService.getOrThrow<StringValue>('EMAIL_EXPIRES');
+
+      const expiresAt = new Date(Date.now() + ms(expiresIn));
+
+      const email = repository.create({
+        userId: payload.userId,
+        tokenHash,
+        type: payload.type,
+        status: EmailStatus.PENDING,
+        expiresAt,
+      });
+
+      await repository.save(email);
+
+      return {
+        token,
+        emailId: email.id,
+      };
+    } catch (error) {
+      checkDatabaseError({
+        e: error as Error,
+        mainResource: 'Email',
+      });
     }
-
-    const token = generateRandomToken();
-    const tokenHash = hashToken(token);
-
-    const expiresIn = this.configService.getOrThrow<StringValue>('EMAIL_EXPIRES');
-
-    const expiresAt = new Date(Date.now() + ms(expiresIn));
-
-    const email = repository.create({
-      userId: params.userId,
-      tokenHash,
-      type: params.type,
-      status: EmailStatus.PENDING,
-      expiresAt,
-    });
-
-    await repository.save(email);
-
-    return {
-      token,
-      emailId: email.id,
-    };
   }
 
   /**
    * Find an active email token for a user.
    */
-  async findActiveEmail(params: FindActiveEmailParams): Promise<Email | null> {
-    const repository = params.manager?.getRepository(Email) ?? this.emailRepository;
-
-    return repository.findOne({
-      where: {
-        userId: params.userId,
-        type: params.type,
-        usedAt: IsNull(),
-        revokedAt: IsNull(),
-        expiresAt: MoreThan(new Date()),
-      },
-    });
-  }
-
-  /**
-   * Verify and consume an email token.
-   */
-  async validateEmailToken(params: ValidateEmailTokenParams): Promise<string> {
-    const repository = params.manager?.getRepository(Email) ?? this.emailRepository;
+  async findActiveEmail(payload: FindActiveEmailPayload): Promise<EmailResponse | null> {
+    const repository = this.getRepository(payload.manager);
 
     const email = await repository.findOne({
       where: {
-        tokenHash: hashToken(params.token),
-        type: params.type,
+        userId: payload.userId,
+        type: payload.type,
         usedAt: IsNull(),
         revokedAt: IsNull(),
         expiresAt: MoreThan(new Date()),
@@ -104,58 +101,107 @@ export class EmailService {
     });
 
     if (!email) {
-      throw new BadRequestException({
-        message: 'Invalid or expired email token',
-        error: 'Invalid Token',
-      } as BaseException);
+      return null;
     }
 
-    email.usedAt = new Date();
+    return {
+      email,
+    };
+  }
 
-    await repository.save(email);
+  /**
+   * Validate an email token.
+   */
+  async validateEmailToken(payload: ValidateEmailTokenPayload): Promise<string> {
+    const repository = this.getRepository(payload.manager);
 
-    return email.userId;
+    try {
+      const email = await repository.findOne({
+        where: {
+          tokenHash: hashToken(payload.token),
+          type: payload.type,
+          usedAt: IsNull(),
+          revokedAt: IsNull(),
+          expiresAt: MoreThan(new Date()),
+        },
+      });
+
+      if (!email) {
+        throw new BadRequestException({
+          message: 'Invalid or expired email token.',
+          error: 'Invalid Token',
+        } as BaseException);
+      }
+
+      email.usedAt = new Date();
+
+      await repository.save(email);
+
+      return email.userId;
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      checkDatabaseError({
+        e: error as Error,
+        mainResource: 'Email',
+      });
+    }
   }
 
   /**
    * Revoke an active email token.
    */
-  async revokeEmail(params: FindActiveEmailParams): Promise<void> {
-    const repository = params.manager?.getRepository(Email) ?? this.emailRepository;
+  async revokeEmail(payload: FindActiveEmailPayload): Promise<void> {
+    const repository = this.getRepository(payload.manager);
 
-    const email = await this.findActiveEmail(params);
+    try {
+      const email = await this.findActiveEmail(payload);
 
-    if (!email) {
-      return;
+      if (!email) {
+        return;
+      }
+
+      email.email.revokedAt = new Date();
+
+      await repository.save(email.email);
+    } catch (error) {
+      checkDatabaseError({
+        e: error as Error,
+        mainResource: 'Email',
+      });
     }
-
-    email.revokedAt = new Date();
-
-    await repository.save(email);
   }
 
   /**
    * Update the delivery status of an email.
-   *
-   * - Marks the email as sent and records the send time on success.
-   * - Marks the email as failed and stores the failure details on error.
    */
-  async updateEmailStatus(params: UpdateEmailStatusParams): Promise<void> {
-    const updateData: Partial<Email> = {
-      status: params.status,
-    };
+  async updateEmailStatus(payload: UpdateEmailStatusPayload): Promise<void> {
+    const repository = this.getRepository(payload.manager);
 
-    if (params.status === EmailStatus.SENT) {
-      updateData.sentAt = new Date();
-      updateData.failedAt = null;
-      updateData.errorMessage = null;
+    try {
+      const updateData: Partial<Email> = {
+        status: payload.status,
+      };
+
+      if (payload.status === EmailStatus.SENT) {
+        updateData.sentAt = new Date();
+        updateData.failedAt = null;
+        updateData.errorMessage = null;
+      }
+
+      if (payload.status === EmailStatus.FAILED) {
+        updateData.failedAt = new Date();
+        updateData.errorMessage = payload.errorMessage ?? null;
+      }
+
+      await repository.update(payload.emailId, updateData);
+    } catch (error) {
+      checkDatabaseError({
+        e: error as Error,
+        mainResource: 'Email',
+      });
     }
-
-    if (params.status === EmailStatus.FAILED) {
-      updateData.failedAt = new Date();
-      updateData.errorMessage = params.errorMessage ?? null;
-    }
-
-    await this.emailRepository.update(params.emailId, updateData);
   }
 }
