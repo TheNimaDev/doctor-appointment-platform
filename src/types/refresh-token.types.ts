@@ -2,10 +2,10 @@ import { RefreshToken } from '@/modules/refresh-token/entities';
 import { NormalizedClientInfo } from './request.types';
 import { EntityManager, FindOptionsWhere } from 'typeorm';
 
-/** Refresh token data without the associated session. */
+/** Refresh token without relation data. */
 export type SafeRefreshToken = Omit<RefreshToken, 'session'>;
 
-/** Payload required to create a refresh token. */
+/** Payload for creating a refresh token. */
 export interface CreateRefreshTokenPayload {
   sessionId: string;
   clientInfo: NormalizedClientInfo;
@@ -13,44 +13,44 @@ export interface CreateRefreshTokenPayload {
   manager?: EntityManager;
 }
 
-/** Payload required to find an active refresh token by session. */
+/** Payload for finding an active refresh token by session. */
 export interface FindActiveRefreshTokenPayload {
   sessionId: string;
   manager?: EntityManager;
 }
 
-/** Payload required to find a valid refresh token by token value. */
+/** Payload for finding a valid refresh token by token. */
 export interface FindValidRefreshTokenPayload {
   token: string;
   manager?: EntityManager;
 }
 
-/** Payload required to revoke a refresh token by its hash. */
+/** Payload for revoking a refresh token by hash. */
 export interface RevokeRefreshTokenHashPayload {
   tokenHash: string;
   manager?: EntityManager;
 }
 
-/** Payload required to revoke a refresh token by its raw token. */
+/** Payload for revoking a refresh token by token. */
 export interface RevokeRefreshTokenPayload {
   token: string;
   manager?: EntityManager;
 }
 
-/** Payload required to revoke all refresh tokens belonging to a user. */
+/** Payload for revoking all refresh tokens belonging to a user. */
 export interface RevokeUserRefreshTokensPayload {
   userId: string;
   manager?: EntityManager;
 }
 
-/** Payload required to revoke refresh tokens matching a condition. */
+/** Payload for revoking a refresh token by condition. */
 export interface RevokeRefreshTokenByConditionPayload {
   manager?: EntityManager;
   where: FindOptionsWhere<RefreshToken>;
 }
 
-/** Data returned after creating a refresh token. */
-export interface CreateRefreshTokenOutput {
+/** Response containing a newly created refresh token. */
+export interface CreateRefreshTokenResponse {
   token: string;
   maxAge: number;
 }

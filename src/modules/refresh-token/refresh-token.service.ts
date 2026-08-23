@@ -1,16 +1,16 @@
-import { generateRandomToken, hashToken } from '@/lib';
+import { generateRandomToken, hashToken, checkDatabaseError } from '@/lib';
 import {
-  CreateRefreshTokenOutput,
   CreateRefreshTokenPayload,
+  CreateRefreshTokenResponse,
   FindActiveRefreshTokenPayload,
   FindValidRefreshTokenPayload,
-  RevokeUserRefreshTokensPayload,
   RevokeRefreshTokenByConditionPayload,
   RevokeRefreshTokenHashPayload,
   RevokeRefreshTokenPayload,
+  RevokeUserRefreshTokensPayload,
 } from '@/types';
 import { Injectable } from '@nestjs/common';
-import { IsNull, MoreThan, Repository } from 'typeorm';
+import { EntityManager, IsNull, MoreThan, Repository } from 'typeorm';
 import { RefreshToken } from './entities';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
@@ -25,51 +25,70 @@ export class RefreshTokenService {
   ) {}
 
   /**
-   * Create a new refresh token for a session.
-   * - Revokes the existing active refresh token for the session.
-   * - Returns the raw token and its maximum age.
+   * Get the appropriate RefreshToken repository.
+   *
+   * - Uses the transaction manager repository when provided.
+   * - Falls back to the default repository otherwise.
    */
-  async createRefreshToken(payload: CreateRefreshTokenPayload): Promise<CreateRefreshTokenOutput> {
-    const repository = payload.manager?.getRepository(RefreshToken) ?? this.refreshTokenRepository;
-
-    const existingToken = await this.findActiveRefreshToken({ sessionId: payload.sessionId, manager: payload.manager });
-
-    if (existingToken) {
-      await this.revokeRefreshTokenByHash({ tokenHash: existingToken.tokenHash, manager: payload.manager });
-    }
-
-    const refreshToken = generateRandomToken();
-
-    const tokenHash = hashToken(refreshToken);
-
-    const expiresIn = payload.remember
-      ? this.configService.getOrThrow<StringValue>('REFRESH_TOKEN_REMEMBER_EXPIRES')
-      : this.configService.getOrThrow<StringValue>('REFRESH_TOKEN_EXPIRES');
-
-    const maxAge = ms(expiresIn);
-    const expiresAt = new Date(Date.now() + maxAge);
-
-    const refreshTokenEntity = repository.create({
-      ...payload.clientInfo,
-      sessionId: payload.sessionId,
-      tokenHash,
-      expiresAt,
-    });
-
-    await repository.save(refreshTokenEntity);
-
-    return {
-      token: refreshToken,
-      maxAge,
-    };
+  private getRepository(manager?: EntityManager): Repository<RefreshToken> {
+    return manager?.getRepository(RefreshToken) ?? this.refreshTokenRepository;
   }
 
   /**
-   * Find the active and non-expired refresh token for a session.
-   * - Returns null if no active refresh token is found.
+   * Create a new refresh token.
+   */
+  async createRefreshToken(payload: CreateRefreshTokenPayload): Promise<CreateRefreshTokenResponse> {
+    const repository = this.getRepository(payload.manager);
+
+    try {
+      const existingToken = await this.findActiveRefreshToken({
+        sessionId: payload.sessionId,
+        manager: payload.manager,
+      });
+
+      if (existingToken) {
+        await this.revokeRefreshTokenByHash({
+          tokenHash: existingToken.tokenHash,
+          manager: payload.manager,
+        });
+      }
+
+      const refreshToken = generateRandomToken();
+      const tokenHash = hashToken(refreshToken);
+
+      const expiresIn = payload.remember
+        ? this.configService.getOrThrow<StringValue>('REFRESH_TOKEN_REMEMBER_EXPIRES')
+        : this.configService.getOrThrow<StringValue>('REFRESH_TOKEN_EXPIRES');
+
+      const maxAge = ms(expiresIn);
+      const expiresAt = new Date(Date.now() + maxAge);
+
+      const refreshTokenEntity = repository.create({
+        ...payload.clientInfo,
+        sessionId: payload.sessionId,
+        tokenHash,
+        expiresAt,
+      });
+
+      await repository.save(refreshTokenEntity);
+
+      return {
+        token: refreshToken,
+        maxAge,
+      };
+    } catch (error) {
+      checkDatabaseError({
+        e: error as Error,
+        mainResource: 'RefreshToken',
+      });
+    }
+  }
+
+  /**
+   * Find an active refresh token for a session.
    */
   async findActiveRefreshToken(payload: FindActiveRefreshTokenPayload): Promise<RefreshToken | null> {
-    const repository = payload.manager?.getRepository(RefreshToken) ?? this.refreshTokenRepository;
+    const repository = this.getRepository(payload.manager);
 
     return repository.findOne({
       where: {
@@ -82,11 +101,9 @@ export class RefreshTokenService {
 
   /**
    * Find a valid refresh token by its raw token.
-   * - The token must be active and non-expired.
-   * - Includes the associated session and user.
    */
   async findValidRefreshToken(payload: FindValidRefreshTokenPayload): Promise<RefreshToken | null> {
-    const repository = payload.manager?.getRepository(RefreshToken) ?? this.refreshTokenRepository;
+    const repository = this.getRepository(payload.manager);
 
     return repository.findOne({
       where: {
@@ -103,8 +120,7 @@ export class RefreshTokenService {
   }
 
   /**
-   * Revoke a refresh token using its existing hash.
-   * - Does nothing if the token is already revoked or does not exist.
+   * Revoke a refresh token by its hash.
    */
   async revokeRefreshTokenByHash(payload: RevokeRefreshTokenHashPayload): Promise<void> {
     await this.revokeRefreshTokenByCondition({
@@ -116,58 +132,67 @@ export class RefreshTokenService {
   }
 
   /**
-   * Revoke a refresh token using its raw token.
-   * - The raw token is hashed before querying the database.
+   * Revoke a refresh token by its raw token.
    */
   async revokeRefreshToken(payload: RevokeRefreshTokenPayload): Promise<void> {
-    const tokenHash = hashToken(payload.token);
-
     await this.revokeRefreshTokenByCondition({
       manager: payload.manager,
       where: {
-        tokenHash,
+        tokenHash: hashToken(payload.token),
       },
     });
   }
 
   /**
    * Revoke all active refresh tokens belonging to a user.
-   * - Does nothing if the user has no active refresh tokens.
    */
   async revokeUserRefreshTokens(payload: RevokeUserRefreshTokensPayload): Promise<void> {
-    const repository = payload.manager?.getRepository(RefreshToken) ?? this.refreshTokenRepository;
+    const repository = this.getRepository(payload.manager);
 
-    await repository
-      .createQueryBuilder()
-      .update(RefreshToken)
-      .set({
-        revokedAt: new Date(),
-      })
-      .where(
-        `sessionId IN (
-        SELECT id FROM sessions WHERE userId = :userId
-      )`,
-        { userId: payload.userId },
-      )
-      .andWhere('revokedAt IS NULL')
-      .execute();
+    try {
+      await repository
+        .createQueryBuilder()
+        .update(RefreshToken)
+        .set({
+          revokedAt: new Date(),
+        })
+        .where(
+          `sessionId IN (
+            SELECT id FROM sessions WHERE userId = :userId
+          )`,
+          { userId: payload.userId },
+        )
+        .andWhere('revokedAt IS NULL')
+        .execute();
+    } catch (error) {
+      checkDatabaseError({
+        e: error as Error,
+        mainResource: 'RefreshToken',
+      });
+    }
   }
 
   /**
-   * Revoke an active refresh token using the provided conditions.
-   * - Only non-revoked tokens are updated.
+   * Revoke an active refresh token by the provided conditions.
    */
   private async revokeRefreshTokenByCondition(payload: RevokeRefreshTokenByConditionPayload): Promise<void> {
-    const repository = payload.manager?.getRepository(RefreshToken) ?? this.refreshTokenRepository;
+    const repository = this.getRepository(payload.manager);
 
-    await repository.update(
-      {
-        ...payload.where,
-        revokedAt: IsNull(),
-      },
-      {
-        revokedAt: new Date(),
-      },
-    );
+    try {
+      await repository.update(
+        {
+          ...payload.where,
+          revokedAt: IsNull(),
+        },
+        {
+          revokedAt: new Date(),
+        },
+      );
+    } catch (error) {
+      checkDatabaseError({
+        e: error as Error,
+        mainResource: 'RefreshToken',
+      });
+    }
   }
 }
