@@ -27,7 +27,7 @@ export class ClinicService {
    * Get the appropriate Clinic repository.
    *
    * - Uses the transaction manager repository when provided.
-   * - Falls back to the default Clinic repository otherwise.
+   * - Falls back to the default repository otherwise.
    */
   private getRepository(manager?: EntityManager): Repository<Clinic> {
     return manager?.getRepository(Clinic) ?? this.clinicRepository;
@@ -35,11 +35,6 @@ export class ClinicService {
 
   /**
    * Create a new clinic.
-   *
-   * - Creates and persists a clinic for an existing doctor.
-   * - Handles database constraint errors such as duplicate clinic names.
-   * - Handles invalid doctor references.
-   * - Returns the created clinic.
    */
   async create(payload: CreateClinicPayload): Promise<ClinicResponse> {
     const repository = this.getRepository(payload.manager);
@@ -74,9 +69,6 @@ export class ClinicService {
 
   /**
    * Find all clinics.
-   *
-   * - Returns all available clinics.
-   * - Can later be extended with pagination, filtering and sorting.
    */
   async findAll(payload: FindClinicsPayload): Promise<ClinicsResponse> {
     const repository = this.getRepository(payload.manager);
@@ -90,9 +82,6 @@ export class ClinicService {
 
   /**
    * Find a clinic by ID.
-   *
-   * - Searches for a clinic using its unique ID.
-   * - Throws NotFoundException if the clinic does not exist.
    */
   async findById(payload: FindClinicByIdPayload): Promise<ClinicResponse> {
     const repository = this.getRepository(payload.manager);
@@ -100,7 +89,9 @@ export class ClinicService {
     const clinic = await repository.findOne({
       where: {
         id: payload.id,
-        doctorId: payload.doctorId,
+        ...(payload.doctorId && {
+          doctorId: payload.doctorId,
+        }),
       },
     });
 
@@ -118,8 +109,6 @@ export class ClinicService {
 
   /**
    * Find all clinics belonging to a doctor.
-   *
-   * - Returns all clinics associated with the given doctor.
    */
   async findByDoctorId(payload: FindClinicsByDoctorIdPayload): Promise<ClinicsResponse> {
     const repository = this.getRepository(payload.manager);
@@ -137,48 +126,51 @@ export class ClinicService {
 
   /**
    * Update an existing clinic.
-   *
-   * - Updates only the provided clinic fields.
-   * - Sensitive fields such as status are handled separately.
-   * - Throws NotFoundException if the clinic does not exist.
    */
-  async update(payload: UpdateClinicPayload): Promise<void> {
+  async update(payload: UpdateClinicPayload): Promise<ClinicResponse> {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const result = await repository.update(
-        { id: payload.id, doctorId: payload.doctorId },
-        {
-          ...(payload.name !== undefined && {
-            name: payload.name,
-          }),
-          ...(payload.address !== undefined && {
-            address: payload.address,
-          }),
-          ...(payload.city !== undefined && {
-            city: payload.city,
-          }),
-          ...(payload.phone !== undefined && {
-            phone: payload.phone,
-          }),
-          ...(payload.latitude !== undefined && {
-            latitude: payload.latitude?.toString() ?? null,
-          }),
-          ...(payload.longitude !== undefined && {
-            longitude: payload.longitude?.toString() ?? null,
-          }),
-          ...(payload.description !== undefined && {
-            description: payload.description,
-          }),
-        },
-      );
+      const clinic = await repository.preload({
+        id: payload.id,
+        ...(payload.doctorId !== undefined && {
+          doctorId: payload.doctorId,
+        }),
+        ...(payload.name !== undefined && {
+          name: payload.name,
+        }),
+        ...(payload.address !== undefined && {
+          address: payload.address,
+        }),
+        ...(payload.city !== undefined && {
+          city: payload.city,
+        }),
+        ...(payload.phone !== undefined && {
+          phone: payload.phone,
+        }),
+        ...(payload.latitude !== undefined && {
+          latitude: payload.latitude?.toString() ?? null,
+        }),
+        ...(payload.longitude !== undefined && {
+          longitude: payload.longitude?.toString() ?? null,
+        }),
+        ...(payload.description !== undefined && {
+          description: payload.description,
+        }),
+      });
 
-      if (result.affected === 0) {
+      if (!clinic || (payload.doctorId && clinic.doctorId !== payload.doctorId)) {
         throw new NotFoundException({
           message: 'Clinic not found in database.',
           error: 'Clinic Not Found',
         } as BaseException);
       }
+
+      const updatedClinic = await repository.save(clinic);
+
+      return {
+        clinic: updatedClinic,
+      };
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
@@ -194,42 +186,15 @@ export class ClinicService {
 
   /**
    * Soft-delete a clinic.
-   *
-   * - Marks the clinic as deleted instead of permanently removing it.
-   * - Preserves the clinic record for auditing or recovery.
    */
   async delete(payload: DeleteClinicPayload): Promise<void> {
     const repository = this.getRepository(payload.manager);
 
-    const { clinic } = await this.findById({
-      id: payload.id,
-      manager: payload.manager,
-      doctorId: payload.doctorId,
-    });
-
-    await repository.softRemove(clinic);
-  }
-
-  /**
-   * Update the status of a clinic.
-   *
-   * - Updates the status of the specified clinic.
-   * - Ensures the clinic belongs to the specified doctor.
-   * - Throws NotFoundException if the clinic does not exist.
-   */
-  async updateStatus(payload: UpdateClinicStatusPayload): Promise<void> {
-    const repository = this.getRepository(payload.manager);
-
     try {
-      const result = await repository.update(
-        {
-          id: payload.id,
-          doctorId: payload.doctorId,
-        },
-        {
-          status: payload.status,
-        },
-      );
+      const result = await repository.softDelete({
+        id: payload.id,
+        doctorId: payload.doctorId,
+      });
 
       if (result.affected === 0) {
         throw new NotFoundException({
@@ -237,6 +202,42 @@ export class ClinicService {
           error: 'Clinic Not Found',
         } as BaseException);
       }
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      checkDatabaseError({
+        e: error as Error,
+        mainResource: 'Clinic',
+      });
+    }
+  }
+
+  /**
+   * Update the status of a clinic.
+   */
+  async updateStatus(payload: UpdateClinicStatusPayload): Promise<ClinicResponse> {
+    const repository = this.getRepository(payload.manager);
+
+    try {
+      const clinic = await repository.preload({
+        id: payload.id,
+        status: payload.status,
+      });
+
+      if (!clinic || (payload.doctorId && clinic.doctorId !== payload.doctorId)) {
+        throw new NotFoundException({
+          message: 'Clinic not found in database.',
+          error: 'Clinic Not Found',
+        } as BaseException);
+      }
+
+      const updatedClinic = await repository.save(clinic);
+
+      return {
+        clinic: updatedClinic,
+      };
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;

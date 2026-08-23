@@ -9,9 +9,6 @@ export class ClinicController {
 
   /**
    * Create a new clinic for a doctor.
-   *
-   * - Creates a clinic for the specified doctor.
-   * - Handles unique clinic name constraints per doctor.
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -32,8 +29,6 @@ export class ClinicController {
 
   /**
    * Get all clinics belonging to a doctor.
-   *
-   * - Returns all clinics associated with the specified doctor.
    */
   @Get()
   @HttpCode(HttpStatus.OK)
@@ -50,8 +45,6 @@ export class ClinicController {
 
   /**
    * Get a specific clinic belonging to a doctor.
-   *
-   * - Returns the clinic associated with the given doctor and clinic IDs.
    */
   @Get(':clinicId')
   @HttpCode(HttpStatus.OK)
@@ -72,9 +65,6 @@ export class ClinicController {
 
   /**
    * Update a clinic.
-   *
-   * - Updates only the provided clinic fields.
-   * - Sensitive fields such as status are not updated here.
    */
   @Patch(':clinicId')
   @HttpCode(HttpStatus.OK)
@@ -96,9 +86,6 @@ export class ClinicController {
 
   /**
    * Soft-delete a clinic.
-   *
-   * - The clinic remains in the database.
-   * - The deletedAt field is populated.
    */
   @Delete(':clinicId')
   @HttpCode(HttpStatus.OK)
@@ -115,9 +102,6 @@ export class ClinicController {
 
   /**
    * Update the status of a clinic.
-   *
-   * - Updates the clinic status.
-   * - Ensures the clinic belongs to the specified doctor.
    */
   @Patch(':clinicId/status')
   @HttpCode(HttpStatus.OK)
