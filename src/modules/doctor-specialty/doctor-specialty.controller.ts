@@ -9,10 +9,6 @@ export class DoctorSpecialtyController {
 
   /**
    * Add a specialty to a doctor.
-   *
-   * - Validates the doctor and specialty.
-   * - Prevents duplicate specialties.
-   * - Optionally marks the specialty as primary.
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -33,8 +29,6 @@ export class DoctorSpecialtyController {
 
   /**
    * Get all specialties assigned to a doctor.
-   *
-   * - Returns all active doctor-specialty relations.
    */
   @Get()
   @HttpCode(HttpStatus.OK)
@@ -51,9 +45,6 @@ export class DoctorSpecialtyController {
 
   /**
    * Set a doctor's specialty as primary.
-   *
-   * - Removes the primary flag from other specialties.
-   * - Marks the selected specialty as primary.
    */
   @Patch(':specialtyId/primary')
   @HttpCode(HttpStatus.OK)
@@ -74,9 +65,6 @@ export class DoctorSpecialtyController {
 
   /**
    * Soft-delete a specialty from a doctor.
-   *
-   * - Marks the doctor-specialty relation as deleted.
-   * - Preserves the relation in the database.
    */
   @Delete(':specialtyId')
   @HttpCode(HttpStatus.OK)

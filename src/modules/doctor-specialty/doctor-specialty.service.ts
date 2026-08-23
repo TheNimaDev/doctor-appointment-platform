@@ -27,7 +27,7 @@ export class DoctorSpecialtyService {
    * Get the appropriate DoctorSpecialty repository.
    *
    * - Uses the transaction manager repository when provided.
-   * - Falls back to the default DoctorSpecialty repository otherwise.
+   * - Falls back to the default repository otherwise.
    */
   private getRepository(manager?: EntityManager): Repository<DoctorSpecialty> {
     return manager?.getRepository(DoctorSpecialty) ?? this.doctorSpecialtyRepository;
@@ -35,13 +35,6 @@ export class DoctorSpecialtyService {
 
   /**
    * Add a specialty to a doctor.
-   *
-   * - Validates that the doctor exists.
-   * - Validates that the specialty exists.
-   * - Prevents duplicate doctor-specialty relations.
-   * - Optionally marks the specialty as primary.
-   * - Ensures only one specialty is primary for the doctor.
-   * - Returns the created relation.
    */
   async add(payload: AddDoctorSpecialtyPayload): Promise<DoctorSpecialtyResponse> {
     const repository = this.getRepository(payload.manager);
@@ -129,8 +122,6 @@ export class DoctorSpecialtyService {
 
   /**
    * Find all specialties assigned to a doctor.
-   *
-   * - Returns all doctor-specialty relations for the given doctor.
    */
   async findAll(payload: FindDoctorSpecialtiesPayload): Promise<DoctorSpecialtiesResponse> {
     const repository = this.getRepository(payload.manager);
@@ -148,9 +139,6 @@ export class DoctorSpecialtyService {
 
   /**
    * Find a specific doctor-specialty relation.
-   *
-   * - Searches by doctor ID and specialty ID.
-   * - Throws NotFoundException if the relation does not exist.
    */
   async findOne(payload: FindDoctorSpecialtyPayload): Promise<DoctorSpecialtyResponse> {
     const repository = this.getRepository(payload.manager);
@@ -176,65 +164,80 @@ export class DoctorSpecialtyService {
 
   /**
    * Set a doctor's specialty as primary.
-   *
-   * - Removes the primary flag from all other specialties.
-   * - Marks the specified specialty as primary.
-   * - Throws NotFoundException if the relation does not exist.
    */
   async setPrimary(payload: SetPrimaryDoctorSpecialtyPayload): Promise<DoctorSpecialtyResponse> {
     const repository = this.getRepository(payload.manager);
 
-    const { doctorSpecialty } = await this.findOne({
-      doctorId: payload.doctorId,
-      specialtyId: payload.specialtyId,
-      manager: payload.manager,
-    });
-
-    await repository.update(
-      {
+    try {
+      await this.findOne({
         doctorId: payload.doctorId,
-      },
-      {
-        isPrimary: false,
-      },
-    );
+        specialtyId: payload.specialtyId,
+        manager: payload.manager,
+      });
 
-    await repository.update(
-      {
-        id: doctorSpecialty.id,
-      },
-      {
-        isPrimary: true,
-      },
-    );
+      await repository.update(
+        {
+          doctorId: payload.doctorId,
+        },
+        {
+          isPrimary: false,
+        },
+      );
 
-    doctorSpecialty.isPrimary = true;
+      await repository.update(
+        {
+          doctorId: payload.doctorId,
+          specialtyId: payload.specialtyId,
+        },
+        {
+          isPrimary: true,
+        },
+      );
 
-    return {
-      doctorSpecialty,
-    };
+      return this.findOne({
+        doctorId: payload.doctorId,
+        specialtyId: payload.specialtyId,
+        manager: payload.manager,
+      });
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      checkDatabaseError({
+        e: error as Error,
+        mainResource: 'Doctor Specialty',
+      });
+    }
   }
 
   /**
    * Soft-delete a specialty from a doctor.
-   *
-   * - Marks the doctor-specialty relation as deleted.
-   * - Preserves the relation in the database.
-   * - Throws NotFoundException if the relation does not exist.
    */
   async remove(payload: RemoveDoctorSpecialtyPayload): Promise<void> {
     const repository = this.getRepository(payload.manager);
 
-    const result = await repository.softDelete({
-      doctorId: payload.doctorId,
-      specialtyId: payload.specialtyId,
-    });
+    try {
+      const result = await repository.softDelete({
+        doctorId: payload.doctorId,
+        specialtyId: payload.specialtyId,
+      });
 
-    if (result.affected === 0) {
-      throw new NotFoundException({
-        message: 'Doctor specialty relation not found in database.',
-        error: 'Doctor Specialty Not Found',
-      } as BaseException);
+      if (result.affected === 0) {
+        throw new NotFoundException({
+          message: 'Doctor specialty relation not found in database.',
+          error: 'Doctor Specialty Not Found',
+        } as BaseException);
+      }
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      checkDatabaseError({
+        e: error as Error,
+        mainResource: 'Doctor Specialty',
+      });
     }
   }
 }
