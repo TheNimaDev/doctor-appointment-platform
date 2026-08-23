@@ -1,19 +1,20 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Repository } from 'typeorm';
-
+import { EntityManager, IsNull, Repository } from 'typeorm';
 import { Session } from './entities';
 import {
   BaseException,
   CreateSessionPayload,
   FindActiveUserSessionPayload,
   FindSessionByIdPayload,
-  FindUserSessionsOutput,
   FindUserSessionsPayload,
   RevokeSessionPayload,
   RevokeUserSessionsPayload,
+  SessionResponse,
+  SessionsResponse,
   UpdateSessionPayload,
 } from '@/types';
+import { checkDatabaseError } from '@/lib';
 
 @Injectable()
 export class SessionService {
@@ -23,29 +24,49 @@ export class SessionService {
   ) {}
 
   /**
-   * Create a new session for a user.
+   * Get the appropriate Session repository.
+   *
+   * - Uses the transaction manager repository when provided.
+   * - Falls back to the default repository otherwise.
    */
-  async createSession(payload: CreateSessionPayload): Promise<Session> {
-    const repository = payload.manager?.getRepository(Session) ?? this.sessionRepository;
-
-    const session = repository.create({
-      userId: payload.userId,
-      remember: payload.remember,
-      ...payload.clientInfo,
-      lastActiveAt: new Date(),
-    });
-
-    return repository.save(session);
+  private getRepository(manager?: EntityManager): Repository<Session> {
+    return manager?.getRepository(Session) ?? this.sessionRepository;
   }
 
   /**
-   * Find all active sessions for a user.
-   * - Includes associated refresh tokens.
+   * Create a new session.
    */
-  async findActiveUserSessions(payload: FindUserSessionsPayload): Promise<FindUserSessionsOutput> {
-    const repository = payload.manager?.getRepository(Session) ?? this.sessionRepository;
+  async createSession(payload: CreateSessionPayload): Promise<SessionResponse> {
+    const repository = this.getRepository(payload.manager);
 
-    return repository.find({
+    try {
+      const session = repository.create({
+        userId: payload.userId,
+        remember: payload.remember,
+        ...payload.clientInfo,
+        lastActiveAt: new Date(),
+      });
+
+      const savedSession = await repository.save(session);
+
+      return {
+        session: savedSession,
+      };
+    } catch (error) {
+      checkDatabaseError({
+        e: error as Error,
+        mainResource: 'Session',
+      });
+    }
+  }
+
+  /**
+   * Get all active sessions for a user.
+   */
+  async findActiveUserSessions(payload: FindUserSessionsPayload): Promise<SessionsResponse> {
+    const repository = this.getRepository(payload.manager);
+
+    const sessions = await repository.find({
       where: {
         userId: payload.userId,
         revokedAt: IsNull(),
@@ -57,16 +78,19 @@ export class SessionService {
         lastActiveAt: 'DESC',
       },
     });
+
+    return {
+      sessions,
+    };
   }
 
   /**
-   * Find all sessions for a user.
-   * - Includes active and revoked sessions.
+   * Get all sessions for a user.
    */
-  async findUserSessions(payload: FindUserSessionsPayload): Promise<FindUserSessionsOutput> {
-    const repository = payload.manager?.getRepository(Session) ?? this.sessionRepository;
+  async findUserSessions(payload: FindUserSessionsPayload): Promise<SessionsResponse> {
+    const repository = this.getRepository(payload.manager);
 
-    return repository.find({
+    const sessions = await repository.find({
       where: {
         userId: payload.userId,
       },
@@ -74,89 +98,128 @@ export class SessionService {
         lastActiveAt: 'DESC',
       },
     });
+
+    return {
+      sessions,
+    };
   }
 
   /**
-   * Find an active session for a user by client information.
-   * - Returns null if no active session is found.
+   * Find an active session for a user.
    */
-  async findActiveUserSession(payload: FindActiveUserSessionPayload): Promise<Session | null> {
-    const repository = payload.manager?.getRepository(Session) ?? this.sessionRepository;
+  async findActiveUserSession(payload: FindActiveUserSessionPayload): Promise<SessionResponse | null> {
+    const repository = this.getRepository(payload.manager);
 
-    return repository.findOne({
+    const session = await repository.findOne({
       where: {
         userId: payload.userId,
         userAgent: payload.clientInfo.userAgent,
         revokedAt: IsNull(),
       },
     });
+
+    if (!session) {
+      return null;
+    }
+
+    return {
+      session,
+    };
   }
 
   /**
-   * Find an active session by id.
-   * - Returns null if the session does not exist or has been revoked.
+   * Get an active session by ID.
    */
-  async findById(payload: FindSessionByIdPayload): Promise<Session | null> {
-    const repository = payload.manager?.getRepository(Session) ?? this.sessionRepository;
+  async getById(payload: FindSessionByIdPayload): Promise<SessionResponse | null> {
+    const repository = this.getRepository(payload.manager);
 
-    return repository.findOne({
+    const session = await repository.findOne({
       where: {
         id: payload.id,
         revokedAt: IsNull(),
       },
     });
+
+    if (!session) {
+      return null;
+    }
+
+    return {
+      session,
+    };
   }
 
   /**
-   * Update an active session's last active time and optional remember preference.
-   * - Throws NotFoundException if the active session does not exist.
+   * Update an active session.
    */
-  async updateSession(payload: UpdateSessionPayload): Promise<void> {
-    const repository = payload.manager?.getRepository(Session) ?? this.sessionRepository;
+  async updateSession(payload: UpdateSessionPayload): Promise<SessionResponse> {
+    const repository = this.getRepository(payload.manager);
 
-    const result = await repository.update(
-      {
+    try {
+      const session = await repository.preload({
         id: payload.sessionId,
-        revokedAt: IsNull(),
-      },
-      {
         ...(payload.remember !== undefined && {
           remember: payload.remember,
         }),
         lastActiveAt: new Date(),
-      },
-    );
+      });
 
-    if (result.affected === 0) {
-      throw new NotFoundException({
-        message: 'Active session not found in database',
-        error: 'Session Not Found',
-      } as BaseException);
+      if (!session || session.revokedAt !== null) {
+        throw new NotFoundException({
+          message: 'Active session not found in database.',
+          error: 'Session Not Found',
+        } as BaseException);
+      }
+
+      const updatedSession = await repository.save(session);
+
+      return {
+        session: updatedSession,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      checkDatabaseError({
+        e: error as Error,
+        mainResource: 'Session',
+      });
     }
   }
 
   /**
    * Revoke an active session.
-   * - Throws NotFoundException if the active session does not exist.
    */
   async revokeSession(payload: RevokeSessionPayload): Promise<void> {
-    const repository = payload.manager?.getRepository(Session) ?? this.sessionRepository;
+    const repository = this.getRepository(payload.manager);
 
-    const result = await repository.update(
-      {
-        id: payload.sessionId,
-        revokedAt: IsNull(),
-      },
-      {
-        revokedAt: new Date(),
-      },
-    );
+    try {
+      const result = await repository.update(
+        {
+          id: payload.sessionId,
+          revokedAt: IsNull(),
+        },
+        {
+          revokedAt: new Date(),
+        },
+      );
 
-    if (result.affected === 0) {
-      throw new NotFoundException({
-        message: 'Active session not found in database',
-        error: 'Session Not Found',
-      } as BaseException);
+      if (result.affected === 0) {
+        throw new NotFoundException({
+          message: 'Active session not found in database.',
+          error: 'Session Not Found',
+        } as BaseException);
+      }
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      checkDatabaseError({
+        e: error as Error,
+        mainResource: 'Session',
+      });
     }
   }
 
@@ -164,16 +227,23 @@ export class SessionService {
    * Revoke all active sessions belonging to a user.
    */
   async revokeUserSessions(payload: RevokeUserSessionsPayload): Promise<void> {
-    const repository = payload.manager?.getRepository(Session) ?? this.sessionRepository;
+    const repository = this.getRepository(payload.manager);
 
-    await repository.update(
-      {
-        userId: payload.userId,
-        revokedAt: IsNull(),
-      },
-      {
-        revokedAt: new Date(),
-      },
-    );
+    try {
+      await repository.update(
+        {
+          userId: payload.userId,
+          revokedAt: IsNull(),
+        },
+        {
+          revokedAt: new Date(),
+        },
+      );
+    } catch (error) {
+      checkDatabaseError({
+        e: error as Error,
+        mainResource: 'Session',
+      });
+    }
   }
 }
