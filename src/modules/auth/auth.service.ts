@@ -150,19 +150,21 @@ export class AuthService {
 
       if (existingSession) {
         await this.sessionService.updateSession({
-          sessionId: existingSession.id,
+          sessionId: existingSession.session.id,
           remember,
           manager,
         });
 
-        userSession = existingSession;
+        userSession = existingSession.session;
       } else {
-        userSession = await this.sessionService.createSession({
+        const newSession = await this.sessionService.createSession({
           userId: userData.id,
           clientInfo: params.clientInfo,
           manager,
           remember,
         });
+
+        userSession = newSession.session;
       }
 
       return this.refreshTokenService.createRefreshToken({
@@ -269,7 +271,7 @@ export class AuthService {
       if (existingEmail) {
         const cooldown = this.configService.getOrThrow<StringValue>('EMAIL_COOLDOWN');
 
-        const nextAllowedAt = existingEmail.createdAt.getTime() + ms(cooldown);
+        const nextAllowedAt = existingEmail.email.createdAt.getTime() + ms(cooldown);
 
         if (Date.now() < nextAllowedAt) {
           throw new BadRequestException({
@@ -422,7 +424,7 @@ export class AuthService {
       if (existingEmail) {
         const cooldown = this.configService.getOrThrow<StringValue>('EMAIL_COOLDOWN');
 
-        const nextAllowedAt = existingEmail.createdAt.getTime() + ms(cooldown);
+        const nextAllowedAt = existingEmail.email.createdAt.getTime() + ms(cooldown);
 
         if (Date.now() < nextAllowedAt) {
           throw new BadRequestException({

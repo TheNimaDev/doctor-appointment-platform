@@ -1,4 +1,4 @@
-import { CreateRefreshTokenOutput } from './refresh-token.types';
+import { CreateRefreshTokenResponse } from './refresh-token.types';
 import { NormalizedClientInfo } from './request.types';
 import { UserResponse } from './user.types';
 
@@ -30,7 +30,7 @@ export interface LoginParams {
 
 /** Result returned by the login service. */
 export interface LoginServiceOutput extends LoginResponse {
-  refreshToken: CreateRefreshTokenOutput;
+  refreshToken: CreateRefreshTokenResponse;
 }
 
 /** Resend email verification parameters */
