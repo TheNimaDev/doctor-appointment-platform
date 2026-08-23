@@ -31,7 +31,7 @@ export class RoleController {
    */
   @Get()
   @HttpCode(HttpStatus.OK)
-  async findAll(): Promise<ApiResponse<RolesResponse>> {
+  async getRoles(): Promise<ApiResponse<RolesResponse>> {
     const roles = await this.roleService.findAll({});
 
     return {
@@ -45,7 +45,7 @@ export class RoleController {
    */
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  async getById(@Param('id') id: string): Promise<ApiResponse<RoleResponse>> {
+  async getRoleById(@Param('id') id: string): Promise<ApiResponse<RoleResponse>> {
     const role = await this.roleService.getById({
       id,
     });
@@ -78,10 +78,14 @@ export class RoleController {
    * Soft-delete a role.
    */
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteRole(@Param('id') id: string): Promise<void> {
+  @HttpCode(HttpStatus.OK)
+  async deleteRole(@Param('id') id: string): Promise<ApiResponse> {
     await this.roleService.deleteRole({
       id,
     });
+
+    return {
+      message: 'Role deleted successfully.',
+    };
   }
 }
