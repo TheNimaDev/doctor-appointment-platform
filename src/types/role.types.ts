@@ -2,10 +2,10 @@ import { EntityManager } from 'typeorm';
 
 import { Role } from '@/modules/role/entities';
 
-/** Role without relation data. */
+/** Role type without sensitive relation data. */
 export type SafeRole = Omit<Role, 'rolePermissions' | 'userRoles'>;
 
-/** Single role API response. */
+/** Role API response. */
 export interface RoleResponse {
   role: SafeRole;
 }
@@ -15,7 +15,7 @@ export interface RolesResponse {
   roles: SafeRole[];
 }
 
-/** Parameters for creating a role. */
+/** Parameters for creating a new role. */
 export interface CreateRolePayload {
   name: string;
   description?: string | null;
