@@ -25,9 +25,6 @@ export class UserController {
 
   /**
    * Update the current user's profile.
-   *
-   * - Updates only the provided profile fields.
-   * - Returns the updated user profile.
    */
   @Patch('me')
   @HttpCode(HttpStatus.OK)
@@ -47,11 +44,7 @@ export class UserController {
   }
 
   /**
-   * Delete the current user's account.
-   *
-   * - Requires the current password.
-   * - Soft-deletes the authenticated user's account.
-   * - Revokes all active refresh tokens and sessions.
+   * Soft-delete the current user's account.
    */
   @Delete('me')
   @HttpCode(HttpStatus.OK)

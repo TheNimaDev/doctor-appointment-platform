@@ -35,7 +35,7 @@ export class UserService {
    * Get the appropriate User repository.
    *
    * - Uses the transaction manager repository when provided.
-   * - Falls back to the default User repository otherwise.
+   * - Falls back to the default repository otherwise.
    */
   private getRepository(manager?: EntityManager): Repository<User> {
     return manager?.getRepository(User) ?? this.userRepository;
@@ -43,10 +43,6 @@ export class UserService {
 
   /**
    * Create a new user.
-   *
-   * - Creates the user account.
-   * - Persists the user in the database.
-   * - Returns the created user with roles and permissions.
    */
   async createUser(payload: CreateUserPayload): Promise<UserResponse> {
     const repository = this.getRepository(payload.manager);
@@ -75,11 +71,7 @@ export class UserService {
   }
 
   /**
-   * Update the status of a user.
-   *
-   * - Updates the user's account status.
-   * - Throws NotFoundException if the user does not exist.
-   * - Returns the updated user with roles and permissions.
+   * Update a user's status.
    */
   async updateUserStatus(payload: UpdateUserStatusPayload): Promise<UserResponse> {
     const repository = this.getRepository(payload.manager);
@@ -117,9 +109,6 @@ export class UserService {
 
   /**
    * Get a user by ID.
-   *
-   * - Throws NotFoundException if the user does not exist.
-   * - Includes the user's roles and permissions.
    */
   async getById(payload: GetUserByIdPayload): Promise<UserResponse> {
     const repository = this.getRepository(payload.manager);
@@ -151,9 +140,6 @@ export class UserService {
 
   /**
    * Find a user by email.
-   *
-   * - Returns null if the user does not exist.
-   * - Includes the user's roles and permissions.
    */
   async findByEmail(payload: FindUserByEmailPayload): Promise<UserResponse | null> {
     const repository = this.getRepository(payload.manager);
@@ -182,9 +168,6 @@ export class UserService {
 
   /**
    * Find a user by email with the password hash.
-   *
-   * - Returns the user including the password hash.
-   * - Throws UnauthorizedException if the user does not exist.
    */
   async findByEmailWithPassword(email: string): Promise<User> {
     const user = await this.databaseService.dataSource
@@ -205,9 +188,6 @@ export class UserService {
 
   /**
    * Find a user by ID with the password hash.
-   *
-   * - Returns the user including the password hash.
-   * - Throws UnauthorizedException if the user does not exist.
    */
   async findByIdWithPassword(userId: string): Promise<User> {
     const user = await this.databaseService.dataSource
@@ -228,9 +208,6 @@ export class UserService {
 
   /**
    * Update a user's password.
-   *
-   * - Updates the user's password hash.
-   * - Throws NotFoundException if the user does not exist.
    */
   async updatePassword(payload: UpdatePasswordPayload): Promise<void> {
     const repository = this.getRepository(payload.manager);
@@ -262,11 +239,7 @@ export class UserService {
   }
 
   /**
-   * Update the current user's profile.
-   *
-   * - Updates the provided profile fields.
-   * - Throws NotFoundException if the user does not exist.
-   * - Returns the updated user with roles and permissions.
+   * Update a user's password.
    */
   async updateProfile(payload: UpdateProfilePayload): Promise<UserResponse> {
     const repository = this.getRepository(payload.manager);
@@ -309,11 +282,6 @@ export class UserService {
 
   /**
    * Update a user's email address.
-   *
-   * - Updates the user's email.
-   * - Throws NotFoundException if the user does not exist.
-   * - Handles duplicate email conflicts.
-   * - Returns the updated user with roles and permissions.
    */
   async updateEmail(payload: UpdateEmailPayload): Promise<UserResponse> {
     const repository = this.getRepository(payload.manager);
@@ -351,13 +319,7 @@ export class UserService {
   }
 
   /**
-   * Delete the current user's account.
-   *
-   * - Validates the current password.
-   * - Soft-deletes the user account.
-   * - Revokes all active refresh tokens.
-   * - Revokes all active sessions.
-   * - Preserves the user's data for recovery or auditing.
+   * Soft-delete the current user's account.
    */
   async deleteUser(payload: DeleteUserPayload): Promise<void> {
     const user = await this.findByIdWithPassword(payload.userId);
@@ -371,29 +333,40 @@ export class UserService {
       } as BaseException);
     }
 
-    await this.databaseService.dataSource.transaction(async (manager) => {
-      const repository = manager.getRepository(User);
+    try {
+      await this.databaseService.dataSource.transaction(async (manager) => {
+        const repository = manager.getRepository(User);
 
-      const result = await repository.softDelete({
-        id: payload.userId,
+        const result = await repository.softDelete({
+          id: payload.userId,
+        });
+
+        if (result.affected === 0) {
+          throw new NotFoundException({
+            message: 'User not found in database.',
+            error: 'User Not Found',
+          } as BaseException);
+        }
+
+        await this.refreshTokenService.revokeUserRefreshTokens({
+          userId: payload.userId,
+          manager,
+        });
+
+        await this.sessionService.revokeUserSessions({
+          userId: payload.userId,
+          manager,
+        });
       });
-
-      if (result.affected === 0) {
-        throw new NotFoundException({
-          message: 'User not found in database.',
-          error: 'User Not Found',
-        } as BaseException);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
       }
 
-      await this.refreshTokenService.revokeUserRefreshTokens({
-        userId: payload.userId,
-        manager,
+      checkDatabaseError({
+        e: error as Error,
+        mainResource: 'User',
       });
-
-      await this.sessionService.revokeUserSessions({
-        userId: payload.userId,
-        manager,
-      });
-    });
+    }
   }
 }
