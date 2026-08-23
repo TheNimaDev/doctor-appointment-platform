@@ -10,14 +10,11 @@ export class SpecialtyController {
 
   /**
    * Create a new specialty.
-   *
-   * - Creates a new medical specialty.
-   * - Handles unique name and slug constraints.
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createSpecialtyDto: CreateSpecialtyDto): Promise<ApiResponse<SpecialtyResponse>> {
-    const specialty = await this.specialtyService.create({
+  async createSpecialty(@Body() createSpecialtyDto: CreateSpecialtyDto): Promise<ApiResponse<SpecialtyResponse>> {
+    const specialty = await this.specialtyService.createSpecialty({
       ...createSpecialtyDto,
     });
 
@@ -29,9 +26,6 @@ export class SpecialtyController {
 
   /**
    * Get all specialties.
-   *
-   * - Returns all available specialties.
-   * - Intended for specialty listing and filtering.
    */
   @Get()
   @HttpCode(HttpStatus.OK)
@@ -46,63 +40,55 @@ export class SpecialtyController {
 
   /**
    * Get a specialty by ID or slug.
-   *
-   * - Returns the specialty associated with the given ID or slug.
-   * - Uses the ID lookup when the parameter is a valid UUID.
-   * - Falls back to slug lookup otherwise.
-   * - Throws NotFoundException if the specialty does not exist.
    */
   @Get(':idOrSlug')
   @HttpCode(HttpStatus.OK)
-  async findByIdOrSlug(@Param('idOrSlug') idOrSlug: string): Promise<ApiResponse<SpecialtyResponse>> {
-    let data: SpecialtyResponse;
+  async getByIdOrSlug(@Param('idOrSlug') idOrSlug: string): Promise<ApiResponse<SpecialtyResponse>> {
+    let specialty: SpecialtyResponse;
 
     if (isUUID(idOrSlug)) {
-      data = await this.specialtyService.findById({
+      specialty = await this.specialtyService.getById({
         id: idOrSlug,
       });
     } else {
-      data = await this.specialtyService.findBySlug({
+      specialty = await this.specialtyService.findBySlug({
         slug: idOrSlug,
       });
     }
 
     return {
       message: 'Specialty retrieved successfully.',
-      data,
+      data: specialty,
     };
   }
 
   /**
    * Update a specialty.
-   *
-   * - Updates only the provided specialty fields.
-   * - Sensitive fields such as status are not updated here.
-   * - Throws NotFoundException if the specialty does not exist.
    */
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
-  async update(@Param('id') id: string, @Body() updateSpecialtyDto: UpdateSpecialtyDto): Promise<ApiResponse> {
-    await this.specialtyService.update({
+  async updateSpecialty(
+    @Param('id') id: string,
+    @Body() updateSpecialtyDto: UpdateSpecialtyDto,
+  ): Promise<ApiResponse<SpecialtyResponse>> {
+    const specialty = await this.specialtyService.updateSpecialty({
       id,
       ...updateSpecialtyDto,
     });
 
     return {
       message: 'Specialty updated successfully.',
+      data: specialty,
     };
   }
 
   /**
    * Soft-delete a specialty.
-   *
-   * - The specialty remains in the database.
-   * - The deletedAt field is populated.
    */
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  async delete(@Param('id') id: string): Promise<ApiResponse> {
-    await this.specialtyService.delete({
+  async deleteSpecialty(@Param('id') id: string): Promise<ApiResponse> {
+    await this.specialtyService.deleteSpecialty({
       id,
     });
 

@@ -1,8 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
+
 import { Specialty } from './entities';
+
 import {
+  BaseException,
   CreateSpecialtyPayload,
   DeleteSpecialtyPayload,
   FindSpecialtiesPayload,
@@ -11,8 +14,8 @@ import {
   SpecialtiesResponse,
   SpecialtyResponse,
   UpdateSpecialtyPayload,
-} from '@/types/specialty.types';
-import { BaseException } from '@/types';
+} from '@/types';
+
 import { checkDatabaseError } from '@/lib';
 
 @Injectable()
@@ -34,12 +37,8 @@ export class SpecialtyService {
 
   /**
    * Create a new specialty.
-   *
-   * - Creates and persists a specialty.
-   * - Handles database constraint errors such as duplicate names and slugs.
-   * - Returns the created specialty.
    */
-  async create(payload: CreateSpecialtyPayload): Promise<SpecialtyResponse> {
+  async createSpecialty(payload: CreateSpecialtyPayload): Promise<SpecialtyResponse> {
     const repository = this.getRepository(payload.manager);
 
     try {
@@ -64,15 +63,16 @@ export class SpecialtyService {
   }
 
   /**
-   * Find all specialties.
-   *
-   * - Returns all available specialties.
-   * - Can later be extended with pagination, filtering and sorting.
+   * Get all specialties.
    */
   async findAll(payload: FindSpecialtiesPayload): Promise<SpecialtiesResponse> {
     const repository = this.getRepository(payload.manager);
 
-    const specialties = await repository.find();
+    const specialties = await repository.find({
+      order: {
+        name: 'ASC',
+      },
+    });
 
     return {
       specialties,
@@ -80,12 +80,11 @@ export class SpecialtyService {
   }
 
   /**
-   * Find a specialty by ID.
+   * Get a specialty by ID.
    *
-   * - Searches for a specialty using its unique ID.
    * - Throws NotFoundException if the specialty does not exist.
    */
-  async findById(payload: FindSpecialtyByIdPayload): Promise<SpecialtyResponse> {
+  async getById(payload: FindSpecialtyByIdPayload): Promise<SpecialtyResponse> {
     const repository = this.getRepository(payload.manager);
 
     const specialty = await repository.findOne({
@@ -109,7 +108,6 @@ export class SpecialtyService {
   /**
    * Find a specialty by slug.
    *
-   * - Searches for a specialty using its unique slug.
    * - Throws NotFoundException if the specialty does not exist.
    */
   async findBySlug(payload: FindSpecialtyBySlugPayload): Promise<SpecialtyResponse> {
@@ -134,37 +132,40 @@ export class SpecialtyService {
   }
 
   /**
-   * Update an existing specialty.
+   * Update a specialty.
    *
-   * - Updates only the provided specialty fields.
-   * - Sensitive fields such as status are handled by dedicated business methods.
+   * - Updates the specialty name, slug, and/or description.
    * - Throws NotFoundException if the specialty does not exist.
    */
-  async update(payload: UpdateSpecialtyPayload): Promise<void> {
+  async updateSpecialty(payload: UpdateSpecialtyPayload): Promise<SpecialtyResponse> {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const result = await repository.update(
-        { id: payload.id },
-        {
-          ...(payload.name !== undefined && {
-            name: payload.name,
-          }),
-          ...(payload.slug !== undefined && {
-            slug: payload.slug,
-          }),
-          ...(payload.description !== undefined && {
-            description: payload.description,
-          }),
-        },
-      );
+      const specialty = await repository.preload({
+        id: payload.id,
+        ...(payload.name !== undefined && {
+          name: payload.name,
+        }),
+        ...(payload.slug !== undefined && {
+          slug: payload.slug,
+        }),
+        ...(payload.description !== undefined && {
+          description: payload.description,
+        }),
+      });
 
-      if (result.affected === 0) {
+      if (!specialty) {
         throw new NotFoundException({
           message: 'Specialty not found in database.',
           error: 'Specialty Not Found',
         } as BaseException);
       }
+
+      const updatedSpecialty = await repository.save(specialty);
+
+      return {
+        specialty: updatedSpecialty,
+      };
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
@@ -181,17 +182,20 @@ export class SpecialtyService {
   /**
    * Soft-delete a specialty.
    *
-   * - Marks the specialty as deleted instead of permanently removing it.
-   * - Preserves the specialty record for auditing or recovery.
+   * - Throws NotFoundException if the specialty does not exist.
    */
-  async delete(payload: DeleteSpecialtyPayload): Promise<void> {
+  async deleteSpecialty(payload: DeleteSpecialtyPayload): Promise<void> {
     const repository = this.getRepository(payload.manager);
 
-    const { specialty } = await this.findById({
+    const result = await repository.softDelete({
       id: payload.id,
-      manager: payload.manager,
     });
 
-    await repository.softRemove(specialty);
+    if (result.affected === 0) {
+      throw new NotFoundException({
+        message: 'Specialty not found in database.',
+        error: 'Specialty Not Found',
+      } as BaseException);
+    }
   }
 }
