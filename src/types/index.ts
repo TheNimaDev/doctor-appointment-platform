@@ -14,3 +14,4 @@ export * from './doctor-specialty.types';
 export * from './clinic.types';
 export * from './role.types';
 export * from './permission.types';
+export * from './role-permission.types';
