@@ -2,7 +2,6 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
-  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { DatabaseService } from '@/modules/database/database.service';
@@ -21,10 +20,9 @@ import {
   RegisterParams,
   ResendVerificationEmailPayload,
   ResetPasswordParams,
-  UserRoleIncludeType,
   VerifyEmailParams,
 } from '@/types';
-import { compareSecret, getSafeUser, hashSecret } from '@/lib';
+import { compareSecret, hashSecret } from '@/lib';
 import { EmailService } from '../email/email.service';
 import { EVENTS } from '@/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -33,7 +31,6 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 import { SessionService } from '../session/session.service';
-import { Session } from '../session/entities';
 import { UserService } from '../user/user.service';
 import { EmailType } from '../email/enums';
 
@@ -52,8 +49,6 @@ export class AuthService {
 
   /**
    * Register a new user and create an email verification token.
-   * - Creates the user and verification token within a transaction.
-   * - Emits a signup verification event after the transaction succeeds.
    */
   async register(params: RegisterParams): Promise<void> {
     const result = await this.databaseService.dataSource.transaction(async (manager) => {
@@ -89,7 +84,6 @@ export class AuthService {
 
   /**
    * Verify a user's email and activate their account.
-   * - Verifies the email token and activates the user within a transaction.
    */
   async verifyEmail(params: VerifyEmailParams): Promise<void> {
     await this.databaseService.dataSource.transaction(async (manager) => {
@@ -110,12 +104,9 @@ export class AuthService {
 
   /**
    * Authenticate a user and issue access and refresh tokens.
-   * - Validates the user's credentials and account status.
-   * - Creates or updates the user's active session.
-   * - Creates a new refresh token within a transaction.
    */
   async login(params: LoginParams): Promise<LoginServiceOutput> {
-    const user = await this.userService.findByEmailWithPassword(params.email);
+    const { user } = await this.userService.findByEmailWithPassword(params.email);
 
     const isValidPassword: boolean = await compareSecret(params.password, user.password);
 
@@ -139,7 +130,7 @@ export class AuthService {
     const userData = userResponse.user;
 
     const refreshTokenData = await this.databaseService.dataSource.transaction(async (manager) => {
-      let userSession: Session;
+      let userSession;
       const remember = params.remember ?? false;
 
       const existingSession = await this.sessionService.findActiveUserSession({
@@ -190,7 +181,6 @@ export class AuthService {
 
   /**
    * Log out the current session.
-   * - Revokes the current refresh token and its associated session atomically.
    */
   async logout(params: RefreshTokenPayload): Promise<void> {
     await this.databaseService.dataSource.transaction(async (manager) => {
@@ -208,7 +198,6 @@ export class AuthService {
 
   /**
    * Log out the user from all active sessions.
-   * - Revokes all user refresh tokens and active sessions atomically.
    */
   async logoutAll(params: RefreshTokenPayload): Promise<void> {
     await this.databaseService.dataSource.transaction(async (manager) => {
@@ -226,10 +215,6 @@ export class AuthService {
 
   /**
    * Resend the email verification token for a pending user.
-   * - Validates the user's email and password.
-   * - Enforces the email verification resend cooldown.
-   * - Creates a new verification token within a transaction.
-   * - Emits a signup verification event after the transaction succeeds.
    */
   async resendVerificationEmail(params: ResendVerificationEmailPayload): Promise<void> {
     const user = await this.databaseService.dataSource
@@ -301,10 +286,6 @@ export class AuthService {
 
   /**
    * Rotate the current refresh token and issue a new access token.
-   * - Revokes the current refresh token.
-   * - Updates the session's last active time.
-   * - Creates a new refresh token for the same session.
-   * - Preserves the session's remember preference.
    */
   async refresh(params: RefreshTokenPayload): Promise<LoginServiceOutput> {
     const refreshTokenData = await this.databaseService.dataSource.transaction(async (manager) => {
@@ -352,14 +333,9 @@ export class AuthService {
 
   /**
    * Change the authenticated user's password.
-   *
-   * - Validates the current password.
-   * - Ensures the new password is different.
-   * - Updates the user's password hash.
-   * - Revokes all active sessions and refresh tokens.
    */
   async changePassword(params: ChangePasswordParams): Promise<void> {
-    const user = await this.userService.findByIdWithPassword(params.userId);
+    const { user } = await this.userService.findByIdWithPassword(params.userId);
 
     const isValidPassword = await compareSecret(params.currentPassword, user.password);
     if (!isValidPassword) {
@@ -399,11 +375,6 @@ export class AuthService {
 
   /**
    * Request a password reset email.
-   *
-   * - Finds the user by email.
-   * - Enforces the password reset email cooldown.
-   * - Creates a password reset email token.
-   * - Emits a password reset event after the token is created.
    */
   async forgotPassword(params: ForgotPasswordParams): Promise<void> {
     const user = await this.userService.findByEmail({
@@ -455,10 +426,6 @@ export class AuthService {
 
   /**
    * Reset a user's password using a valid password reset token.
-   *
-   * - Validates and consumes the password reset token.
-   * - Updates the user's password.
-   * - Revokes all active sessions and refresh tokens.
    */
   async resetPassword(params: ResetPasswordParams): Promise<void> {
     await this.databaseService.dataSource.transaction(async (manager) => {
@@ -490,13 +457,9 @@ export class AuthService {
 
   /**
    * Request an email address change.
-   *
-   * - Validates the current password.
-   * - Creates an email change verification token.
-   * - Sends the verification link to the current email address.
    */
   async changeEmail(params: ChangeEmailParams): Promise<void> {
-    const user = await this.userService.findByIdWithPassword(params.userId);
+    const { user } = await this.userService.findByIdWithPassword(params.userId);
 
     const isPasswordValid = await compareSecret(params.password, user.password);
 
@@ -523,11 +486,6 @@ export class AuthService {
 
   /**
    * Confirm an email address change.
-   *
-   * - Validates the email change verification token.
-   * - Checks that the new email is not already in use.
-   * - Updates the user's email address.
-   * - Revokes all active sessions and refresh tokens.
    */
   async confirmChangeEmail(params: ConfirmChangeEmailParams): Promise<void> {
     await this.databaseService.dataSource.transaction(async (manager) => {
