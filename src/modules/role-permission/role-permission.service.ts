@@ -7,6 +7,8 @@ import {
   FindRolePermissionPayload,
   RolePermissionResponse,
   RemoveRolePermissionPayload,
+  FindRolePermissionsPayload,
+  RolePermissionsResponse,
 } from '@/types';
 import { BaseException } from '@/types';
 import { checkDatabaseError } from '@/lib';
@@ -84,6 +86,23 @@ export class RolePermissionService {
         mainResource: 'Role Permission',
       });
     }
+  }
+
+  /**
+   * Find all permissions assigned to a role.
+   */
+  async findAll(payload: FindRolePermissionsPayload): Promise<RolePermissionsResponse> {
+    const repository = this.getRepository(payload.manager);
+
+    const rolePermissions = await repository.find({
+      where: {
+        roleId: payload.roleId,
+      },
+    });
+
+    return {
+      rolePermissions,
+    };
   }
 
   /**
