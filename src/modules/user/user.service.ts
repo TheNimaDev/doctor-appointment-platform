@@ -14,6 +14,7 @@ import {
   UpdateUserStatusPayload,
   UserResponse,
   UserRoleIncludeType,
+  UserWithPasswordResponse,
 } from '@/types';
 
 import { checkDatabaseError, compareSecret, getSafeUser } from '@/lib';
@@ -169,7 +170,7 @@ export class UserService {
   /**
    * Find a user by email with the password hash.
    */
-  async findByEmailWithPassword(email: string): Promise<User> {
+  async findByEmailWithPassword(email: string): Promise<UserWithPasswordResponse> {
     const user = await this.databaseService.dataSource
       .createQueryBuilder(User, 'user')
       .addSelect('user.password')
@@ -183,13 +184,13 @@ export class UserService {
       } as BaseException);
     }
 
-    return user;
+    return { user };
   }
 
   /**
    * Find a user by ID with the password hash.
    */
-  async findByIdWithPassword(userId: string): Promise<User> {
+  async findByIdWithPassword(userId: string): Promise<UserWithPasswordResponse> {
     const user = await this.databaseService.dataSource
       .createQueryBuilder(User, 'user')
       .addSelect('user.password')
@@ -203,7 +204,7 @@ export class UserService {
       } as BaseException);
     }
 
-    return user;
+    return { user };
   }
 
   /**
@@ -322,7 +323,7 @@ export class UserService {
    * Soft-delete the current user's account.
    */
   async deleteUser(payload: DeleteUserPayload): Promise<void> {
-    const user = await this.findByIdWithPassword(payload.userId);
+    const { user } = await this.findByIdWithPassword(payload.userId);
 
     const isPasswordValid = await compareSecret(payload.password, user.password);
 

@@ -9,7 +9,7 @@ import { Permission } from '@/modules/permission/entities';
 /** User type without sensitive fields. */
 export type SafeUser = Omit<User, 'password' | 'sessions' | 'doctor'>;
 
-/** User data exposed in API responses. */
+/** User data with roles and permissions exposed in API responses. */
 export type UserRolePermission = Omit<SafeUser, 'userRoles'> & RolesAndPermissions;
 
 /** User loaded with roles and permissions relations. */
@@ -30,6 +30,13 @@ export type UserRoleIncludeType = SafeUser & {
 /** User response payload. */
 export interface UserResponse {
   user: UserRolePermission;
+}
+
+/** User data with password for internal authentication. */
+export interface UserWithPasswordResponse {
+  user: SafeUser & {
+    password: string;
+  };
 }
 
 /** Parameters for creating a new user. */
