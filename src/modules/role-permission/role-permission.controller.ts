@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { RolePermissionService } from './role-permission.service';
 import { AddRolePermissionDto } from './dto';
 
@@ -25,6 +25,16 @@ export class RolePermissionController {
     return this.rolePermissionService.remove({
       roleId,
       permissionId,
+    });
+  }
+
+  /**
+   * Get all permissions assigned to a role.
+   */
+  @Get()
+  async findAll(@Param('roleId') roleId: string) {
+    return this.rolePermissionService.findAll({
+      roleId,
     });
   }
 }
