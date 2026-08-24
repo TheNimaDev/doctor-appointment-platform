@@ -36,6 +36,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     Modules.ClinicModule,
     Modules.RoleModule,
     Modules.PermissionModule,
+    Modules.RolePermissionModule,
   ],
   providers: [
     {
