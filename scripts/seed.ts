@@ -8,10 +8,10 @@ import { CliModule } from '@/modules/cli/cli.module';
 import { DatabaseService } from '@/modules/database/database.service';
 
 import { Permission } from '@/modules/permission/entities';
-import { Role, RolePermission } from '@/modules/role/entities';
+import { Role } from '@/modules/role/entities';
+import { RolePermission } from '@/modules/role-permission/entities';
 
 import {
-  USER_PERMISSIONS,
   DOCTOR_PERMISSIONS,
   CLINIC_PERMISSIONS,
   RAW_PERMISSIONS_OBJECT,

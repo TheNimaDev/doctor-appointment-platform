@@ -3,7 +3,8 @@ import { RolesAndPermissions } from './token.types';
 import { EntityManager } from 'typeorm';
 import { RegisterParams } from './auth.types';
 import { UserStatus } from '@/modules/user/enums';
-import { Role, RolePermission, UserRole } from '@/modules/role/entities';
+import { Role, UserRole } from '@/modules/role/entities';
+import { RolePermission } from '@/modules/role-permission/entities';
 import { Permission } from '@/modules/permission/entities';
 
 /** User type without sensitive fields. */

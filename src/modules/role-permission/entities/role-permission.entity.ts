@@ -1,5 +1,6 @@
 import { Permission } from '@/modules/permission/entities';
-import { Role } from './role.entity';
+import { Role } from '@/modules/role/entities';
+
 import {
   Column,
   CreateDateColumn,
