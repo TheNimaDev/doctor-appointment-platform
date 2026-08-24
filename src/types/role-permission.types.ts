@@ -4,6 +4,11 @@ import { RolePermission } from '@/modules/role-permission/entities';
 /** Role-Permission relation without relation data. */
 export type SafeRolePermission = Omit<RolePermission, 'role' | 'permission'>;
 
+/** Multiple role-permission API response. */
+export interface RolePermissionsResponse {
+  rolePermissions: SafeRolePermission[];
+}
+
 /** Single role-permission API response. */
 export interface RolePermissionResponse {
   rolePermission: SafeRolePermission;
@@ -27,5 +32,11 @@ export interface FindRolePermissionPayload {
 export interface RemoveRolePermissionPayload {
   roleId: string;
   permissionId: string;
+  manager?: EntityManager;
+}
+
+/** Parameters for finding all permissions assigned to a role. */
+export interface FindRolePermissionsPayload {
+  roleId: string;
   manager?: EntityManager;
 }
