@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { DatabaseService } from '@/modules/database/database.service';
 import { User } from '@/modules/user/entities';
 import ms, { StringValue } from 'ms';
@@ -24,7 +19,7 @@ import {
 } from '@/types';
 import { compareSecret, hashSecret } from '@/lib';
 import { EmailService } from '../email/email.service';
-import { EVENTS } from '@/common';
+import { EVENTS, ROLES } from '@/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UserStatus } from '@/modules/user/enums';
 import { ConfigService } from '@nestjs/config';
@@ -33,6 +28,8 @@ import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.servi
 import { SessionService } from '../session/session.service';
 import { UserService } from '../user/user.service';
 import { EmailType } from '../email/enums';
+import { UserRoleService } from '../user-role/user-role.service';
+import { RoleService } from '../role/role.service';
 
 @Injectable()
 export class AuthService {
@@ -41,6 +38,8 @@ export class AuthService {
     private readonly refreshTokenService: RefreshTokenService,
     private readonly sessionService: SessionService,
     private readonly userService: UserService,
+    private readonly userRoleService: UserRoleService,
+    private readonly roleService: RoleService,
     private readonly emailService: EmailService,
     private readonly eventEmitter: EventEmitter2,
     private readonly configService: ConfigService,
@@ -58,6 +57,17 @@ export class AuthService {
         ...params,
         manager,
         password: hashedPassword,
+      });
+
+      const { role } = await this.roleService.findByName({
+        name: ROLES.PATIENT,
+        manager,
+      });
+
+      await this.userRoleService.add({
+        roleId: role.id,
+        userId: user.id,
+        manager,
       });
 
       const token = await this.emailService.createEmail({
