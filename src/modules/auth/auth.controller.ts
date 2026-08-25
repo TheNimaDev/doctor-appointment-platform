@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
   ChangeEmailDto,
@@ -14,8 +14,8 @@ import {
 import type { AccessRequest, ApiResponse, LoginResponse, NormalizedClientInfo, RefreshRequest } from '@/types';
 import type { CookieOptions, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
-import { NormalizeClientInfo, Public } from '@/common';
-import { RefreshTokenGuard } from './guards/refresh-token.guard';
+import { NormalizeClientInfo } from '@/common';
+import * as AuthDecorator from './decorators';
 
 @Controller('auth')
 export class AuthController {
@@ -45,8 +45,7 @@ export class AuthController {
    * - Sends an email verification request after successful registration.
    */
   @Post('register')
-  @HttpCode(HttpStatus.CREATED)
-  @Public()
+  @AuthDecorator.RegisterDecorators()
   async register(@Body() registerDto: RegisterDto): Promise<ApiResponse> {
     await this.authService.register(registerDto);
 
@@ -59,8 +58,7 @@ export class AuthController {
    * Verify a user's email address using the provided verification token.
    */
   @Get('verify/email')
-  @HttpCode(HttpStatus.OK)
-  @Public()
+  @AuthDecorator.VerifyEmailDecorators()
   async verifyEmail(@Query() verifyEmailDto: VerifyEmailDto): Promise<ApiResponse> {
     await this.authService.verifyEmail(verifyEmailDto);
 
@@ -74,8 +72,7 @@ export class AuthController {
    * - Stores the refresh token in an HTTP-only cookie.
    */
   @Post('login')
-  @HttpCode(HttpStatus.OK)
-  @Public()
+  @AuthDecorator.LoginDecorators()
   async login(
     @Body() loginDto: LoginDto,
     @NormalizeClientInfo() clientInfo: NormalizedClientInfo,
@@ -95,8 +92,7 @@ export class AuthController {
    * Log out the current session and revoke its refresh token.
    */
   @Post('logout')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(RefreshTokenGuard)
+  @AuthDecorator.LogoutDecorators()
   async logout(@Req() req: RefreshRequest, @Res({ passthrough: true }) res: Response): Promise<ApiResponse> {
     res.clearCookie('refreshToken', this.getCookieOptions());
     await this.authService.logout(req.refreshPayload);
@@ -110,8 +106,7 @@ export class AuthController {
    * Log out the user from all active sessions and revoke all refresh tokens.
    */
   @Post('logout/all')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(RefreshTokenGuard)
+  @AuthDecorator.LogoutAllDecorators()
   async logoutAll(@Req() req: RefreshRequest, @Res({ passthrough: true }) res: Response): Promise<ApiResponse> {
     res.clearCookie('refreshToken', this.getCookieOptions());
     await this.authService.logoutAll(req.refreshPayload);
@@ -125,8 +120,7 @@ export class AuthController {
    * Resend the email verification link for a pending user.
    */
   @Post('verify/email/resend')
-  @HttpCode(HttpStatus.OK)
-  @Public()
+  @AuthDecorator.VerifyEmailResendDecorators()
   async resendVerificationEmail(@Body() resendVerificationEmailDto: ResendVerificationEmailDto): Promise<ApiResponse> {
     await this.authService.resendVerificationEmail(resendVerificationEmailDto);
 
@@ -142,8 +136,7 @@ export class AuthController {
    * - Returns a new access token and user data.
    */
   @Post('refresh')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(RefreshTokenGuard)
+  @AuthDecorator.RefreshDecorators()
   async refresh(
     @Req() req: RefreshRequest,
     @Res({ passthrough: true }) res: Response,
@@ -165,7 +158,7 @@ export class AuthController {
    * - Revokes active sessions after a successful password change.
    */
   @Post('password/change')
-  @HttpCode(HttpStatus.OK)
+  @AuthDecorator.ChangePasswordDecorators()
   async changePassword(@Req() req: AccessRequest, @Body() changePasswordDto: ChangePasswordDto): Promise<ApiResponse> {
     await this.authService.changePassword({
       userId: req.user.userId,
@@ -183,8 +176,7 @@ export class AuthController {
    * - Sends the reset link to the user's email.
    */
   @Post('password/forgot')
-  @HttpCode(HttpStatus.OK)
-  @Public()
+  @AuthDecorator.ForgotPasswordDecorators()
   async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto): Promise<ApiResponse> {
     await this.authService.forgotPassword(forgotPasswordDto);
 
@@ -201,8 +193,7 @@ export class AuthController {
    * - Revokes all active sessions.
    */
   @Post('password/reset')
-  @HttpCode(HttpStatus.OK)
-  @Public()
+  @AuthDecorator.ResetPasswordDecorators()
   async resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<ApiResponse> {
     await this.authService.resetPassword(resetPasswordDto);
 
@@ -218,7 +209,7 @@ export class AuthController {
    * - Sends a verification link to the current email address.
    */
   @Post('email/change')
-  @HttpCode(HttpStatus.OK)
+  @AuthDecorator.ChangeEmailDecorators()
   async changeEmail(@Req() req: AccessRequest, @Body() changeEmailDto: ChangeEmailDto): Promise<ApiResponse> {
     await this.authService.changeEmail({
       userId: req.user.userId,
@@ -238,8 +229,7 @@ export class AuthController {
    * - Revokes all active sessions.
    */
   @Post('email/change/confirm')
-  @HttpCode(HttpStatus.OK)
-  @Public()
+  @AuthDecorator.ConfirmChangeEmailDecorators()
   async confirmChangeEmail(@Body() confirmChangeEmailDto: ConfirmChangeEmailDto): Promise<ApiResponse> {
     await this.authService.confirmChangeEmail(confirmChangeEmailDto);
 
