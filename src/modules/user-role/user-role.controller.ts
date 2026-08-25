@@ -1,8 +1,8 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { UserRoleService } from './user-role.service';
 import { AddUserRoleDto } from './dto';
-
 import { ApiResponse, UserRoleResponse, UserRolesResponse } from '@/types';
+import * as UserRoleDecorator from './decorators';
 
 @Controller('users/:userId/roles')
 export class UserRoleController {
@@ -12,7 +12,7 @@ export class UserRoleController {
    * Get all roles assigned to a user.
    */
   @Get()
-  @HttpCode(HttpStatus.OK)
+  @UserRoleDecorator.FindUserRolesDecorators()
   async findAll(@Param('userId') userId: string): Promise<ApiResponse<UserRolesResponse>> {
     const data = await this.userRoleService.findAll({
       userId,
@@ -28,7 +28,7 @@ export class UserRoleController {
    * Add a role to a user.
    */
   @Post()
-  @HttpCode(HttpStatus.CREATED)
+  @UserRoleDecorator.AddUserRoleDecorators()
   async add(
     @Param('userId') userId: string,
     @Body() addUserRoleDto: AddUserRoleDto,
@@ -48,7 +48,7 @@ export class UserRoleController {
    * Remove a role from a user.
    */
   @Delete(':roleId')
-  @HttpCode(HttpStatus.OK)
+  @UserRoleDecorator.RemoveUserRoleDecorators()
   async remove(@Param('userId') userId: string, @Param('roleId') roleId: string): Promise<ApiResponse> {
     await this.userRoleService.remove({
       userId,
