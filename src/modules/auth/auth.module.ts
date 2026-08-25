@@ -8,10 +8,21 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { RefreshTokenModule } from '@/modules/refresh-token';
 import { SessionModule } from '@/modules/session';
 import { UserModule } from '@/modules/user';
+import { RoleModule } from '../role';
+import { UserRoleModule } from '../user-role';
 
 @Module({
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
-  imports: [EmailModule, PassportModule, JwtModule.register({}), RefreshTokenModule, SessionModule, UserModule],
+  imports: [
+    EmailModule,
+    PassportModule,
+    JwtModule.register({}),
+    RefreshTokenModule,
+    SessionModule,
+    UserModule,
+    RoleModule,
+    UserRoleModule,
+  ],
 })
 export class AuthModule {}
