@@ -1,9 +1,8 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
-
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { RoleService } from './role.service';
 import { CreateRoleDto, UpdateRoleDto } from './dto';
-
 import type { ApiResponse, RoleResponse, RolesResponse } from '@/types';
+import * as RoleDecorator from './decorators';
 
 @Controller('roles')
 export class RoleController {
@@ -13,7 +12,7 @@ export class RoleController {
    * Create a new role.
    */
   @Post()
-  @HttpCode(HttpStatus.CREATED)
+  @RoleDecorator.CreateRoleDecorators()
   async createRole(@Body() createRoleDto: CreateRoleDto): Promise<ApiResponse<RoleResponse>> {
     const role = await this.roleService.createRole({
       name: createRoleDto.name,
@@ -30,7 +29,7 @@ export class RoleController {
    * Get all roles.
    */
   @Get()
-  @HttpCode(HttpStatus.OK)
+  @RoleDecorator.FindRolesDecorators()
   async getRoles(): Promise<ApiResponse<RolesResponse>> {
     const roles = await this.roleService.findAll({});
 
@@ -44,7 +43,7 @@ export class RoleController {
    * Get a role by ID.
    */
   @Get(':id')
-  @HttpCode(HttpStatus.OK)
+  @RoleDecorator.FindRoleDecorators()
   async getRoleById(@Param('id') id: string): Promise<ApiResponse<RoleResponse>> {
     const role = await this.roleService.getById({
       id,
@@ -60,7 +59,7 @@ export class RoleController {
    * Update a role.
    */
   @Patch(':id')
-  @HttpCode(HttpStatus.OK)
+  @RoleDecorator.UpdateRoleDecorators()
   async updateRole(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto): Promise<ApiResponse<RoleResponse>> {
     const role = await this.roleService.updateRole({
       id,
@@ -78,7 +77,7 @@ export class RoleController {
    * Soft-delete a role.
    */
   @Delete(':id')
-  @HttpCode(HttpStatus.OK)
+  @RoleDecorator.DeleteRoleDecorators()
   async deleteRole(@Param('id') id: string): Promise<ApiResponse> {
     await this.roleService.deleteRole({
       id,
