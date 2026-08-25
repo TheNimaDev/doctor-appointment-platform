@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { PermissionService } from './permission.service';
 import { ApiResponse, PermissionResponse, PermissionsResponse } from '@/types';
 import { CreatePermissionDto, UpdatePermissionDto } from './dto';
+import * as PermissionDecorator from './decorators';
 
 @Controller('permissions')
 export class PermissionController {
@@ -11,7 +12,7 @@ export class PermissionController {
    * Create a new permission profile.
    */
   @Post()
-  @HttpCode(HttpStatus.CREATED)
+  @PermissionDecorator.CreatePermissionDecorators()
   async create(@Body() createPermissionDto: CreatePermissionDto): Promise<ApiResponse<PermissionResponse>> {
     const data = await this.permissionService.createPermission({
       ...createPermissionDto,
@@ -27,7 +28,7 @@ export class PermissionController {
    * Get all permissions.
    */
   @Get()
-  @HttpCode(HttpStatus.OK)
+  @PermissionDecorator.FindPermissionsDecorators()
   async findAll(): Promise<ApiResponse<PermissionsResponse>> {
     const data = await this.permissionService.findAll({});
 
@@ -41,7 +42,7 @@ export class PermissionController {
    * Get a permission by ID.
    */
   @Get(':id')
-  @HttpCode(HttpStatus.OK)
+  @PermissionDecorator.FindPermissionDecorators()
   async findById(@Param('id') id: string): Promise<ApiResponse<PermissionResponse>> {
     const data = await this.permissionService.getById({
       id,
@@ -57,7 +58,7 @@ export class PermissionController {
    * Update a permission profile.
    */
   @Patch(':id')
-  @HttpCode(HttpStatus.OK)
+  @PermissionDecorator.UpdatePermissionDecorators()
   async update(
     @Param('id') id: string,
     @Body() updatePermissionDto: UpdatePermissionDto,
@@ -77,7 +78,7 @@ export class PermissionController {
    * Soft-delete a permission profile.
    */
   @Delete(':id')
-  @HttpCode(HttpStatus.OK)
+  @PermissionDecorator.DeletePermissionDecorators()
   async delete(@Param('id') id: string): Promise<ApiResponse> {
     await this.permissionService.deletePermission({
       id,
