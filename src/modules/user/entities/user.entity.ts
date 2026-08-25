@@ -11,7 +11,7 @@ import {
 } from 'typeorm';
 import { UserStatus } from '../enums';
 import { Session } from '@/modules/session/entities';
-import { UserRole } from '@/modules/role/entities/user-role.entity';
+import { UserRole } from '@/modules/user-role/entities';
 import { Doctor } from '@/modules/doctor/entities';
 
 @Entity('users')

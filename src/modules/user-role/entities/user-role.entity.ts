@@ -1,5 +1,5 @@
 import { User } from '@/modules/user/entities';
-import { Role } from './role.entity';
+import { Role } from '@/modules/role/entities';
 import {
   Column,
   CreateDateColumn,
