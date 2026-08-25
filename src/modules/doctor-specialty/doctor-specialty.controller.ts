@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { DoctorSpecialtyService } from './doctor-specialty.service';
 import { AddDoctorSpecialtyDto } from './dto';
 import type { ApiResponse, DoctorSpecialtiesResponse, DoctorSpecialtyResponse } from '@/types';
+import * as DoctorSpecialtyDecorator from './decorators';
 
 @Controller('doctors/:doctorId/specialties')
 export class DoctorSpecialtyController {
@@ -11,7 +12,7 @@ export class DoctorSpecialtyController {
    * Add a specialty to a doctor.
    */
   @Post()
-  @HttpCode(HttpStatus.CREATED)
+  @DoctorSpecialtyDecorator.AddDoctorSpecialtyDecorators()
   async add(
     @Param('doctorId') doctorId: string,
     @Body() addDoctorSpecialtyDto: AddDoctorSpecialtyDto,
@@ -31,7 +32,7 @@ export class DoctorSpecialtyController {
    * Get all specialties assigned to a doctor.
    */
   @Get()
-  @HttpCode(HttpStatus.OK)
+  @DoctorSpecialtyDecorator.FindDoctorSpecialtiesDecorators()
   async findAll(@Param('doctorId') doctorId: string): Promise<ApiResponse<DoctorSpecialtiesResponse>> {
     const data = await this.doctorSpecialtyService.findAll({
       doctorId,
@@ -47,7 +48,7 @@ export class DoctorSpecialtyController {
    * Set a doctor's specialty as primary.
    */
   @Patch(':specialtyId/primary')
-  @HttpCode(HttpStatus.OK)
+  @DoctorSpecialtyDecorator.SetDoctorSpecialtyPrimaryDecorators()
   async setPrimary(
     @Param('doctorId') doctorId: string,
     @Param('specialtyId') specialtyId: string,
@@ -67,7 +68,7 @@ export class DoctorSpecialtyController {
    * Soft-delete a specialty from a doctor.
    */
   @Delete(':specialtyId')
-  @HttpCode(HttpStatus.OK)
+  @DoctorSpecialtyDecorator.RemoveDoctorSpecialtyDecorators()
   async remove(@Param('doctorId') doctorId: string, @Param('specialtyId') specialtyId: string): Promise<ApiResponse> {
     await this.doctorSpecialtyService.remove({
       doctorId,
