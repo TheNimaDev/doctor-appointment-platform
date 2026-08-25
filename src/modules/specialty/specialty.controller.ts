@@ -1,8 +1,9 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { SpecialtyService } from './specialty.service';
 import { CreateSpecialtyDto, UpdateSpecialtyDto } from './dto';
 import type { ApiResponse, SpecialtiesResponse, SpecialtyResponse } from '@/types';
 import { isUUID } from 'class-validator';
+import * as SpecialtyDecorator from './decorators';
 
 @Controller('specialties')
 export class SpecialtyController {
@@ -12,7 +13,7 @@ export class SpecialtyController {
    * Create a new specialty.
    */
   @Post()
-  @HttpCode(HttpStatus.CREATED)
+  @SpecialtyDecorator.CreateSpecialtyDecorators()
   async createSpecialty(@Body() createSpecialtyDto: CreateSpecialtyDto): Promise<ApiResponse<SpecialtyResponse>> {
     const specialty = await this.specialtyService.createSpecialty({
       ...createSpecialtyDto,
@@ -28,7 +29,7 @@ export class SpecialtyController {
    * Get all specialties.
    */
   @Get()
-  @HttpCode(HttpStatus.OK)
+  @SpecialtyDecorator.FindSpecialtiesDecorators()
   async findAll(): Promise<ApiResponse<SpecialtiesResponse>> {
     const specialties = await this.specialtyService.findAll({});
 
@@ -42,7 +43,7 @@ export class SpecialtyController {
    * Get a specialty by ID or slug.
    */
   @Get(':idOrSlug')
-  @HttpCode(HttpStatus.OK)
+  @SpecialtyDecorator.FindSpecialtyDecorators()
   async getByIdOrSlug(@Param('idOrSlug') idOrSlug: string): Promise<ApiResponse<SpecialtyResponse>> {
     let specialty: SpecialtyResponse;
 
@@ -66,7 +67,7 @@ export class SpecialtyController {
    * Update a specialty.
    */
   @Patch(':id')
-  @HttpCode(HttpStatus.OK)
+  @SpecialtyDecorator.UpdateSpecialtyDecorators()
   async updateSpecialty(
     @Param('id') id: string,
     @Body() updateSpecialtyDto: UpdateSpecialtyDto,
@@ -86,7 +87,7 @@ export class SpecialtyController {
    * Soft-delete a specialty.
    */
   @Delete(':id')
-  @HttpCode(HttpStatus.OK)
+  @SpecialtyDecorator.DeleteSpecialtyDecorators()
   async deleteSpecialty(@Param('id') id: string): Promise<ApiResponse> {
     await this.specialtyService.deleteSpecialty({
       id,
