@@ -85,7 +85,7 @@ export class RoleService {
   /**
    * Find a role by name.
    */
-  async findByName(payload: FindRoleByNamePayload): Promise<RoleResponse | null> {
+  async findByName(payload: FindRoleByNamePayload): Promise<RoleResponse> {
     const repository = this.getRepository(payload.manager);
 
     const role = await repository.findOne({
@@ -95,7 +95,10 @@ export class RoleService {
     });
 
     if (!role) {
-      return null;
+      throw new NotFoundException({
+        message: 'Role not found in database.',
+        error: 'Role Not Found',
+      } as BaseException);
     }
 
     return {
