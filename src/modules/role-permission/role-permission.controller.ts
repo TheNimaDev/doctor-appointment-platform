@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { RolePermissionService } from './role-permission.service';
 import { AddRolePermissionDto } from './dto';
 import { ApiResponse, RolePermissionResponse, RolePermissionsResponse } from '@/types';
+import * as RolePermissionDecorator from './decorators';
 
 @Controller('roles/:roleId/permissions')
 export class RolePermissionController {
@@ -11,7 +12,7 @@ export class RolePermissionController {
    * Add a permission to a role.
    */
   @Post()
-  @HttpCode(HttpStatus.CREATED)
+  @RolePermissionDecorator.AddRolePermissionDecorators()
   async add(
     @Param('roleId') roleId: string,
     @Body() addRolePermissionDto: AddRolePermissionDto,
@@ -31,7 +32,7 @@ export class RolePermissionController {
    * Remove a permission from a role.
    */
   @Delete(':permissionId')
-  @HttpCode(HttpStatus.OK)
+  @RolePermissionDecorator.RemoveRolePermissionDecorators()
   async remove(@Param('roleId') roleId: string, @Param('permissionId') permissionId: string): Promise<ApiResponse> {
     await this.rolePermissionService.remove({
       roleId,
@@ -47,7 +48,7 @@ export class RolePermissionController {
    * Get all permissions assigned to a role.
    */
   @Get()
-  @HttpCode(HttpStatus.OK)
+  @RolePermissionDecorator.FindRolePermissionsDecorators()
   async findAll(@Param('roleId') roleId: string): Promise<ApiResponse<RolePermissionsResponse>> {
     const data = await this.rolePermissionService.findAll({
       roleId,
