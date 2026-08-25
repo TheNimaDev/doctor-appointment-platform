@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { DoctorService } from './doctor.service';
 import { CreateDoctorDto, UpdateDoctorDto } from './dto';
 import type { ApiResponse, DoctorResponse, DoctorsResponse } from '@/types';
+import * as DoctorDecorator from './decorators';
 
 @Controller('doctors')
 export class DoctorController {
@@ -11,7 +12,7 @@ export class DoctorController {
    * Create a new doctor profile.
    */
   @Post()
-  @HttpCode(HttpStatus.CREATED)
+  @DoctorDecorator.CreateDoctorDecorators()
   async create(@Body() createDoctorDto: CreateDoctorDto): Promise<ApiResponse<DoctorResponse>> {
     const data = await this.doctorService.create({
       ...createDoctorDto,
@@ -27,7 +28,7 @@ export class DoctorController {
    * Get all doctors.
    */
   @Get()
-  @HttpCode(HttpStatus.OK)
+  @DoctorDecorator.FindDoctorsDecorators()
   async findAll(): Promise<ApiResponse<DoctorsResponse>> {
     const data = await this.doctorService.findAll({});
 
@@ -41,7 +42,7 @@ export class DoctorController {
    * Get a doctor by ID.
    */
   @Get(':id')
-  @HttpCode(HttpStatus.OK)
+  @DoctorDecorator.FindDoctorDecorators()
   async findById(@Param('id') id: string): Promise<ApiResponse<DoctorResponse>> {
     const data = await this.doctorService.findById({
       id,
@@ -57,7 +58,7 @@ export class DoctorController {
    * Update a doctor profile.
    */
   @Patch(':id')
-  @HttpCode(HttpStatus.OK)
+  @DoctorDecorator.UpdateDoctorDecorators()
   async update(
     @Param('id') id: string,
     @Body() updateDoctorDto: UpdateDoctorDto,
@@ -77,7 +78,7 @@ export class DoctorController {
    * Soft-delete a doctor profile.
    */
   @Delete(':id')
-  @HttpCode(HttpStatus.OK)
+  @DoctorDecorator.DeleteDoctorDecorators()
   async delete(@Param('id') id: string): Promise<ApiResponse> {
     await this.doctorService.delete({
       id,
