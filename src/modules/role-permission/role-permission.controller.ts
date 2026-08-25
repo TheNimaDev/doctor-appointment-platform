@@ -1,6 +1,7 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
 import { RolePermissionService } from './role-permission.service';
 import { AddRolePermissionDto } from './dto';
+import { ApiResponse, RolePermissionResponse, RolePermissionsResponse } from '@/types';
 
 @Controller('roles/:roleId/permissions')
 export class RolePermissionController {
@@ -10,31 +11,51 @@ export class RolePermissionController {
    * Add a permission to a role.
    */
   @Post()
-  async add(@Param('roleId') roleId: string, @Body() addRolePermissionDto: AddRolePermissionDto) {
-    return this.rolePermissionService.add({
+  @HttpCode(HttpStatus.CREATED)
+  async add(
+    @Param('roleId') roleId: string,
+    @Body() addRolePermissionDto: AddRolePermissionDto,
+  ): Promise<ApiResponse<RolePermissionResponse>> {
+    const data = await this.rolePermissionService.add({
       roleId,
       permissionId: addRolePermissionDto.permissionId,
     });
+
+    return {
+      message: 'Permission assigned to role successfully.',
+      data,
+    };
   }
 
   /**
    * Remove a permission from a role.
    */
   @Delete(':permissionId')
-  async remove(@Param('roleId') roleId: string, @Param('permissionId') permissionId: string): Promise<void> {
-    return this.rolePermissionService.remove({
+  @HttpCode(HttpStatus.OK)
+  async remove(@Param('roleId') roleId: string, @Param('permissionId') permissionId: string): Promise<ApiResponse> {
+    await this.rolePermissionService.remove({
       roleId,
       permissionId,
     });
+
+    return {
+      message: 'Permission removed from role successfully.',
+    };
   }
 
   /**
    * Get all permissions assigned to a role.
    */
   @Get()
-  async findAll(@Param('roleId') roleId: string) {
-    return this.rolePermissionService.findAll({
+  @HttpCode(HttpStatus.OK)
+  async findAll(@Param('roleId') roleId: string): Promise<ApiResponse<RolePermissionsResponse>> {
+    const data = await this.rolePermissionService.findAll({
       roleId,
     });
+
+    return {
+      message: 'Role permissions retrieved successfully.',
+      data,
+    };
   }
 }
