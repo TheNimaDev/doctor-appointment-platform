@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Patch, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Patch, Req } from '@nestjs/common';
 import { UserService } from './user.service';
 import type { AccessRequest, ApiResponse, UserResponse } from '@/types';
 import { DeleteMeDto, UpdateProfileDto } from './dto';
+import * as UserDecorator from './decorators';
 
 @Controller('users')
 export class UserController {
@@ -11,7 +12,7 @@ export class UserController {
    * Get the current user's profile.
    */
   @Get('me')
-  @HttpCode(HttpStatus.OK)
+  @UserDecorator.GetMeDecorators()
   async getMe(@Req() req: AccessRequest): Promise<ApiResponse<UserResponse>> {
     const user = await this.userService.getById({
       id: req.user.userId,
@@ -27,7 +28,7 @@ export class UserController {
    * Update the current user's profile.
    */
   @Patch('me')
-  @HttpCode(HttpStatus.OK)
+  @UserDecorator.UpdateMeDecorators()
   async updateMe(
     @Req() req: AccessRequest,
     @Body() updateProfileDto: UpdateProfileDto,
@@ -47,7 +48,7 @@ export class UserController {
    * Soft-delete the current user's account.
    */
   @Delete('me')
-  @HttpCode(HttpStatus.OK)
+  @UserDecorator.DeleteMeDecorators()
   async deleteMe(@Req() req: AccessRequest, @Body() deleteMeDto: DeleteMeDto): Promise<ApiResponse> {
     await this.userService.deleteUser({
       userId: req.user.userId,
