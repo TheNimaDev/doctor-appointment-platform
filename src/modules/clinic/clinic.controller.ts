@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { ClinicService } from './clinic.service';
 import { CreateClinicDto, UpdateClinicDto, UpdateClinicStatusDto } from './dto';
 import type { ApiResponse, ClinicResponse, ClinicsResponse } from '@/types';
+import * as ClinicDecorator from './decorators';
 
 @Controller('doctors/:doctorId/clinics')
 export class ClinicController {
@@ -11,7 +12,7 @@ export class ClinicController {
    * Create a new clinic for a doctor.
    */
   @Post()
-  @HttpCode(HttpStatus.CREATED)
+  @ClinicDecorator.CreateClinicDecorators()
   async create(
     @Param('doctorId') doctorId: string,
     @Body() createClinicDto: CreateClinicDto,
@@ -31,7 +32,7 @@ export class ClinicController {
    * Get all clinics belonging to a doctor.
    */
   @Get()
-  @HttpCode(HttpStatus.OK)
+  @ClinicDecorator.FindClinicsDecorators()
   async findByDoctorId(@Param('doctorId') doctorId: string): Promise<ApiResponse<ClinicsResponse>> {
     const data = await this.clinicService.findByDoctorId({
       doctorId,
@@ -47,7 +48,7 @@ export class ClinicController {
    * Get a specific clinic belonging to a doctor.
    */
   @Get(':clinicId')
-  @HttpCode(HttpStatus.OK)
+  @ClinicDecorator.FindClinicDecorators()
   async findById(
     @Param('doctorId') doctorId: string,
     @Param('clinicId') clinicId: string,
@@ -67,7 +68,7 @@ export class ClinicController {
    * Update a clinic.
    */
   @Patch(':clinicId')
-  @HttpCode(HttpStatus.OK)
+  @ClinicDecorator.UpdateClinicDecorators()
   async update(
     @Param('doctorId') doctorId: string,
     @Param('clinicId') clinicId: string,
@@ -88,7 +89,7 @@ export class ClinicController {
    * Soft-delete a clinic.
    */
   @Delete(':clinicId')
-  @HttpCode(HttpStatus.OK)
+  @ClinicDecorator.DeleteClinicDecorators()
   async delete(@Param('doctorId') doctorId: string, @Param('clinicId') clinicId: string): Promise<ApiResponse> {
     await this.clinicService.delete({
       id: clinicId,
@@ -104,7 +105,7 @@ export class ClinicController {
    * Update the status of a clinic.
    */
   @Patch(':clinicId/status')
-  @HttpCode(HttpStatus.OK)
+  @ClinicDecorator.UpdateClinicStatusDecorators()
   async updateStatus(
     @Param('doctorId') doctorId: string,
     @Param('clinicId') clinicId: string,
