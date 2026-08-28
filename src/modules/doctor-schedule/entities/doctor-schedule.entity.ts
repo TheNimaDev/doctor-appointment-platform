@@ -4,12 +4,15 @@ import {
   DeleteDateColumn,
   Entity,
   Index,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
 
 import { DayOfWeek, ScheduleStatus } from '../enums';
+import { Clinic } from '@/modules/clinic/entities';
 
 @Entity('doctor_schedules')
 @Index(['clinicId'])
@@ -22,6 +25,12 @@ export class DoctorSchedule {
 
   @Column({ type: 'uuid' })
   clinicId: string;
+
+  @ManyToOne(() => Clinic, (clinic) => clinic.doctorSchedules, {
+    onDelete: 'RESTRICT',
+  })
+  @JoinColumn({ name: 'clinicId' })
+  clinic: Clinic;
 
   @Column({
     type: 'enum',

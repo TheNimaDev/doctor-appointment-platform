@@ -6,12 +6,14 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
 import { ClinicStatus } from '../enums';
 import { Doctor } from '@/modules/doctor/entities';
+import { DoctorSchedule } from '@/modules/doctor-schedule/entities';
 
 @Entity('clinics')
 @Unique(['doctorId', 'name'])
@@ -30,6 +32,9 @@ export class Clinic {
   })
   @JoinColumn({ name: 'doctorId' })
   doctor: Doctor;
+
+  @OneToMany(() => DoctorSchedule, (doctorSchedule) => doctorSchedule.clinic)
+  doctorSchedules: DoctorSchedule[];
 
   @Column({ type: 'varchar', length: 150 })
   name: string;
