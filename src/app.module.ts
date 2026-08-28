@@ -38,6 +38,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     Modules.PermissionModule,
     Modules.RolePermissionModule,
     Modules.UserRoleModule,
+    Modules.DoctorScheduleModule,
   ],
   providers: [
     {
