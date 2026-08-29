@@ -6,7 +6,7 @@ export const CreateSpecialtyDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.CREATED),
     Permission({
-      permissions: [PERMISSIONS.OWNER_ALL],
+      permissions: [PERMISSIONS.SPECIALTY_CREATE],
     }),
   );
 };
@@ -15,7 +15,7 @@ export const FindSpecialtiesDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     Permission({
-      permissions: [PERMISSIONS.DOCTOR_READ],
+      permissions: [PERMISSIONS.SPECIALTY_READ],
     }),
   );
 };
@@ -24,7 +24,7 @@ export const FindSpecialtyDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     Permission({
-      permissions: [PERMISSIONS.DOCTOR_READ],
+      permissions: [PERMISSIONS.SPECIALTY_READ],
     }),
   );
 };
@@ -33,7 +33,7 @@ export const UpdateSpecialtyDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     Permission({
-      permissions: [PERMISSIONS.OWNER_ALL],
+      permissions: [PERMISSIONS.SPECIALTY_UPDATE],
     }),
   );
 };
@@ -42,7 +42,7 @@ export const DeleteSpecialtyDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     Permission({
-      permissions: [PERMISSIONS.OWNER_ALL],
+      permissions: [PERMISSIONS.SPECIALTY_DELETE],
     }),
   );
 };
