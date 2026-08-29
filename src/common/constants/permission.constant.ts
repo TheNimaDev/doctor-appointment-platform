@@ -84,11 +84,88 @@ export const CLINIC_PERMISSIONS = {
   },
 } as const satisfies PermissionStructure;
 
+export const SPECIALTY_PERMISSIONS = {
+  SPECIALTY_CREATE: {
+    name: 'specialty:create',
+    module: 'specialty',
+    action: 'create',
+  },
+  SPECIALTY_READ: {
+    name: 'specialty:read',
+    module: 'specialty',
+    action: 'read',
+  },
+  SPECIALTY_UPDATE: {
+    name: 'specialty:update',
+    module: 'specialty',
+    action: 'update',
+  },
+  SPECIALTY_DELETE: {
+    name: 'specialty:delete',
+    module: 'specialty',
+    action: 'delete',
+  },
+} as const satisfies PermissionStructure;
+
+export const DOCTOR_SPECIALTY_PERMISSIONS = {
+  DOCTOR_SPECIALTY_READ: {
+    name: 'doctor-specialty:read',
+    module: 'doctor-specialty',
+    action: 'read',
+  },
+  DOCTOR_SPECIALTY_CREATE: {
+    name: 'doctor-specialty:create',
+    module: 'doctor-specialty',
+    action: 'create',
+  },
+  DOCTOR_SPECIALTY_UPDATE: {
+    name: 'doctor-specialty:update',
+    module: 'doctor-specialty',
+    action: 'update',
+  },
+  DOCTOR_SPECIALTY_DELETE: {
+    name: 'doctor-specialty:delete',
+    module: 'doctor-specialty',
+    action: 'delete',
+  },
+} as const satisfies PermissionStructure;
+
+export const DOCTOR_SCHEDULE_PERMISSIONS = {
+  DOCTOR_SCHEDULE_CREATE: {
+    name: 'doctor-schedule:create',
+    module: 'doctor-schedule',
+    action: 'create',
+  },
+  DOCTOR_SCHEDULE_READ: {
+    name: 'doctor-schedule:read',
+    module: 'doctor-schedule',
+    action: 'read',
+  },
+  DOCTOR_SCHEDULE_UPDATE: {
+    name: 'doctor-schedule:update',
+    module: 'doctor-schedule',
+    action: 'update',
+  },
+  DOCTOR_SCHEDULE_DELETE: {
+    name: 'doctor-schedule:delete',
+    module: 'doctor-schedule',
+    action: 'delete',
+  },
+  DOCTOR_SCHEDULE_UPDATE_STATUS: {
+    name: 'doctor-schedule:update-status',
+    module: 'doctor-schedule',
+    action: 'update-status',
+  },
+} as const satisfies PermissionStructure;
+
 export const RAW_PERMISSIONS_OBJECT = {
   ...BASE_PERMISSIONS,
   ...USER_PERMISSIONS,
   ...DOCTOR_PERMISSIONS,
   ...CLINIC_PERMISSIONS,
+  ...SPECIALTY_PERMISSIONS,
+  ...DOCTOR_SPECIALTY_PERMISSIONS,
+  ...DOCTOR_SCHEDULE_PERMISSIONS,
 } as const satisfies PermissionStructure;
 
 type ReturnPermissionObject = Readonly<{
