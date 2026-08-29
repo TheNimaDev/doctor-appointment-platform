@@ -12,8 +12,10 @@ import { Role } from '@/modules/role/entities';
 import { RolePermission } from '@/modules/role-permission/entities';
 
 import {
-  DOCTOR_PERMISSIONS,
   CLINIC_PERMISSIONS,
+  DOCTOR_PERMISSIONS,
+  DOCTOR_SCHEDULE_PERMISSIONS,
+  DOCTOR_SPECIALTY_PERMISSIONS,
   RAW_PERMISSIONS_OBJECT,
   PERMISSIONS,
   ROLES,
@@ -104,33 +106,70 @@ async function seedRoles(manager: EntityManager): Promise<void> {
 
   await seedRole(manager, {
     role: ROLES.CLINIC_ADMIN,
-    description: 'Administrator responsible for managing clinics and related resources.',
+    description: 'Administrator responsible for managing assigned clinics and related medical resources.',
     permissions: [
-      PERMISSIONS.USER_READ,
-      PERMISSIONS.USER_UPDATE,
+      PERMISSIONS.SPECIALTY_READ,
 
       ...Object.values(DOCTOR_PERMISSIONS).map((permission) => permission.name),
-
       ...Object.values(CLINIC_PERMISSIONS).map((permission) => permission.name),
+      ...Object.values(DOCTOR_SPECIALTY_PERMISSIONS).map((permission) => permission.name),
+      ...Object.values(DOCTOR_SCHEDULE_PERMISSIONS).map((permission) => permission.name),
     ],
   });
 
   await seedRole(manager, {
     role: ROLES.DOCTOR,
-    description: 'Doctor with access to doctor-related resources.',
-    permissions: [PERMISSIONS.DOCTOR_READ, PERMISSIONS.DOCTOR_UPDATE],
+    description: 'Doctor with access to manage personal medical resources and schedules.',
+    permissions: [
+      PERMISSIONS.DOCTOR_READ,
+      PERMISSIONS.DOCTOR_UPDATE,
+
+      PERMISSIONS.CLINIC_CREATE,
+      PERMISSIONS.CLINIC_READ,
+      PERMISSIONS.CLINIC_UPDATE,
+      PERMISSIONS.CLINIC_DELETE,
+      PERMISSIONS.CLINIC_UPDATE_STATUS,
+
+      PERMISSIONS.SPECIALTY_READ,
+
+      PERMISSIONS.DOCTOR_SPECIALTY_READ,
+      PERMISSIONS.DOCTOR_SPECIALTY_CREATE,
+      PERMISSIONS.DOCTOR_SPECIALTY_UPDATE,
+      PERMISSIONS.DOCTOR_SPECIALTY_DELETE,
+
+      PERMISSIONS.DOCTOR_SCHEDULE_CREATE,
+      PERMISSIONS.DOCTOR_SCHEDULE_READ,
+      PERMISSIONS.DOCTOR_SCHEDULE_UPDATE,
+      PERMISSIONS.DOCTOR_SCHEDULE_DELETE,
+      PERMISSIONS.DOCTOR_SCHEDULE_UPDATE_STATUS,
+    ],
   });
 
   await seedRole(manager, {
     role: ROLES.ASSISTANT,
-    description: 'Assistant with limited access to assigned resources.',
-    permissions: [PERMISSIONS.DOCTOR_READ, PERMISSIONS.CLINIC_READ],
+    description: 'Assistant with limited access to assigned clinic resources.',
+    permissions: [
+      PERMISSIONS.DOCTOR_READ,
+      PERMISSIONS.CLINIC_READ,
+      PERMISSIONS.SPECIALTY_READ,
+      PERMISSIONS.DOCTOR_SPECIALTY_READ,
+      PERMISSIONS.DOCTOR_SCHEDULE_READ,
+    ],
   });
 
   await seedRole(manager, {
     role: ROLES.PATIENT,
-    description: 'Patient with access to personal user resources.',
-    permissions: [PERMISSIONS.USER_READ, PERMISSIONS.USER_UPDATE],
+    description: 'Patient with access to personal profile and public medical resources.',
+    permissions: [
+      PERMISSIONS.USER_READ,
+      PERMISSIONS.USER_UPDATE,
+
+      PERMISSIONS.DOCTOR_READ,
+      PERMISSIONS.CLINIC_READ,
+      PERMISSIONS.SPECIALTY_READ,
+      PERMISSIONS.DOCTOR_SPECIALTY_READ,
+      PERMISSIONS.DOCTOR_SCHEDULE_READ,
+    ],
   });
 }
 
