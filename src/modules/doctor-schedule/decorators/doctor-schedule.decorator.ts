@@ -7,7 +7,7 @@ export const CreateDoctorScheduleDecorators = () => {
     HttpCode(HttpStatus.CREATED),
 
     Permission({
-      permissions: [PERMISSIONS.DOCTOR_UPDATE],
+      permissions: [PERMISSIONS.DOCTOR_SCHEDULE_CREATE],
       owner: true,
       resource: 'doctor',
     }),
@@ -19,7 +19,7 @@ export const FindDoctorSchedulesDecorators = () => {
     HttpCode(HttpStatus.OK),
 
     Permission({
-      permissions: [PERMISSIONS.DOCTOR_READ],
+      permissions: [PERMISSIONS.DOCTOR_SCHEDULE_READ],
     }),
   );
 };
@@ -29,7 +29,7 @@ export const FindDoctorScheduleDecorators = () => {
     HttpCode(HttpStatus.OK),
 
     Permission({
-      permissions: [PERMISSIONS.DOCTOR_READ],
+      permissions: [PERMISSIONS.DOCTOR_SCHEDULE_READ],
     }),
   );
 };
@@ -39,7 +39,7 @@ export const UpdateDoctorScheduleDecorators = () => {
     HttpCode(HttpStatus.OK),
 
     Permission({
-      permissions: [PERMISSIONS.DOCTOR_UPDATE],
+      permissions: [PERMISSIONS.DOCTOR_SCHEDULE_UPDATE],
       owner: true,
       resource: 'doctor',
     }),
@@ -51,7 +51,7 @@ export const UpdateDoctorScheduleStatusDecorators = () => {
     HttpCode(HttpStatus.OK),
 
     Permission({
-      permissions: [PERMISSIONS.DOCTOR_UPDATE],
+      permissions: [PERMISSIONS.DOCTOR_SCHEDULE_UPDATE_STATUS],
       owner: true,
       resource: 'doctor',
     }),
@@ -63,7 +63,7 @@ export const DeleteDoctorScheduleDecorators = () => {
     HttpCode(HttpStatus.OK),
 
     Permission({
-      permissions: [PERMISSIONS.DOCTOR_UPDATE],
+      permissions: [PERMISSIONS.DOCTOR_SCHEDULE_DELETE],
       owner: true,
       resource: 'doctor',
     }),
