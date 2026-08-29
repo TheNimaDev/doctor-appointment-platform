@@ -17,7 +17,7 @@ import {
   ResetPasswordParams,
   VerifyEmailParams,
 } from '@/types';
-import { compareSecret, hashSecret } from '@/lib';
+import { compareSecret } from '@/lib';
 import { EmailService } from '../email/email.service';
 import { EVENTS, ROLES } from '@/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -51,12 +51,9 @@ export class AuthService {
    */
   async register(params: RegisterParams): Promise<void> {
     const result = await this.databaseService.dataSource.transaction(async (manager) => {
-      const hashedPassword = await hashSecret(params.password);
-
       const { user } = await this.userService.createUser({
         ...params,
         manager,
-        password: hashedPassword,
       });
 
       const { role } = await this.roleService.findByName({
@@ -364,11 +361,9 @@ export class AuthService {
     }
 
     await this.databaseService.dataSource.transaction(async (manager) => {
-      const passwordHash = await hashSecret(params.newPassword);
-
       await this.userService.updatePassword({
         userId: params.userId,
-        password: passwordHash,
+        password: params.newPassword,
         manager,
       });
 
@@ -445,11 +440,9 @@ export class AuthService {
         type: EmailType.PASSWORD_RESET,
       });
 
-      const passwordHash = await hashSecret(params.newPassword);
-
       await this.userService.updatePassword({
         userId,
-        password: passwordHash,
+        password: params.newPassword,
         manager,
       });
 

@@ -17,7 +17,7 @@ import {
   UserWithPasswordResponse,
 } from '@/types';
 
-import { checkDatabaseError, compareSecret, getSafeUser } from '@/lib';
+import { checkDatabaseError, compareSecret, getSafeUser, hashSecret } from '@/lib';
 import { DatabaseService } from '@/modules/database/database.service';
 import { SessionService } from '../session/session.service';
 import { RefreshTokenService } from '../refresh-token/refresh-token.service';
@@ -49,11 +49,12 @@ export class UserService {
     const repository = this.getRepository(payload.manager);
 
     try {
+      const hashedPassword = await hashSecret(payload.password);
       const user = repository.create({
         email: payload.email,
         firstName: payload.firstName,
         lastName: payload.lastName,
-        password: payload.password,
+        password: hashedPassword,
       });
 
       const savedUser = await repository.save(user);
@@ -214,9 +215,10 @@ export class UserService {
     const repository = this.getRepository(payload.manager);
 
     try {
+      const hashedPassword = await hashSecret(payload.password);
       const user = await repository.preload({
         id: payload.userId,
-        password: payload.password,
+        password: hashedPassword,
       });
 
       if (!user) {
