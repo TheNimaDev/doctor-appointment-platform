@@ -44,6 +44,7 @@ export interface UserWithPasswordResponse {
 /** Parameters for creating a new user. */
 export interface CreateUserPayload extends RegisterParams {
   manager?: EntityManager;
+  status?: UserStatus;
 }
 
 /** Parameters for updating a user's status. */
