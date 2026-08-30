@@ -55,6 +55,7 @@ export class UserService {
         firstName: payload.firstName,
         lastName: payload.lastName,
         password: hashedPassword,
+        status: payload.status,
       });
 
       const savedUser = await repository.save(user);
