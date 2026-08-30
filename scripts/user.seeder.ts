@@ -4,39 +4,40 @@ import { UserService } from '@/modules/user/user.service';
 import { ROLES } from '@/common';
 import { UserRoleService } from '@/modules/user-role/user-role.service';
 import { RoleService } from '@/modules/role/role.service';
+import { UserStatus } from '@/modules/user/enums';
 
 const SEED_USERS = [
   {
     email: 'superadmin@example.com',
-    password: '123456',
+    password: '12345678',
     firstName: 'Super',
     lastName: 'Admin',
     role: ROLES.SUPER_ADMIN,
   },
   {
     email: 'doctor@example.com',
-    password: '123456',
+    password: '12345678',
     firstName: 'Nima',
     lastName: 'Doctor',
     role: ROLES.DOCTOR,
   },
   {
     email: 'clinicadmin@example.com',
-    password: '123456',
+    password: '12345678',
     firstName: 'Clinic',
     lastName: 'Admin',
     role: ROLES.CLINIC_ADMIN,
   },
   {
     email: 'assistant@example.com',
-    password: '123456',
+    password: '12345678',
     firstName: 'Clinic',
     lastName: 'Assistant',
     role: ROLES.ASSISTANT,
   },
   {
     email: 'patient@example.com',
-    password: '123456',
+    password: '12345678',
     firstName: 'Nima',
     lastName: 'Patient',
     role: ROLES.PATIENT,
@@ -64,6 +65,7 @@ export async function seedUsers(
     const { user } = await userService.createUser({
       ...userDate,
       manager,
+      status: UserStatus.ACTIVE,
     });
 
     const { role } = await roleService.findByName({
