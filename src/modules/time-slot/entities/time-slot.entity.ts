@@ -5,13 +5,15 @@ import {
   Entity,
   Index,
   PrimaryGeneratedColumn,
+  Unique,
   UpdateDateColumn,
 } from 'typeorm';
 
 import { TimeSlotStatus } from '../enums';
 
 @Entity('time_slots')
-@Index(['scheduleId', 'date', 'startTime'], { unique: true })
+@Unique(['scheduleId', 'date', 'startTime'])
+@Index(['doctorId', 'date', 'status'])
 export class TimeSlot {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -25,7 +27,6 @@ export class TimeSlot {
   @Column({ type: 'uuid' })
   clinicId: string;
 
-  @Index()
   @Column({ type: 'date' })
   date: string;
 
@@ -35,7 +36,6 @@ export class TimeSlot {
   @Column({ type: 'time' })
   endTime: string;
 
-  @Index()
   @Column({
     type: 'enum',
     enum: TimeSlotStatus,
