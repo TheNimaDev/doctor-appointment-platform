@@ -18,18 +18,18 @@ import {
   VerifyEmailParams,
 } from '@/types';
 import { compareSecret } from '@/lib';
-import { EmailService } from '../email/email.service';
+import { EmailService } from '@/modules/email/email.service';
 import { EVENTS, ROLES } from '@/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UserStatus } from '@/modules/user/enums';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
-import { SessionService } from '../session/session.service';
-import { UserService } from '../user/user.service';
-import { EmailType } from '../email/enums';
-import { UserRoleService } from '../user-role/user-role.service';
-import { RoleService } from '../role/role.service';
+import { SessionService } from '@/modules/session/session.service';
+import { UserService } from '@/modules/user/user.service';
+import { EmailType } from '@/modules/email/enums';
+import { UserRoleService } from '@/modules/user-role/user-role.service';
+import { RoleService } from '@/modules/role/role.service';
 
 @Injectable()
 export class AuthService {

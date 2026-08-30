@@ -8,8 +8,8 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { RefreshTokenModule } from '@/modules/refresh-token';
 import { SessionModule } from '@/modules/session';
 import { UserModule } from '@/modules/user';
-import { RoleModule } from '../role';
-import { UserRoleModule } from '../user-role';
+import { RoleModule } from '@/modules/role';
+import { UserRoleModule } from '@/modules/user-role';
 
 @Module({
   controllers: [AuthController],

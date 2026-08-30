@@ -12,8 +12,8 @@ import {
 } from '@/types';
 import { BaseException } from '@/types';
 import { checkDatabaseError } from '@/lib';
-import { RoleService } from '../role/role.service';
-import { UserService } from '../user/user.service';
+import { RoleService } from '@/modules/role/role.service';
+import { UserService } from '@/modules/user/user.service';
 import { ROLES } from '@/common';
 
 @Injectable()

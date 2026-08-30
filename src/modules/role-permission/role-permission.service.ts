@@ -12,8 +12,8 @@ import {
 } from '@/types';
 import { BaseException } from '@/types';
 import { checkDatabaseError } from '@/lib';
-import { PermissionService } from '../permission/permission.service';
-import { RoleService } from '../role/role.service';
+import { PermissionService } from '@/modules/permission/permission.service';
+import { RoleService } from '@/modules/role/role.service';
 
 @Injectable()
 export class RolePermissionService {

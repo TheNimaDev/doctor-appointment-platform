@@ -19,8 +19,8 @@ import {
 
 import { checkDatabaseError, compareSecret, getSafeUser, hashSecret } from '@/lib';
 import { DatabaseService } from '@/modules/database/database.service';
-import { SessionService } from '../session/session.service';
-import { RefreshTokenService } from '../refresh-token/refresh-token.service';
+import { SessionService } from '@/modules/session/session.service';
+import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 
 @Injectable()
 export class UserService {

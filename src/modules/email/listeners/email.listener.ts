@@ -3,7 +3,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { MailService } from '@/modules/mail/mail.service';
 import { EVENTS } from '@/common';
 import type { EmailChangeVerificationEvent, PasswordResetEvent, SignupVerificationEvent } from '@/types';
-import { EmailService } from '../email.service';
+import { EmailService } from '@/modules/email/email.service';
 import { EmailStatus } from '../enums';
 
 @Injectable()

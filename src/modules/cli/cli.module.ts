@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { DatabaseModule } from '@/modules/database';
-import { UserModule } from '../user';
-import { RoleModule } from '../role';
-import { UserRoleModule } from '../user-role';
+import { UserModule } from '@/modules/user';
+import { RoleModule } from '@/modules/role';
+import { UserRoleModule } from '@/modules/user-role';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
