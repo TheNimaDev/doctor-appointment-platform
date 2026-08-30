@@ -5,6 +5,7 @@ import { ROLES } from '@/common';
 import { UserRoleService } from '@/modules/user-role/user-role.service';
 import { RoleService } from '@/modules/role/role.service';
 import { UserStatus } from '@/modules/user/enums';
+import { Role } from '@/modules/role/entities';
 
 const SEED_USERS = [
   {
@@ -50,6 +51,12 @@ export async function seedUsers(
   userRoleService: UserRoleService,
   manager: EntityManager,
 ): Promise<void> {
+  const patientRole = await manager.findOne(Role, {
+    where: {
+      name: ROLES.PATIENT,
+    },
+  });
+
   for (const userData of SEED_USERS) {
     const { role: userRole, ...userDate } = userData;
 
@@ -73,11 +80,20 @@ export async function seedUsers(
       manager,
     });
 
-    await userRoleService.add({
-      userId: user.id,
-      roleId: role.id,
-      manager,
-    });
+    if (role.name !== ROLES.SUPER_ADMIN) {
+      await userRoleService.add({
+        userId: user.id,
+        roleId: patientRole.id,
+        manager,
+      });
+    }
+    if (patientRole.id !== role.id) {
+      await userRoleService.add({
+        userId: user.id,
+        roleId: role.id,
+        manager,
+      });
+    }
   }
 
   console.log(`✅ ${SEED_USERS.length} users seeded.`);
