@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { TimeSlot } from './entities';
@@ -15,6 +15,7 @@ import {
   TimeSlotsResponse,
   UpdateTimeSlotStatusPayload,
 } from '@/types';
+import { TIME_SLOT_ALLOWED_TRANSITIONS } from './constants';
 
 @Injectable()
 export class TimeSlotService {
@@ -135,9 +136,10 @@ export class TimeSlotService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const timeSlot = await repository.preload({
-        id: payload.id,
-        status: payload.status,
+      const timeSlot = await repository.findOne({
+        where: {
+          id: payload.id,
+        },
       });
 
       if (!timeSlot) {
@@ -147,13 +149,24 @@ export class TimeSlotService {
         } as BaseException);
       }
 
+      const allowed = TIME_SLOT_ALLOWED_TRANSITIONS[timeSlot.status];
+
+      if (!allowed.includes(payload.status)) {
+        throw new BadRequestException({
+          message: `Cannot change time slot status from ${timeSlot.status} to ${payload.status}.`,
+          error: 'Invalid Time Slot Status Transition',
+        } as BaseException);
+      }
+
+      timeSlot.status = payload.status;
+
       const updatedTimeSlot = await repository.save(timeSlot);
 
       return {
         timeSlot: updatedTimeSlot,
       };
     } catch (error) {
-      if (error instanceof NotFoundException) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;
       }
 
