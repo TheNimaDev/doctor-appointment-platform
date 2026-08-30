@@ -13,6 +13,7 @@ import {
 
 import { TimeSlotStatus } from '../enums';
 import { DoctorSchedule } from '@/modules/doctor-schedule/entities';
+import { Doctor } from '@/modules/doctor/entities';
 
 @Entity('time_slots')
 @Unique(['scheduleId', 'date', 'startTime'])
@@ -30,6 +31,10 @@ export class TimeSlot {
 
   @Column({ type: 'uuid' })
   doctorId: string;
+
+  @ManyToOne(() => Doctor, (doctor) => doctor.timeSlots)
+  @JoinColumn({ name: 'doctorId' })
+  doctor: Doctor;
 
   @Column({ type: 'uuid' })
   clinicId: string;

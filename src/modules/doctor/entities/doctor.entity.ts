@@ -14,6 +14,7 @@ import { DoctorStatus } from '../enums';
 import { User } from '@/modules/user/entities';
 import { DoctorSpecialty } from '@/modules/doctor-specialty/entities';
 import { Clinic } from '@/modules/clinic/entities';
+import { TimeSlot } from '@/modules/time-slot/entities';
 
 @Entity('doctors')
 @Index(['status'])
@@ -36,6 +37,9 @@ export class Doctor {
 
   @OneToMany(() => Clinic, (clinic) => clinic.doctor)
   clinics: Clinic[];
+
+  @OneToMany(() => TimeSlot, (timeSlot) => timeSlot.doctor)
+  timeSlots: TimeSlot[];
 
   @Column({ type: 'varchar', length: 50, unique: true })
   medicalCode: string;
