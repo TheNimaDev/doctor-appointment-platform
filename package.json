@@ -19,6 +19,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "typeorm": "typeorm-ts-node-commonjs",
+    "admin:create": "ts-node scripts/create-super-admin.ts",
     "db:create": "ts-node scripts/create-database.ts",
     "db:truncate": "ts-node scripts/truncate-database.ts",
     "db:setup": "npm run db:create && npm run migration:run",
