@@ -4,12 +4,15 @@ import {
   DeleteDateColumn,
   Entity,
   Index,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
 
 import { TimeSlotStatus } from '../enums';
+import { DoctorSchedule } from '@/modules/doctor-schedule/entities';
 
 @Entity('time_slots')
 @Unique(['scheduleId', 'date', 'startTime'])
@@ -20,6 +23,10 @@ export class TimeSlot {
 
   @Column({ type: 'uuid' })
   scheduleId: string;
+
+  @ManyToOne(() => DoctorSchedule, (schedule) => schedule.timeSlots)
+  @JoinColumn({ name: 'scheduleId' })
+  schedule: DoctorSchedule;
 
   @Column({ type: 'uuid' })
   doctorId: string;
