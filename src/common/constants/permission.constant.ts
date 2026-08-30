@@ -158,6 +158,32 @@ export const DOCTOR_SCHEDULE_PERMISSIONS = {
   },
 } as const satisfies PermissionStructure;
 
+export const TIME_SLOT_PERMISSIONS = {
+  TIME_SLOT_READ: {
+    name: 'time-slot:read',
+    module: 'time-slot',
+    action: 'read',
+  },
+
+  TIME_SLOT_MANAGE: {
+    name: 'time-slot:manage',
+    module: 'time-slot',
+    action: 'manage',
+  },
+
+  TIME_SLOT_BLOCK: {
+    name: 'time-slot:block',
+    module: 'time-slot',
+    action: 'block',
+  },
+
+  TIME_SLOT_UNBLOCK: {
+    name: 'time-slot:unblock',
+    module: 'time-slot',
+    action: 'unblock',
+  },
+} as const satisfies PermissionStructure;
+
 export const RAW_PERMISSIONS_OBJECT = {
   ...BASE_PERMISSIONS,
   ...USER_PERMISSIONS,
@@ -166,6 +192,7 @@ export const RAW_PERMISSIONS_OBJECT = {
   ...SPECIALTY_PERMISSIONS,
   ...DOCTOR_SPECIALTY_PERMISSIONS,
   ...DOCTOR_SCHEDULE_PERMISSIONS,
+  ...TIME_SLOT_PERMISSIONS,
 } as const satisfies PermissionStructure;
 
 type ReturnPermissionObject = Readonly<{
