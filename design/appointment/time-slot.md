@@ -15,11 +15,9 @@ Clinic:
 
 مطب تهران
 
-
 Saturday:
 
 09:00 - 13:00
-
 
 Slot Duration:
 
@@ -30,19 +28,12 @@ Generated TimeSlots:
 
 ```
 09:00
-
 09:30
-
 10:00
-
 10:30
-
 11:00
-
 11:30
-
 12:00
-
 12:30
 ```
 
@@ -78,16 +69,12 @@ Example:
 DoctorSchedule:
 
 Saturday
-
 09:00 - 13:00
-
 
 TimeSlots:
 
 09:00
-
 09:30
-
 10:00
 ```
 
@@ -155,11 +142,8 @@ TimeSlot:
 
 ```ts
 AVAILABLE;
-
 BOOKED;
-
 BLOCKED;
-
 EXPIRED;
 ```
 
@@ -221,14 +205,14 @@ Yesterday 09:00
 
 # Indexes
 
-```
-INDEX(doctorId)
+برای بهینه‌سازی Query مربوط به جستجوی Slotهای قابل رزرو برای یک پزشک:
 
-INDEX(clinicId)
-
-INDEX(date)
-
-INDEX(status)
+```sql
+INDEX(
+    doctorId,
+    date,
+    status
+)
 ```
 
 ---
@@ -239,9 +223,9 @@ INDEX(status)
 
 ```sql
 UNIQUE(
-scheduleId,
-date,
-startTime
+    scheduleId,
+    date,
+    startTime
 )
 ```
 
@@ -254,14 +238,11 @@ Schedule:
 
 Saturday
 
-
 Date:
 
 2026-08-01
 
-
 09:00
-
 
 09:00
 ```
@@ -278,13 +259,9 @@ Date:
 
 ```
 TimeSlot
-
 N
-
 ↓
-
 1
-
 DoctorSchedule
 ```
 
@@ -302,13 +279,9 @@ Description:
 
 ```
 TimeSlot
-
 N
-
 ↓
-
 1
-
 Doctor
 ```
 
@@ -326,13 +299,9 @@ Description:
 
 ```
 TimeSlot
-
 N
-
 ↓
-
 1
-
 Clinic
 ```
 
@@ -350,13 +319,9 @@ Description:
 
 ```
 TimeSlot
-
 1
-
 ↓
-
 0..1
-
 Appointment
 ```
 
@@ -422,7 +387,6 @@ Schedule:
 
 ```
 Saturday
-
 09:00 - 11:00
 ```
 
