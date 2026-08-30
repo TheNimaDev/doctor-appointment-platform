@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { UserRole } from './entities';
@@ -14,6 +14,7 @@ import { BaseException } from '@/types';
 import { checkDatabaseError } from '@/lib';
 import { RoleService } from '../role/role.service';
 import { UserService } from '../user/user.service';
+import { ROLES } from '@/common';
 
 @Injectable()
 export class UserRoleService {
@@ -42,15 +43,31 @@ export class UserRoleService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      await this.userService.getById({
+      const { role } = await this.roleService.getById({
+        id: payload.roleId,
+        manager: payload.manager,
+      });
+
+      if (role.name === ROLES.SUPER_ADMIN) {
+        throw new BadRequestException({
+          message: 'This role cannot be assigned to users.',
+          error: 'Protected Role',
+        } as BaseException);
+      }
+
+      const { user } = await this.userService.getById({
         id: payload.userId,
         manager: payload.manager,
       });
 
-      await this.roleService.getById({
-        id: payload.roleId,
-        manager: payload.manager,
-      });
+      const isSuperAdmin = user.roles?.some((userRole) => userRole === ROLES.SUPER_ADMIN);
+
+      if (isSuperAdmin) {
+        throw new BadRequestException({
+          message: 'SUPER_ADMIN cannot have additional roles.',
+          error: 'Protected Role',
+        } as BaseException);
+      }
 
       const existing = await repository.findOne({
         where: {
@@ -77,7 +94,11 @@ export class UserRoleService {
         userRole: savedUserRole,
       };
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof ConflictException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ConflictException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
 
