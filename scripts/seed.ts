@@ -28,9 +28,14 @@ async function bootstrap(): Promise<void> {
 
       console.log('🌱 Starting seed...\n');
 
+      const isDevelopment = process.env.NODE_ENV === 'development';
+
       await seedPermissions(manager);
       await seedRoles(manager);
-      await seedUsers(userService, roleService, userRoleService, manager);
+
+      if (isDevelopment) {
+        await seedUsers(userService, roleService, userRoleService, manager);
+      }
 
       console.log('\n=========================================');
       console.log('✅ Seed completed successfully.');
