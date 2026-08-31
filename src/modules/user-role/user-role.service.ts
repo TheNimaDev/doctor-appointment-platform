@@ -180,4 +180,29 @@ export class UserRoleService {
       });
     }
   }
+
+  /**
+   * Assign the SUPER_ADMIN role to a user.
+   */
+  async assignSuperAdmin(payload: AddUserRolePayload): Promise<UserRoleResponse> {
+    const repository = this.getRepository(payload.manager);
+
+    try {
+      const userRole = repository.create({
+        userId: payload.userId,
+        roleId: payload.roleId,
+      });
+
+      const savedUserRole = await repository.save(userRole);
+
+      return {
+        userRole: savedUserRole,
+      };
+    } catch (error) {
+      checkDatabaseError({
+        e: error as Error,
+        mainResource: 'User Role',
+      });
+    }
+  }
 }
