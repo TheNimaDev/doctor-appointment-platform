@@ -40,6 +40,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     Modules.UserRoleModule,
     Modules.DoctorScheduleModule,
     Modules.TimeSlotModule,
+    Modules.AppointmentModule,
   ],
   providers: [
     {
