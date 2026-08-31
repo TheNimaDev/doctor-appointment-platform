@@ -7,12 +7,12 @@
 Appointment هسته اصلی سیستم نوبت‌دهی است و مشخص می‌کند:
 
 - چه بیماری
-- برای چه پزشکی
-- در چه کلینیکی
-- در چه تاریخ و ساعتی
+- برای چه TimeSlot
 - با چه وضعیتی
 
 نوبت دارد.
+
+اطلاعات پزشک، کلینیک، تاریخ و زمان نوبت از `TimeSlot` قابل دسترسی هستند.
 
 ---
 
@@ -22,20 +22,16 @@ Appointment هسته اصلی سیستم نوبت‌دهی است و مشخص م
 | ------------------ | ------------ | -------- | -------------- |
 | id                 | UUID         | ❌       | Primary Key    |
 | patientId          | UUID         | ❌       | FK → Patient   |
-| doctorId           | UUID         | ❌       | FK → Doctor    |
-| clinicId           | UUID         | ❌       | FK → Clinic    |
 | timeSlotId         | UUID         | ❌       | FK → TimeSlot  |
-| appointmentDate    | date         | ❌       | تاریخ نوبت     |
-| startTime          | time         | ❌       | زمان شروع      |
-| endTime            | time         | ❌       | زمان پایان     |
 | status             | enum         | ❌       | وضعیت نوبت     |
-| type               | enum         | ❌       | نوع ویزیت      |
 | notes              | text         | ✅       | توضیحات بیمار  |
 | cancelledAt        | datetime     | ✅       | زمان لغو       |
 | cancellationReason | varchar(255) | ✅       | دلیل لغو       |
 | createdAt          | datetime     | ❌       | زمان ایجاد     |
 | updatedAt          | datetime     | ❌       | زمان بروزرسانی |
 | deletedAt          | datetime     | ✅       | Soft Delete    |
+
+اطلاعات پزشک، کلینیک، تاریخ و زمان نوبت از `TimeSlot` قابل دسترسی هستند.
 
 ---
 
@@ -119,18 +115,6 @@ Doctor cancelled
 
 ---
 
-# Appointment Type
-
-## AppointmentType
-
-```ts
-IN_PERSON;
-
-ONLINE;
-```
-
----
-
 # Relations
 
 ## Many To One
@@ -172,46 +156,6 @@ Dental Visit
 
 ---
 
-## Appointment → Doctor
-
-```
-Appointment
-
-N
-
-↓
-
-1
-
-Doctor
-```
-
-Description:
-
-یک پزشک چندین نوبت دارد.
-
----
-
-## Appointment → Clinic
-
-```
-Appointment
-
-N
-
-↓
-
-1
-
-Clinic
-```
-
-Description:
-
-محل انجام ویزیت.
-
----
-
 ## Appointment → TimeSlot
 
 ```
@@ -230,6 +174,20 @@ Description:
 
 هر نوبت روی یک Slot مشخص ثبت می‌شود.
 
+اطلاعات زیر از `TimeSlot` دریافت می‌شوند:
+
+```
+Doctor
+
+Clinic
+
+Date
+
+Start Time
+
+End Time
+```
+
 Example:
 
 ```
@@ -238,7 +196,6 @@ TimeSlot:
 2026-08-01
 
 10:00
-
 
 ↓
 
@@ -249,52 +206,12 @@ Appointment
 
 # Indexes
 
-```
+```sql
 INDEX(patientId)
-
-INDEX(doctorId)
-
-INDEX(clinicId)
-
-INDEX(appointmentDate)
 
 INDEX(status)
 
 INDEX(timeSlotId)
-```
-
----
-
-# Unique Constraint
-
-جلوگیری از رزرو همزمان:
-
-```sql
-UNIQUE(timeSlotId)
-```
-
-یعنی:
-
-یک TimeSlot فقط یک Appointment فعال دارد.
-
-Example:
-
-Wrong:
-
-```
-Slot:
-
-10:00
-
-
-Appointment:
-
-Ali
-
-
-Appointment:
-
-Reza
 ```
 
 ---
@@ -306,14 +223,6 @@ Reza
 Patient درخواست رزرو می‌دهد:
 
 ```
-Doctor
-
-+
-
-Clinic
-
-+
-
 TimeSlot
 ```
 
@@ -333,7 +242,7 @@ BEGIN TRANSACTION
 
 Lock کردن Slot:
 
-```
+```sql
 SELECT *
 
 FROM time_slots
@@ -399,14 +308,6 @@ Two users booking same slot
 
 استفاده می‌شود از:
 
-## Database Level
-
-```
-UNIQUE(timeSlotId)
-```
-
----
-
 ## Transaction Level
 
 ```
@@ -424,14 +325,12 @@ Pessimistic Lock
 ```
 Patient
 
-Doctor
-
-Clinic
-
 TimeSlot
 ```
 
 داشته باشد.
+
+اطلاعات `Doctor` و `Clinic` از `TimeSlot` مشخص می‌شوند.
 
 ---
 
