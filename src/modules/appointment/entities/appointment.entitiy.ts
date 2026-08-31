@@ -4,10 +4,15 @@ import {
   DeleteDateColumn,
   Entity,
   Index,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+
 import { AppointmentStatus } from '../enums';
+
+import { TimeSlot } from '@/modules/time-slot/entities';
 
 @Entity('appointments')
 export class Appointment {
@@ -21,6 +26,10 @@ export class Appointment {
   @Index()
   @Column({ type: 'uuid' })
   timeSlotId: string;
+
+  @ManyToOne(() => TimeSlot, (timeSlot) => timeSlot.appointments)
+  @JoinColumn({ name: 'timeSlotId' })
+  timeSlot: TimeSlot;
 
   @Index()
   @Column({ type: 'enum', enum: AppointmentStatus, default: AppointmentStatus.PENDING })

@@ -6,6 +6,7 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
@@ -15,6 +16,7 @@ import { TimeSlotStatus } from '../enums';
 import { DoctorSchedule } from '@/modules/doctor-schedule/entities';
 import { Doctor } from '@/modules/doctor/entities';
 import { Clinic } from '@/modules/clinic/entities';
+import { Appointment } from '@/modules/appointment/entities';
 
 @Entity('time_slots')
 @Unique(['scheduleId', 'date', 'startTime'])
@@ -59,6 +61,9 @@ export class TimeSlot {
     default: TimeSlotStatus.AVAILABLE,
   })
   status: TimeSlotStatus;
+
+  @OneToMany(() => Appointment, (appointment) => appointment.timeSlot)
+  appointments: Appointment[];
 
   @CreateDateColumn()
   createdAt: Date;
