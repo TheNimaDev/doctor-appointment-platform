@@ -161,7 +161,7 @@ Dental Visit
 ```
 Appointment
 
-1
+N
 
 ↓
 
@@ -172,7 +172,10 @@ TimeSlot
 
 Description:
 
-هر نوبت روی یک Slot مشخص ثبت می‌شود.
+هر Appointment روی یک TimeSlot مشخص ثبت می‌شود.
+
+یک TimeSlot می‌تواند در طول زمان چند Appointment داشته باشد،
+اما در هر لحظه فقط یک Appointment فعال می‌تواند داشته باشد.
 
 اطلاعات زیر از `TimeSlot` دریافت می‌شوند:
 
