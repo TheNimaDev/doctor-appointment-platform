@@ -86,9 +86,15 @@ export async function seedUsers(
         roleId: patientRole.id,
         manager,
       });
-    }
-    if (patientRole.id !== role.id) {
-      await userRoleService.add({
+      if (patientRole.id !== role.id) {
+        await userRoleService.add({
+          userId: user.id,
+          roleId: role.id,
+          manager,
+        });
+      }
+    } else {
+      await userRoleService.assignSuperAdmin({
         userId: user.id,
         roleId: role.id,
         manager,

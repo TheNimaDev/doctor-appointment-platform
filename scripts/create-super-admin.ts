@@ -127,7 +127,7 @@ async function main(): Promise<void> {
         manager,
       });
 
-      await userRoleService.add({
+      await userRoleService.assignSuperAdmin({
         userId: user.id,
         roleId: role.id,
         manager,
