@@ -11,19 +11,19 @@ import {
 } from 'typeorm';
 
 import { AppointmentStatus } from '../enums';
-
 import { TimeSlot } from '@/modules/time-slot/entities';
 
+@Index(['patientId'])
+@Index(['timeSlotId'])
+@Index(['status'])
 @Entity('appointments')
 export class Appointment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Index()
   @Column({ type: 'uuid' })
   patientId: string;
 
-  @Index()
   @Column({ type: 'uuid' })
   timeSlotId: string;
 
@@ -31,7 +31,6 @@ export class Appointment {
   @JoinColumn({ name: 'timeSlotId' })
   timeSlot: TimeSlot;
 
-  @Index()
   @Column({ type: 'enum', enum: AppointmentStatus, default: AppointmentStatus.PENDING })
   status: AppointmentStatus;
 
