@@ -185,4 +185,21 @@ export class AppointmentController {
       data,
     };
   }
+
+  /**
+   * Complete an appointment.
+   */
+  @Patch(':id/complete')
+  @AppointmentDecorator.CompleteAppointmentDecorators()
+  async completeAppointment(@Param('id') id: string): Promise<ApiResponse<AppointmentResponse>> {
+    const data = await this.appointmentService.handleAppointmentStatus({
+      id,
+      status: AppointmentStatus.COMPLETED,
+    });
+
+    return {
+      message: 'Appointment completed successfully.',
+      data,
+    };
+  }
 }
