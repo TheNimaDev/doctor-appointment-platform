@@ -45,3 +45,12 @@ export const FindDoctorAppointmentsDecorators = () => {
     }),
   );
 };
+
+export const FindDoctorAppointmentDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.APPOINTMENT_READ_DOCTOR],
+    }),
+  );
+};
