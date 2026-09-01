@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { Appointment } from './entities';
@@ -16,7 +16,6 @@ import {
 } from '@/types';
 import { TimeSlotService } from '@/modules/time-slot/time-slot.service';
 import { TimeSlotStatus } from '@/modules/time-slot/enums';
-import { TimeSlot } from '@/modules/time-slot/entities';
 import { DatabaseService } from '@/modules/database/database.service';
 import { DoctorService } from '../doctor/doctor.service';
 
@@ -139,9 +138,15 @@ export class AppointmentService {
   async findPatientAppointments(payload: FindPatientAppointmentsPayload): Promise<AppointmentsResponse> {
     const repository = this.getRepository(payload.manager);
 
+    // TODO: Get patient ID from user ID after implementing Patient module.
+    // const { patient } = await this.patientService.findByUserId({
+    //   userId: payload.userId,
+    //   manager: payload.manager,
+    // });
+
     const appointments = await repository.find({
       where: {
-        patientId: payload.patientId,
+        patientId: payload.userId, // TODO: Replace with patient.id
       },
       order: {
         createdAt: 'DESC',
