@@ -27,3 +27,21 @@ export const ReserveAppointmentDecorators = () => {
     }),
   );
 };
+
+export const FindPatientAppointmentsDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.APPOINTMENT_READ_PATIENT],
+    }),
+  );
+};
+
+export const FindDoctorAppointmentsDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.APPOINTMENT_READ_DOCTOR],
+    }),
+  );
+};
