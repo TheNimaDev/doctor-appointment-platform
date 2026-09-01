@@ -168,4 +168,21 @@ export class AppointmentController {
       data,
     };
   }
+
+  /**
+   * Reject an appointment.
+   */
+  @Patch(':id/reject')
+  @AppointmentDecorator.RejectAppointmentDecorators()
+  async rejectAppointment(@Param('id') id: string): Promise<ApiResponse<AppointmentResponse>> {
+    const data = await this.appointmentService.handleAppointmentStatus({
+      id,
+      status: AppointmentStatus.REJECTED,
+    });
+
+    return {
+      message: 'Appointment rejected successfully.',
+      data,
+    };
+  }
 }
