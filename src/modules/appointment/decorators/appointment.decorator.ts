@@ -81,3 +81,12 @@ export const ConfirmAppointmentDecorators = () => {
     }),
   );
 };
+
+export const RejectAppointmentDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.APPOINTMENT_REJECT],
+    }),
+  );
+};
