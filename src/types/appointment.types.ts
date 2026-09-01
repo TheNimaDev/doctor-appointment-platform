@@ -49,3 +49,10 @@ export interface FindDoctorAppointmentsPayload {
   userId: string;
   manager?: EntityManager;
 }
+
+/** Parameters required to find a doctor's appointment by ID. */
+export interface FindDoctorAppointmentByIdPayload {
+  id: string;
+  userId: string;
+  manager?: EntityManager;
+}
