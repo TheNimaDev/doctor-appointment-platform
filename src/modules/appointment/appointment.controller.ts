@@ -151,4 +151,21 @@ export class AppointmentController {
       data,
     };
   }
+
+  /**
+   * Confirm an appointment.
+   */
+  @Patch(':id/confirm')
+  @AppointmentDecorator.ConfirmAppointmentDecorators()
+  async confirmAppointment(@Param('id') id: string): Promise<ApiResponse<AppointmentResponse>> {
+    const data = await this.appointmentService.handleAppointmentStatus({
+      id,
+      status: AppointmentStatus.CONFIRMED,
+    });
+
+    return {
+      message: 'Appointment confirmed successfully.',
+      data,
+    };
+  }
 }
