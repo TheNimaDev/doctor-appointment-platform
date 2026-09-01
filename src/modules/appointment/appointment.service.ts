@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { Appointment } from './entities';
@@ -15,11 +15,15 @@ import {
   FindDoctorAppointmentsPayload,
   FindDoctorAppointmentByIdPayload,
   FindPatientAppointmentByIdPayload,
+  UpdateAppointmentStatusPayload,
+  HandleAppointmentStatusPayload,
 } from '@/types';
 import { TimeSlotService } from '@/modules/time-slot/time-slot.service';
 import { TimeSlotStatus } from '@/modules/time-slot/enums';
 import { DatabaseService } from '@/modules/database/database.service';
-import { DoctorService } from '../doctor/doctor.service';
+import { DoctorService } from '@/modules/doctor/doctor.service';
+import { AppointmentStatus } from './enums';
+import { APPOINTMENT_ALLOWED_TRANSITIONS } from './constants';
 
 @Injectable()
 export class AppointmentService {
@@ -248,5 +252,49 @@ export class AppointmentService {
     return {
       appointment,
     };
+  }
+
+  /**
+   * Update an appointment's status.
+   */
+  async updateStatusAppointment(payload: UpdateAppointmentStatusPayload): Promise<AppointmentResponse> {
+    const repository = this.getRepository(payload.manager);
+
+    try {
+      const { appointment } = await this.getById({
+        id: payload.id,
+        manager: payload.manager,
+      });
+
+      const allowed = APPOINTMENT_ALLOWED_TRANSITIONS[appointment.status];
+
+      if (!allowed.includes(payload.status)) {
+        throw new BadRequestException({
+          message: `Cannot change appointment status from ${appointment.status} to ${payload.status}.`,
+          error: 'Invalid Appointment Status Transition',
+        } as BaseException);
+      }
+
+      appointment.status = payload.status;
+
+      if (payload.status === AppointmentStatus.CANCELLED) {
+        appointment.cancellationReason = payload.reason;
+      }
+
+      const updatedAppointment = await repository.save(appointment);
+
+      return {
+        appointment: updatedAppointment,
+      };
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      checkDatabaseError({
+        e: error as Error,
+        mainResource: 'Appointment',
+      });
+    }
   }
 }
