@@ -15,11 +15,15 @@ export interface AppointmentsResponse {
   appointments: SafeAppointment[];
 }
 
-/** Parameters required to create an appointment. */
-export interface CreateAppointmentPayload {
+/** Parameters required to reserve an appointment. */
+export interface ReserveAppointmentPayload {
   patientId: string;
   timeSlotId: string;
   notes?: string;
+}
+
+/** Parameters required to create an appointment. */
+export interface CreateAppointmentPayload extends ReserveAppointmentPayload {
   manager?: EntityManager;
 }
 
