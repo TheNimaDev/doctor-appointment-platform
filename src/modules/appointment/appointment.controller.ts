@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Req } from '@nestjs/common';
 import { AppointmentService } from './appointment.service';
 import * as AppointmentDecorator from './decorators';
 import type { ApiResponse, AppointmentResponse, AppointmentsResponse, AccessRequest } from '@/types';
-import { ReserveAppointmentDto } from './dto';
+import { CancelAppointmentDto, ReserveAppointmentDto } from './dto';
+import { AppointmentStatus } from './enums';
 
 @Controller('appointments')
 export class AppointmentController {
@@ -126,6 +127,27 @@ export class AppointmentController {
 
     return {
       message: 'Doctor appointment retrieved successfully.',
+      data,
+    };
+  }
+
+  /**
+   * Cancel an appointment.
+   */
+  @Patch(':id/cancel')
+  @AppointmentDecorator.CancelAppointmentDecorators()
+  async cancelAppointment(
+    @Param('id') id: string,
+    @Body() cancelAppointmentDto: CancelAppointmentDto,
+  ): Promise<ApiResponse<AppointmentResponse>> {
+    const data = await this.appointmentService.handleAppointmentStatus({
+      id,
+      status: AppointmentStatus.CANCELLED,
+      reason: cancelAppointmentDto.reason,
+    });
+
+    return {
+      message: 'Appointment cancelled successfully.',
       data,
     };
   }
