@@ -40,7 +40,7 @@ export interface FindAppointmentsPayload {
 
 /** Parameters required to find a patient's appointments. */
 export interface FindPatientAppointmentsPayload {
-  patientId: string;
+  userId: string;
   manager?: EntityManager;
 }
 
