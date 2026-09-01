@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { Appointment } from './entities';
@@ -10,13 +10,22 @@ import {
   FindAppointmentsPayload,
   AppointmentResponse,
   AppointmentsResponse,
+  ReserveAppointmentPayload,
 } from '@/types';
+import { TimeSlotService } from '@/modules/time-slot/time-slot.service';
+import { TimeSlotStatus } from '@/modules/time-slot/enums';
+import { TimeSlot } from '@/modules/time-slot/entities';
+import { DatabaseService } from '@/modules/database/database.service';
 
 @Injectable()
 export class AppointmentService {
   constructor(
     @InjectRepository(Appointment)
     private readonly appointmentRepository: Repository<Appointment>,
+
+    private readonly databaseService: DatabaseService,
+
+    private readonly timeSlotService: TimeSlotService,
   ) {}
 
   /**
@@ -91,6 +100,31 @@ export class AppointmentService {
       } as BaseException);
     }
 
+    return {
+      appointment,
+    };
+  }
+
+  /**
+   * Reserve an appointment.
+   */
+  async reserveAppointment(payload: ReserveAppointmentPayload): Promise<AppointmentResponse> {
+    const appointment = await this.databaseService.dataSource.transaction(async (manager) => {
+      const { appointment } = await this.createAppointment({
+        patientId: payload.patientId,
+        timeSlotId: payload.timeSlotId,
+        notes: payload.notes,
+        manager,
+      });
+
+      await this.timeSlotService.updateStatus({
+        id: payload.timeSlotId,
+        status: TimeSlotStatus.BOOKED,
+        manager,
+      });
+
+      return appointment;
+    });
     return {
       appointment,
     };
