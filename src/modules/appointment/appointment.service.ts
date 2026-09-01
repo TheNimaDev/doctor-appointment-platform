@@ -14,6 +14,7 @@ import {
   FindPatientAppointmentsPayload,
   FindDoctorAppointmentsPayload,
   FindDoctorAppointmentByIdPayload,
+  FindPatientAppointmentByIdPayload,
 } from '@/types';
 import { TimeSlotService } from '@/modules/time-slot/time-slot.service';
 import { TimeSlotStatus } from '@/modules/time-slot/enums';
@@ -156,6 +157,37 @@ export class AppointmentService {
 
     return {
       appointments,
+    };
+  }
+
+  /**
+   * Get an appointment by ID belonging to the current patient.
+   */
+  async getPatientAppointmentById(payload: FindPatientAppointmentByIdPayload): Promise<AppointmentResponse> {
+    const repository = this.getRepository(payload.manager);
+
+    // TODO: Get patient ID from user ID after implementing Patient module.
+    // const { patient } = await this.patientService.findByUserId({
+    //   userId: payload.userId,
+    //   manager: payload.manager,
+    // });
+
+    const appointment = await repository.findOne({
+      where: {
+        id: payload.id,
+        patientId: payload.userId, // TODO: Replace with patient.id
+      },
+    });
+
+    if (!appointment) {
+      throw new NotFoundException({
+        message: 'Appointment not found in database.',
+        error: 'Appointment Not Found',
+      } as BaseException);
+    }
+
+    return {
+      appointment,
     };
   }
 
