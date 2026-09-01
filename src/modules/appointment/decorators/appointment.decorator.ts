@@ -18,3 +18,12 @@ export const FindAppointmentDecorators = () => {
     }),
   );
 };
+
+export const ReserveAppointmentDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.CREATED),
+    Permission({
+      permissions: [PERMISSIONS.APPOINTMENT_RESERVE],
+    }),
+  );
+};
