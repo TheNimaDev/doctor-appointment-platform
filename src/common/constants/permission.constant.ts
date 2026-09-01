@@ -184,6 +184,56 @@ export const TIME_SLOT_PERMISSIONS = {
   },
 } as const satisfies PermissionStructure;
 
+export const APPOINTMENT_PERMISSIONS = {
+  APPOINTMENT_READ: {
+    name: 'appointment:read',
+    module: 'appointment',
+    action: 'read',
+  },
+
+  APPOINTMENT_READ_ALL: {
+    name: 'appointment:read-all',
+    module: 'appointment',
+    action: 'read',
+  },
+
+  APPOINTMENT_RESERVE: {
+    name: 'appointment:reserve',
+    module: 'appointment',
+    action: 'reserve',
+  },
+
+  APPOINTMENT_CANCEL: {
+    name: 'appointment:cancel',
+    module: 'appointment',
+    action: 'cancel',
+  },
+
+  APPOINTMENT_CONFIRM: {
+    name: 'appointment:confirm',
+    module: 'appointment',
+    action: 'confirm',
+  },
+
+  APPOINTMENT_REJECT: {
+    name: 'appointment:reject',
+    module: 'appointment',
+    action: 'reject',
+  },
+
+  APPOINTMENT_COMPLETE: {
+    name: 'appointment:complete',
+    module: 'appointment',
+    action: 'complete',
+  },
+
+  APPOINTMENT_NO_SHOW: {
+    name: 'appointment:no-show',
+    module: 'appointment',
+    action: 'no-show',
+  },
+} as const satisfies PermissionStructure;
+
 export const RAW_PERMISSIONS_OBJECT = {
   ...BASE_PERMISSIONS,
   ...USER_PERMISSIONS,
@@ -193,6 +243,7 @@ export const RAW_PERMISSIONS_OBJECT = {
   ...DOCTOR_SPECIALTY_PERMISSIONS,
   ...DOCTOR_SCHEDULE_PERMISSIONS,
   ...TIME_SLOT_PERMISSIONS,
+  ...APPOINTMENT_PERMISSIONS,
 } as const satisfies PermissionStructure;
 
 type ReturnPermissionObject = Readonly<{
