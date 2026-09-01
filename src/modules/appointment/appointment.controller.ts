@@ -202,4 +202,21 @@ export class AppointmentController {
       data,
     };
   }
+
+  /**
+   * Mark an appointment as no-show.
+   */
+  @Patch(':id/no-show')
+  @AppointmentDecorator.NoShowAppointmentDecorators()
+  async markAppointmentAsNoShow(@Param('id') id: string): Promise<ApiResponse<AppointmentResponse>> {
+    const data = await this.appointmentService.handleAppointmentStatus({
+      id,
+      status: AppointmentStatus.NO_SHOW,
+    });
+
+    return {
+      message: 'Appointment marked as no-show successfully.',
+      data,
+    };
+  }
 }
