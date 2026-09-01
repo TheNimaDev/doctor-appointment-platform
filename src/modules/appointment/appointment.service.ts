@@ -12,11 +12,13 @@ import {
   AppointmentsResponse,
   ReserveAppointmentPayload,
   FindPatientAppointmentsPayload,
+  FindDoctorAppointmentsPayload,
 } from '@/types';
 import { TimeSlotService } from '@/modules/time-slot/time-slot.service';
 import { TimeSlotStatus } from '@/modules/time-slot/enums';
 import { TimeSlot } from '@/modules/time-slot/entities';
 import { DatabaseService } from '@/modules/database/database.service';
+import { DoctorService } from '../doctor/doctor.service';
 
 @Injectable()
 export class AppointmentService {
@@ -25,8 +27,8 @@ export class AppointmentService {
     private readonly appointmentRepository: Repository<Appointment>,
 
     private readonly databaseService: DatabaseService,
-
     private readonly timeSlotService: TimeSlotService,
+    private readonly doctorService: DoctorService,
   ) {}
 
   /**
@@ -140,6 +142,33 @@ export class AppointmentService {
     const appointments = await repository.find({
       where: {
         patientId: payload.patientId,
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+
+    return {
+      appointments,
+    };
+  }
+
+  /**
+   * Get all appointments belonging to a doctor.
+   */
+  async findDoctorAppointments(payload: FindDoctorAppointmentsPayload): Promise<AppointmentsResponse> {
+    const repository = this.getRepository(payload.manager);
+
+    const { doctor } = await this.doctorService.findByUserId({
+      userId: payload.userId,
+      manager: payload.manager,
+    });
+
+    const appointments = await repository.find({
+      where: {
+        timeSlot: {
+          doctorId: doctor.id,
+        },
       },
       order: {
         createdAt: 'DESC',
