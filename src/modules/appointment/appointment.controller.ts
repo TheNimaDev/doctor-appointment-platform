@@ -1,12 +1,32 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
 import { AppointmentService } from './appointment.service';
 import * as AppointmentDecorator from './decorators';
-
-import type { ApiResponse, AppointmentResponse, AppointmentsResponse } from '@/types';
+import type { ApiResponse, AppointmentResponse, AppointmentsResponse, AccessRequest } from '@/types';
+import { ReserveAppointmentDto } from './dto';
 
 @Controller('appointments')
 export class AppointmentController {
   constructor(private readonly appointmentService: AppointmentService) {}
+
+  /**
+   * Reserve an appointment.
+   */
+  @Post()
+  @AppointmentDecorator.ReserveAppointmentDecorators()
+  async reserveAppointment(
+    @Req() req: AccessRequest,
+    @Body() reserveAppointmentDto: ReserveAppointmentDto,
+  ): Promise<ApiResponse<AppointmentResponse>> {
+    const data = await this.appointmentService.reserveAppointment({
+      patientId: req.user.userId,
+      ...reserveAppointmentDto,
+    });
+
+    return {
+      message: 'Appointment reserved successfully.',
+      data,
+    };
+  }
 
   /**
    * Get all appointments.
