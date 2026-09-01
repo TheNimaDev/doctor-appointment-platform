@@ -63,3 +63,13 @@ export const FindDoctorAppointmentDecorators = () => {
     }),
   );
 };
+
+export const CancelAppointmentDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.APPOINTMENT_CANCEL],
+    }),
+  );
+};
+
