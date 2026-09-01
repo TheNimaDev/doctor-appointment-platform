@@ -75,6 +75,26 @@ export class AppointmentController {
   }
 
   /**
+   * Get an appointment by ID belonging to the current patient.
+   */
+  @Get(':id')
+  @AppointmentDecorator.FindPatientAppointmentDecorators()
+  async getPatientAppointmentById(
+    @Req() req: AccessRequest,
+    @Param('id') id: string,
+  ): Promise<ApiResponse<AppointmentResponse>> {
+    const data = await this.appointmentService.getPatientAppointmentById({
+      id,
+      userId: req.user.userId,
+    });
+
+    return {
+      message: 'Patient appointment retrieved successfully.',
+      data,
+    };
+  }
+
+  /**
    * Get all appointments belonging to the current doctor.
    */
   @Get('doctor')

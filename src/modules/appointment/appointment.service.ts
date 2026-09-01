@@ -161,7 +161,7 @@ export class AppointmentService {
   }
 
   /**
-   * Get an appointment by ID belonging to the current patient.
+   * Get an appointment by ID belonging to the patient.
    */
   async getPatientAppointmentById(payload: FindPatientAppointmentByIdPayload): Promise<AppointmentResponse> {
     const repository = this.getRepository(payload.manager);
