@@ -64,6 +64,13 @@ export interface FindPatientAppointmentByIdPayload {
   manager?: EntityManager;
 }
 
+/** Parameters required to handle an appointment status change. */
+export interface HandleAppointmentStatusPayload {
+  id: string;
+  status: AppointmentStatus;
+  reason?: string;
+}
+
 /** Parameters required to update an appointment's status. */
 export interface UpdateAppointmentStatusPayload {
   id: string;
