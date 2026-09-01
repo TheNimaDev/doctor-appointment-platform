@@ -99,3 +99,12 @@ export const CompleteAppointmentDecorators = () => {
     }),
   );
 };
+
+export const NoShowAppointmentDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.APPOINTMENT_NO_SHOW],
+    }),
+  );
+};
