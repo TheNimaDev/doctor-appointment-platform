@@ -31,7 +31,7 @@ export class AppointmentController {
   /**
    * Get all appointments.
    */
-  @Get()
+  @Get('all')
   @AppointmentDecorator.FindAppointmentsDecorators()
   async findAll(): Promise<ApiResponse<AppointmentsResponse>> {
     const data = await this.appointmentService.findAll({});
@@ -45,7 +45,7 @@ export class AppointmentController {
   /**
    * Get an appointment by ID.
    */
-  @Get(':id')
+  @Get('all/:id')
   @AppointmentDecorator.FindAppointmentDecorators()
   async getById(@Param('id') id: string): Promise<ApiResponse<AppointmentResponse>> {
     const data = await this.appointmentService.getById({
@@ -54,6 +54,38 @@ export class AppointmentController {
 
     return {
       message: 'Appointment retrieved successfully.',
+      data,
+    };
+  }
+
+  /**
+   * Get all appointments belonging to the current patient.
+   */
+  @Get()
+  @AppointmentDecorator.FindPatientAppointmentsDecorators()
+  async findPatientAppointments(@Req() req: AccessRequest): Promise<ApiResponse<AppointmentsResponse>> {
+    const data = await this.appointmentService.findPatientAppointments({
+      userId: req.user.userId,
+    });
+
+    return {
+      message: 'Patient appointments retrieved successfully.',
+      data,
+    };
+  }
+
+  /**
+   * Get all appointments belonging to the current doctor.
+   */
+  @Get('doctor')
+  @AppointmentDecorator.FindDoctorAppointmentsDecorators()
+  async findDoctorAppointments(@Req() req: AccessRequest): Promise<ApiResponse<AppointmentsResponse>> {
+    const data = await this.appointmentService.findDoctorAppointments({
+      userId: req.user.userId,
+    });
+
+    return {
+      message: 'Doctor appointments retrieved successfully.',
       data,
     };
   }
