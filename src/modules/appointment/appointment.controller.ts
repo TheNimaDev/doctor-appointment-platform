@@ -89,4 +89,24 @@ export class AppointmentController {
       data,
     };
   }
+
+  /**
+   * Get an appointment by ID belonging to the current doctor.
+   */
+  @Get('doctor/:id')
+  @AppointmentDecorator.FindDoctorAppointmentDecorators()
+  async getDoctorAppointmentById(
+    @Req() req: AccessRequest,
+    @Param('id') id: string,
+  ): Promise<ApiResponse<AppointmentResponse>> {
+    const data = await this.appointmentService.getDoctorAppointmentById({
+      userId: req.user.userId,
+      id,
+    });
+
+    return {
+      message: 'Doctor appointment retrieved successfully.',
+      data,
+    };
+  }
 }
