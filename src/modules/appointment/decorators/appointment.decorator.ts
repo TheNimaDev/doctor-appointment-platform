@@ -90,3 +90,12 @@ export const RejectAppointmentDecorators = () => {
     }),
   );
 };
+
+export const CompleteAppointmentDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.APPOINTMENT_COMPLETE],
+    }),
+  );
+};
