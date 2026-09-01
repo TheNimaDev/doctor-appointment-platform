@@ -255,6 +255,32 @@ export class AppointmentService {
   }
 
   /**
+   * Update an appointment's status and handle related time slot changes.
+   */
+  async handleAppointmentStatus(payload: HandleAppointmentStatusPayload): Promise<AppointmentResponse> {
+    return this.databaseService.dataSource.transaction(async (manager) => {
+      const { appointment } = await this.updateStatusAppointment({
+        id: payload.id,
+        status: payload.status,
+        reason: payload.reason,
+        manager,
+      });
+
+      if (payload.status === AppointmentStatus.CANCELLED || payload.status === AppointmentStatus.REJECTED) {
+        await this.timeSlotService.updateStatus({
+          id: appointment.timeSlotId,
+          status: TimeSlotStatus.AVAILABLE,
+          manager,
+        });
+      }
+
+      return {
+        appointment,
+      };
+    });
+  }
+
+  /**
    * Update an appointment's status.
    */
   async updateStatusAppointment(payload: UpdateAppointmentStatusPayload): Promise<AppointmentResponse> {
