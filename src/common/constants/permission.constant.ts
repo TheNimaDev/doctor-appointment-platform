@@ -185,14 +185,20 @@ export const TIME_SLOT_PERMISSIONS = {
 } as const satisfies PermissionStructure;
 
 export const APPOINTMENT_PERMISSIONS = {
-  APPOINTMENT_READ: {
-    name: 'appointment:read',
+  APPOINTMENT_READ_ALL: {
+    name: 'appointment:read-all',
     module: 'appointment',
     action: 'read',
   },
 
-  APPOINTMENT_READ_ALL: {
-    name: 'appointment:read-all',
+  APPOINTMENT_READ_PATIENT: {
+    name: 'appointment:read-patient',
+    module: 'appointment',
+    action: 'read',
+  },
+
+  APPOINTMENT_READ_DOCTOR: {
+    name: 'appointment:read-doctor',
     module: 'appointment',
     action: 'read',
   },
