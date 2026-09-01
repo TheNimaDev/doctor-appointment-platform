@@ -11,6 +11,7 @@ import {
   AppointmentResponse,
   AppointmentsResponse,
   ReserveAppointmentPayload,
+  FindPatientAppointmentsPayload,
 } from '@/types';
 import { TimeSlotService } from '@/modules/time-slot/time-slot.service';
 import { TimeSlotStatus } from '@/modules/time-slot/enums';
@@ -127,6 +128,26 @@ export class AppointmentService {
     });
     return {
       appointment,
+    };
+  }
+
+  /**
+   * Get all appointments belonging to a patient.
+   */
+  async findPatientAppointments(payload: FindPatientAppointmentsPayload): Promise<AppointmentsResponse> {
+    const repository = this.getRepository(payload.manager);
+
+    const appointments = await repository.find({
+      where: {
+        patientId: payload.patientId,
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+
+    return {
+      appointments,
     };
   }
 }
