@@ -8,5 +8,6 @@ import { TimeSlotService } from './time-slot.service';
   imports: [TypeOrmModule.forFeature([TimeSlot])],
   controllers: [TimeSlotController],
   providers: [TimeSlotService],
+  exports: [TimeSlotService],
 })
 export class TimeSlotModule {}
