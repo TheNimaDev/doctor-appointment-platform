@@ -8,13 +8,21 @@ export interface PermissionDecoratorParams {
   requiredAll?: boolean;
   owner?: boolean;
   resource?: string;
+  resourceIdParam?: string;
 }
 
-export function Permission({ permissions, requiredAll = false, owner = false, resource }: PermissionDecoratorParams) {
+export function Permission({
+  permissions,
+  requiredAll = false,
+  owner = false,
+  resource,
+  resourceIdParam = 'id',
+}: PermissionDecoratorParams) {
   return SetMetadata(PERMISSION_METADATA, {
     permissions,
     requiredAll,
     owner,
     resource,
+    resourceIdParam,
   });
 }
