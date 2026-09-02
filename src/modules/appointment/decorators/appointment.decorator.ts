@@ -5,7 +5,7 @@ export const FindAppointmentsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     Permission({
-      permissions: [PERMISSIONS.OWNER_ALL],
+      permissions: [PERMISSIONS.APPOINTMENT_READ_ALL],
     }),
   );
 };
@@ -14,7 +14,7 @@ export const FindAppointmentDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     Permission({
-      permissions: [PERMISSIONS.OWNER_ALL],
+      permissions: [PERMISSIONS.APPOINTMENT_READ_ALL],
     }),
   );
 };
@@ -42,6 +42,8 @@ export const FindPatientAppointmentDecorators = () => {
     HttpCode(HttpStatus.OK),
     Permission({
       permissions: [PERMISSIONS.APPOINTMENT_READ_PATIENT],
+      owner: true,
+      resource: 'appointment-patient',
     }),
   );
 };
@@ -60,6 +62,8 @@ export const FindDoctorAppointmentDecorators = () => {
     HttpCode(HttpStatus.OK),
     Permission({
       permissions: [PERMISSIONS.APPOINTMENT_READ_DOCTOR],
+      owner: true,
+      resource: 'appointment-doctor',
     }),
   );
 };
@@ -69,6 +73,8 @@ export const CancelAppointmentDecorators = () => {
     HttpCode(HttpStatus.OK),
     Permission({
       permissions: [PERMISSIONS.APPOINTMENT_CANCEL],
+      owner: true,
+      resource: 'appointment-patient',
     }),
   );
 };
@@ -78,6 +84,8 @@ export const ConfirmAppointmentDecorators = () => {
     HttpCode(HttpStatus.OK),
     Permission({
       permissions: [PERMISSIONS.APPOINTMENT_CONFIRM],
+      owner: true,
+      resource: 'appointment-doctor',
     }),
   );
 };
@@ -87,6 +95,8 @@ export const RejectAppointmentDecorators = () => {
     HttpCode(HttpStatus.OK),
     Permission({
       permissions: [PERMISSIONS.APPOINTMENT_REJECT],
+      owner: true,
+      resource: 'appointment-doctor',
     }),
   );
 };
@@ -96,6 +106,8 @@ export const CompleteAppointmentDecorators = () => {
     HttpCode(HttpStatus.OK),
     Permission({
       permissions: [PERMISSIONS.APPOINTMENT_COMPLETE],
+      owner: true,
+      resource: 'appointment-doctor',
     }),
   );
 };
@@ -105,6 +117,8 @@ export const NoShowAppointmentDecorators = () => {
     HttpCode(HttpStatus.OK),
     Permission({
       permissions: [PERMISSIONS.APPOINTMENT_NO_SHOW],
+      owner: true,
+      resource: 'appointment-doctor',
     }),
   );
 };
