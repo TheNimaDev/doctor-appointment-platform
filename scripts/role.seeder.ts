@@ -1,4 +1,4 @@
-import { EntityManager } from 'typeorm';
+import { EntityManager, In } from 'typeorm';
 import { Permission } from '@/modules/permission/entities';
 import { Role } from '@/modules/role/entities';
 import { RolePermission } from '@/modules/role-permission/entities';
@@ -10,6 +10,8 @@ import {
   DOCTOR_SPECIALTY_PERMISSIONS,
   PERMISSIONS,
   ROLES,
+  TIME_SLOT_PERMISSIONS,
+  USER_PERMISSIONS,
 } from '@/common';
 
 interface SeedRoleParams {
@@ -36,37 +38,57 @@ async function seedRole(manager: EntityManager, data: SeedRoleParams): Promise<v
 
   roleEntity = await manager.save(Role, roleEntity);
 
-  for (const permissionName of permissions) {
-    const permission = await manager.findOne(Permission, {
-      where: {
-        name: permissionName,
-      },
-    });
+  const uniquePermissionNames = [...new Set(permissions)];
+  const permissionEntities = await manager.find(Permission, {
+    where: {
+      name: In(uniquePermissionNames),
+    },
+  });
 
-    if (!permission) {
-      throw new Error(`Permission "${permissionName}" not found while seeding role "${role}".`);
-    }
+  const foundPermissionNames = new Set(permissionEntities.map((permission) => permission.name));
+  const missingPermissionsNames = uniquePermissionNames.filter(
+    (permissionName) => !foundPermissionNames.has(permissionName),
+  );
 
-    const exists = await manager.findOne(RolePermission, {
-      where: {
-        roleId: roleEntity.id,
-        permissionId: permission.id,
-      },
-    });
-
-    if (exists) {
-      continue;
-    }
-
-    const rolePermission = manager.create(RolePermission, {
-      roleId: roleEntity.id,
-      permissionId: permission.id,
-    });
-
-    await manager.save(RolePermission, rolePermission);
+  if (missingPermissionsNames.length > 0) {
+    throw new Error(`Permissions not found while seeding role "${role}": ${missingPermissionsNames.join(', ')}`);
   }
 
-  console.log(`✅ Role "${role}" seeded.`);
+  const desiredPermissionIds = new Set(permissionEntities.map((permission) => permission.id));
+  const currentRolePermissions = await manager.find(RolePermission, {
+    where: {
+      roleId: roleEntity.id,
+    },
+  });
+
+  const staleRolePermissions = currentRolePermissions.filter(
+    (rolePermission) => !desiredPermissionIds.has(rolePermission.permissionId),
+  );
+
+  if (staleRolePermissions.length > 0) {
+    await manager.remove(RolePermission, staleRolePermissions);
+  }
+
+  const existingPermissionIds = new Set(
+    currentRolePermissions
+      .filter((rolePermission) => desiredPermissionIds.has(rolePermission.permissionId))
+      .map((rolePermission) => rolePermission.permissionId),
+  );
+
+  const newRolePermissions = permissionEntities
+    .filter((permission) => !existingPermissionIds.has(permission.id))
+    .map((permission) =>
+      manager.create(RolePermission, {
+        roleId: roleEntity.id,
+        permissionId: permission.id,
+      }),
+    );
+
+  if (newRolePermissions.length > 0) {
+    await manager.save(RolePermission, newRolePermissions);
+  }
+
+  console.log(`✅ Role "${role}" synchronized (${uniquePermissionNames.length} permissions).`);
 }
 
 export async function seedRoles(manager: EntityManager): Promise<void> {
@@ -80,12 +102,15 @@ export async function seedRoles(manager: EntityManager): Promise<void> {
     role: ROLES.CLINIC_ADMIN,
     description: 'Administrator responsible for managing assigned clinics and related medical resources.',
     permissions: [
-      PERMISSIONS.SPECIALTY_READ,
-
-      ...Object.values(DOCTOR_PERMISSIONS).map((permission) => permission.name),
       ...Object.values(CLINIC_PERMISSIONS).map((permission) => permission.name),
-      ...Object.values(DOCTOR_SPECIALTY_PERMISSIONS).map((permission) => permission.name),
       ...Object.values(DOCTOR_SCHEDULE_PERMISSIONS).map((permission) => permission.name),
+      ...Object.values(TIME_SLOT_PERMISSIONS).map((permission) => permission.name),
+
+      PERMISSIONS.APPOINTMENT_READ_DOCTOR,
+      PERMISSIONS.APPOINTMENT_CONFIRM,
+      PERMISSIONS.APPOINTMENT_REJECT,
+      PERMISSIONS.APPOINTMENT_COMPLETE,
+      PERMISSIONS.APPOINTMENT_NO_SHOW,
     ],
   });
 
@@ -93,27 +118,17 @@ export async function seedRoles(manager: EntityManager): Promise<void> {
     role: ROLES.DOCTOR,
     description: 'Doctor with access to manage personal medical resources and schedules.',
     permissions: [
-      PERMISSIONS.DOCTOR_READ,
-      PERMISSIONS.DOCTOR_UPDATE,
+      ...Object.values(DOCTOR_PERMISSIONS).map((permission) => permission.name),
+      ...Object.values(CLINIC_PERMISSIONS).map((permission) => permission.name),
+      ...Object.values(DOCTOR_SCHEDULE_PERMISSIONS).map((permission) => permission.name),
+      ...Object.values(TIME_SLOT_PERMISSIONS).map((permission) => permission.name),
+      ...Object.values(DOCTOR_SPECIALTY_PERMISSIONS).map((permission) => permission.name),
 
-      PERMISSIONS.CLINIC_CREATE,
-      PERMISSIONS.CLINIC_READ,
-      PERMISSIONS.CLINIC_UPDATE,
-      PERMISSIONS.CLINIC_DELETE,
-      PERMISSIONS.CLINIC_UPDATE_STATUS,
-
-      PERMISSIONS.SPECIALTY_READ,
-
-      PERMISSIONS.DOCTOR_SPECIALTY_READ,
-      PERMISSIONS.DOCTOR_SPECIALTY_CREATE,
-      PERMISSIONS.DOCTOR_SPECIALTY_UPDATE,
-      PERMISSIONS.DOCTOR_SPECIALTY_DELETE,
-
-      PERMISSIONS.DOCTOR_SCHEDULE_CREATE,
-      PERMISSIONS.DOCTOR_SCHEDULE_READ,
-      PERMISSIONS.DOCTOR_SCHEDULE_UPDATE,
-      PERMISSIONS.DOCTOR_SCHEDULE_DELETE,
-      PERMISSIONS.DOCTOR_SCHEDULE_UPDATE_STATUS,
+      PERMISSIONS.APPOINTMENT_READ_DOCTOR,
+      PERMISSIONS.APPOINTMENT_CONFIRM,
+      PERMISSIONS.APPOINTMENT_REJECT,
+      PERMISSIONS.APPOINTMENT_COMPLETE,
+      PERMISSIONS.APPOINTMENT_NO_SHOW,
     ],
   });
 
@@ -121,11 +136,14 @@ export async function seedRoles(manager: EntityManager): Promise<void> {
     role: ROLES.ASSISTANT,
     description: 'Assistant with limited access to assigned clinic resources.',
     permissions: [
-      PERMISSIONS.DOCTOR_READ,
-      PERMISSIONS.CLINIC_READ,
-      PERMISSIONS.SPECIALTY_READ,
-      PERMISSIONS.DOCTOR_SPECIALTY_READ,
-      PERMISSIONS.DOCTOR_SCHEDULE_READ,
+      ...Object.values(DOCTOR_SCHEDULE_PERMISSIONS).map((permission) => permission.name),
+      ...Object.values(TIME_SLOT_PERMISSIONS).map((permission) => permission.name),
+
+      PERMISSIONS.APPOINTMENT_READ_DOCTOR,
+      PERMISSIONS.APPOINTMENT_CONFIRM,
+      PERMISSIONS.APPOINTMENT_REJECT,
+      PERMISSIONS.APPOINTMENT_COMPLETE,
+      PERMISSIONS.APPOINTMENT_NO_SHOW,
     ],
   });
 
@@ -133,14 +151,16 @@ export async function seedRoles(manager: EntityManager): Promise<void> {
     role: ROLES.PATIENT,
     description: 'Patient with access to personal profile and public medical resources.',
     permissions: [
-      PERMISSIONS.USER_READ,
-      PERMISSIONS.USER_UPDATE,
-
+      ...Object.values(USER_PERMISSIONS).map((permission) => permission.name),
       PERMISSIONS.DOCTOR_READ,
       PERMISSIONS.CLINIC_READ,
       PERMISSIONS.SPECIALTY_READ,
       PERMISSIONS.DOCTOR_SPECIALTY_READ,
       PERMISSIONS.DOCTOR_SCHEDULE_READ,
+      PERMISSIONS.TIME_SLOT_READ,
+      PERMISSIONS.APPOINTMENT_READ_PATIENT,
+      PERMISSIONS.APPOINTMENT_RESERVE,
+      PERMISSIONS.APPOINTMENT_CANCEL,
     ],
   });
 }
