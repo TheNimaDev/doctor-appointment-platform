@@ -76,6 +76,22 @@ export class AppointmentController {
   }
 
   /**
+   * Get all appointments belonging to the current doctor.
+   */
+  @Get('doctor')
+  @AppointmentDecorator.FindDoctorAppointmentsDecorators()
+  async findDoctorAppointments(@Req() req: AccessRequest): Promise<ApiResponse<AppointmentsResponse>> {
+    const data = await this.appointmentService.findDoctorAppointments({
+      userId: req.user.userId,
+    });
+
+    return {
+      message: 'Doctor appointments retrieved successfully.',
+      data,
+    };
+  }
+
+  /**
    * Get an appointment by ID belonging to the current patient.
    */
   @Get(':id')
@@ -91,22 +107,6 @@ export class AppointmentController {
 
     return {
       message: 'Patient appointment retrieved successfully.',
-      data,
-    };
-  }
-
-  /**
-   * Get all appointments belonging to the current doctor.
-   */
-  @Get('doctor')
-  @AppointmentDecorator.FindDoctorAppointmentsDecorators()
-  async findDoctorAppointments(@Req() req: AccessRequest): Promise<ApiResponse<AppointmentsResponse>> {
-    const data = await this.appointmentService.findDoctorAppointments({
-      userId: req.user.userId,
-    });
-
-    return {
-      message: 'Doctor appointments retrieved successfully.',
       data,
     };
   }
