@@ -14,7 +14,7 @@ import {
   SessionsResponse,
   UpdateSessionPayload,
 } from '@/types';
-import { checkDatabaseError } from '@/lib';
+import { checkDatabaseError, getServerDateTime } from '@/lib';
 
 @Injectable()
 export class SessionService {
@@ -44,7 +44,7 @@ export class SessionService {
         userId: payload.userId,
         remember: payload.remember,
         ...payload.clientInfo,
-        lastActiveAt: new Date(),
+        lastActiveAt: getServerDateTime(),
       });
 
       const savedSession = await repository.save(session);
@@ -161,7 +161,7 @@ export class SessionService {
         ...(payload.remember !== undefined && {
           remember: payload.remember,
         }),
-        lastActiveAt: new Date(),
+        lastActiveAt: getServerDateTime(),
       });
 
       if (!session || session.revokedAt !== null) {
@@ -201,7 +201,7 @@ export class SessionService {
           revokedAt: IsNull(),
         },
         {
-          revokedAt: new Date(),
+          revokedAt: getServerDateTime(),
         },
       );
 
@@ -236,7 +236,7 @@ export class SessionService {
           revokedAt: IsNull(),
         },
         {
-          revokedAt: new Date(),
+          revokedAt: getServerDateTime(),
         },
       );
     } catch (error) {
