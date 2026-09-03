@@ -5,6 +5,7 @@ import { DatabaseService } from './modules/database/database.service';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
 import { join } from 'node:path';
+import { getServerTimestamp } from './lib';
 
 let PORT: number;
 let BASE_URL: string;
@@ -81,7 +82,7 @@ ${colors.green}●${colors.reset} ${colors.bold}Environment${colors.reset}      
 ${colors.yellow}●${colors.reset} ${colors.bold}Process ID${colors.reset}           ${colors.yellow}${process.pid}${colors.reset}
 ${colors.magenta}●${colors.reset} ${colors.bold}Node Version${colors.reset}         ${colors.magenta}${process.version}${colors.reset}
 ${colors.cyan}●${colors.reset} ${colors.bold}Platform${colors.reset}             ${colors.cyan}${process.platform}${colors.reset}
-${colors.gray}●${colors.reset} ${colors.bold}Started At${colors.reset}           ${colors.gray}${new Date().toLocaleString()}${colors.reset}
+${colors.gray}●${colors.reset} ${colors.bold}Started At${colors.reset}           ${colors.gray}${getServerTimestamp()}${colors.reset}
 
 ${colors.dim}${colors.gray}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}
 
