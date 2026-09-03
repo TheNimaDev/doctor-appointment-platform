@@ -12,7 +12,7 @@ import {
   UpdateEmailStatusPayload,
   ValidateEmailTokenPayload,
 } from '@/types';
-import { checkDatabaseError, generateRandomToken, hashToken } from '@/lib';
+import { checkDatabaseError, generateRandomToken, getServerDateTime, hashToken } from '@/lib';
 import { ConfigService } from '@nestjs/config';
 import ms, { StringValue } from 'ms';
 
@@ -51,7 +51,7 @@ export class EmailService {
       });
 
       if (existingEmail) {
-        existingEmail.revokedAt = new Date();
+        existingEmail.revokedAt = getServerDateTime();
         await repository.save(existingEmail);
       }
 
@@ -60,7 +60,7 @@ export class EmailService {
 
       const expiresIn = this.configService.getOrThrow<StringValue>('EMAIL_EXPIRES');
 
-      const expiresAt = new Date(Date.now() + ms(expiresIn));
+      const expiresAt = new Date(getServerDateTime().getTime() + ms(expiresIn));
 
       const email = repository.create({
         userId: payload.userId,
@@ -96,7 +96,7 @@ export class EmailService {
         type: payload.type,
         usedAt: IsNull(),
         revokedAt: IsNull(),
-        expiresAt: MoreThan(new Date()),
+        expiresAt: MoreThan(getServerDateTime()),
       },
     });
 
@@ -122,7 +122,7 @@ export class EmailService {
           type: payload.type,
           usedAt: IsNull(),
           revokedAt: IsNull(),
-          expiresAt: MoreThan(new Date()),
+          expiresAt: MoreThan(getServerDateTime()),
         },
       });
 
@@ -133,7 +133,7 @@ export class EmailService {
         } as BaseException);
       }
 
-      email.usedAt = new Date();
+      email.usedAt = getServerDateTime();
 
       await repository.save(email);
 
@@ -163,7 +163,7 @@ export class EmailService {
         return;
       }
 
-      email.email.revokedAt = new Date();
+      email.email.revokedAt = getServerDateTime();
 
       await repository.save(email.email);
     } catch (error) {
@@ -186,13 +186,13 @@ export class EmailService {
       };
 
       if (payload.status === EmailStatus.SENT) {
-        updateData.sentAt = new Date();
+        updateData.sentAt = getServerDateTime();
         updateData.failedAt = null;
         updateData.errorMessage = null;
       }
 
       if (payload.status === EmailStatus.FAILED) {
-        updateData.failedAt = new Date();
+        updateData.failedAt = getServerDateTime();
         updateData.errorMessage = payload.errorMessage ?? null;
       }
 
