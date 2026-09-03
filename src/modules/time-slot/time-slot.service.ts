@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { TimeSlot } from './entities';
 import { TimeSlotStatus } from './enums';
-import { checkDatabaseError, getServerTime } from '@/lib';
+import { checkDatabaseError, isDateTimeExpired } from '@/lib';
 import {
   BaseException,
   CreateTimeSlotPayload,
@@ -151,7 +151,7 @@ export class TimeSlotService {
 
       const allowed = TIME_SLOT_ALLOWED_TRANSITIONS[timeSlot.status];
 
-      if (payload.status !== TimeSlotStatus.EXPIRED && timeSlot.endTime <= getServerTime()) {
+      if (payload.status !== TimeSlotStatus.EXPIRED && isDateTimeExpired(timeSlot.date, timeSlot.endTime)) {
         throw new BadRequestException({
           message: `Cannot update an expired time slot to ${payload.status}.`,
           error: 'Time Slot Expired',
