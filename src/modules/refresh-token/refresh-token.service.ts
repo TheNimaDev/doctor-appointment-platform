@@ -1,4 +1,4 @@
-import { generateRandomToken, hashToken, checkDatabaseError } from '@/lib';
+import { generateRandomToken, hashToken, checkDatabaseError, getServerDateTime } from '@/lib';
 import {
   CreateRefreshTokenPayload,
   CreateRefreshTokenResponse,
@@ -61,7 +61,7 @@ export class RefreshTokenService {
         : this.configService.getOrThrow<StringValue>('REFRESH_TOKEN_EXPIRES');
 
       const maxAge = ms(expiresIn);
-      const expiresAt = new Date(Date.now() + maxAge);
+      const expiresAt = new Date(getServerDateTime().getTime() + maxAge);
 
       const refreshTokenEntity = repository.create({
         ...payload.clientInfo,
@@ -94,7 +94,7 @@ export class RefreshTokenService {
       where: {
         sessionId: payload.sessionId,
         revokedAt: IsNull(),
-        expiresAt: MoreThan(new Date()),
+        expiresAt: MoreThan(getServerDateTime()),
       },
     });
   }
@@ -109,7 +109,7 @@ export class RefreshTokenService {
       where: {
         tokenHash: hashToken(payload.token),
         revokedAt: IsNull(),
-        expiresAt: MoreThan(new Date()),
+        expiresAt: MoreThan(getServerDateTime()),
       },
       relations: {
         session: {
@@ -154,7 +154,7 @@ export class RefreshTokenService {
         .createQueryBuilder()
         .update(RefreshToken)
         .set({
-          revokedAt: new Date(),
+          revokedAt: getServerDateTime(),
         })
         .where(
           `sessionId IN (
@@ -185,7 +185,7 @@ export class RefreshTokenService {
           revokedAt: IsNull(),
         },
         {
-          revokedAt: new Date(),
+          revokedAt: getServerDateTime(),
         },
       );
     } catch (error) {
