@@ -140,6 +140,11 @@ export class TimeSlotService {
         where: {
           id: payload.id,
         },
+        ...(payload.manager && {
+          lock: {
+            mode: 'pessimistic_write',
+          },
+        }),
       });
 
       if (!timeSlot) {
