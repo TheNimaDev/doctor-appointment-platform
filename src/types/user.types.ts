@@ -9,7 +9,7 @@ import { RolePermission } from '@/modules/role-permission/entities';
 import { Permission } from '@/modules/permission/entities';
 
 /** User type without sensitive fields. */
-export type SafeUser = Omit<User, 'password' | 'sessions' | 'doctor'>;
+export type SafeUser = Omit<User, 'password' | 'sessions' | 'doctor' | 'clinic'>;
 
 /** User data with roles and permissions exposed in API responses. */
 export type UserRolePermission = Omit<SafeUser, 'userRoles'> & RolesAndPermissions;
