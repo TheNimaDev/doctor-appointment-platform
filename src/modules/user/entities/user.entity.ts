@@ -13,6 +13,7 @@ import { UserStatus } from '../enums';
 import { Session } from '@/modules/session/entities';
 import { UserRole } from '@/modules/user-role/entities';
 import { Doctor } from '@/modules/doctor/entities';
+import { Clinic } from '@/modules/clinic/entities';
 
 @Entity('users')
 export class User {
@@ -45,7 +46,10 @@ export class User {
   userRoles: UserRole[];
 
   @OneToOne(() => Doctor, (doctor) => doctor.user)
-  doctor: Doctor;
+  doctor?: Doctor;
+
+  @OneToOne(() => Clinic, (clinic) => clinic.owner)
+  clinic?: Clinic;
 
   @Column({ type: 'datetime', nullable: true })
   lastLoginAt: Date | null;

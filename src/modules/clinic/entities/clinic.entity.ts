@@ -4,12 +4,15 @@ import {
   DeleteDateColumn,
   Entity,
   Index,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
 import { ClinicStatus } from '../enums';
+import { User } from '@/modules/user/entities';
 import { TimeSlot } from '@/modules/time-slot/entities';
 
 @Entity('clinics')
@@ -23,6 +26,12 @@ export class Clinic {
 
   @Column({ type: 'uuid' })
   ownerId: string;
+
+  @ManyToOne(() => User, (user) => user.clinic, {
+    onDelete: 'RESTRICT',
+  })
+  @JoinColumn({ name: 'ownerId' })
+  owner: User;
 
   @OneToMany(() => TimeSlot, (timeSlot) => timeSlot.clinic)
   timeSlots: TimeSlot[];
