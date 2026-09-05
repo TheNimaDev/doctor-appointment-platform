@@ -13,15 +13,19 @@ import {
   FindTimeSlotsByDoctorAndDatePayload,
   TimeSlotResponse,
   TimeSlotsResponse,
+  UpdateTimeSlotStatusHandlerPayload,
   UpdateTimeSlotStatusPayload,
 } from '@/types';
 import { TIME_SLOT_ALLOWED_TRANSITIONS } from './constants';
+import { DatabaseService } from '../database/database.service';
 
 @Injectable()
 export class TimeSlotService {
   constructor(
     @InjectRepository(TimeSlot)
     private readonly timeSlotRepository: Repository<TimeSlot>,
+
+    private readonly databaseService: DatabaseService,
   ) {}
 
   /**
@@ -127,6 +131,15 @@ export class TimeSlotService {
     return {
       timeSlots,
     };
+  }
+
+  /**
+   * Update a time slot's status within a transaction.
+   */
+  async updateStatusHandler(payload: UpdateTimeSlotStatusHandlerPayload): Promise<TimeSlotResponse> {
+    return await this.databaseService.dataSource.transaction(async (manager) => {
+      return await this.updateStatus({ ...payload, manager });
+    });
   }
 
   /**
