@@ -10,19 +10,19 @@
 
 # Fields
 
-| Field | Type | Nullable | Description |
-|---|---|---|---|
-| id | UUID | ❌ | Primary Key |
-| firstName | varchar(100) | ❌ | نام |
-| lastName | varchar(100) | ❌ | نام خانوادگی |
-| email | varchar(255) | ❌ | ایمیل |
-| password | varchar(255) | ❌ | رمز عبور Hash شده |
-| avatarId | UUID | ✅ | FK → File |
-| status | enum | ❌ | وضعیت حساب کاربر |
-| lastLoginAt | datetime | ✅ | آخرین ورود |
-| createdAt | datetime | ❌ | زمان ایجاد |
-| updatedAt | datetime | ❌ | زمان بروزرسانی |
-| deletedAt | datetime | ✅ | Soft Delete |
+| Field       | Type         | Nullable | Description       |
+| ----------- | ------------ | -------- | ----------------- |
+| id          | UUID         | ❌       | Primary Key       |
+| firstName   | varchar(100) | ❌       | نام               |
+| lastName    | varchar(100) | ❌       | نام خانوادگی      |
+| email       | varchar(255) | ❌       | ایمیل             |
+| password    | varchar(255) | ❌       | رمز عبور Hash شده |
+| avatarId    | UUID         | ✅       | FK → File         |
+| status      | enum         | ❌       | وضعیت حساب کاربر  |
+| lastLoginAt | datetime     | ✅       | آخرین ورود        |
+| createdAt   | datetime     | ❌       | زمان ایجاد        |
+| updatedAt   | datetime     | ❌       | زمان بروزرسانی    |
+| deletedAt   | datetime     | ✅       | Soft Delete       |
 
 ---
 
@@ -204,6 +204,32 @@ Email.userId UNIQUE
 
 ---
 
+## User → Clinic
+
+```text
+User
+
+1
+
+↓
+
+1
+
+Clinic
+```
+
+### Description
+
+هر User حداکثر یک Clinic می‌تواند داشته باشد و مالک Clinic خواهد بود.
+
+Constraint:
+
+```
+Clinic.ownerId UNIQUE
+```
+
+---
+
 # One To Many
 
 ---
@@ -331,6 +357,7 @@ Role
 Example:
 
 یک User می‌تواند چند Role داشته باشد:
+
 ```
 User:
 
@@ -359,11 +386,11 @@ BLOCKED;
 
 ## Status Description
 
-| Status | Description |
-|---|---|
+| Status               | Description                                 |
+| -------------------- | ------------------------------------------- |
 | PENDING_VERIFICATION | کاربر ثبت‌نام کرده ولی ایمیل را تایید نکرده |
-| ACTIVE | حساب فعال و قابل استفاده |
-| BLOCKED | حساب توسط سیستم یا Admin مسدود شده |
+| ACTIVE               | حساب فعال و قابل استفاده                    |
+| BLOCKED              | حساب توسط سیستم یا Admin مسدود شده          |
 
 ---
 
@@ -473,13 +500,21 @@ Login rejected
 
 ## Rule 7
 
-هر User فقط یک Email Verification فعال دارد.
+هر User حداکثر یک Clinic می‌تواند داشته باشد.
 
-در صورت درخواست مجدد تایید ایمیل:
+Example:
 
-- Verification قبلی حذف می‌شود.
-- Token جدید ساخته می‌شود.
-- Email تایید دوباره ارسال می‌شود.
+```text
+User:
+
+Nima
+
+↓
+
+Clinic:
+
+مطب تهران
+```
 
 ---
 
