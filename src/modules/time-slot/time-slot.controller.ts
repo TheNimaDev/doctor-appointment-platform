@@ -70,7 +70,7 @@ export class TimeSlotController {
   @Patch(':id/block')
   @TimeSlotDecorator.BlockTimeSlotDecorators()
   async blockTimeSlot(@Param('id') id: string): Promise<ApiResponse<TimeSlotResponse>> {
-    const timeSlot = await this.timeSlotService.updateStatus({
+    const timeSlot = await this.timeSlotService.updateStatusHandler({
       id,
       status: TimeSlotStatus.BLOCKED,
     });
@@ -87,7 +87,7 @@ export class TimeSlotController {
   @Patch(':id/unblock')
   @TimeSlotDecorator.UnblockTimeSlotDecorators()
   async unblockTimeSlot(@Param('id') id: string): Promise<ApiResponse<TimeSlotResponse>> {
-    const timeSlot = await this.timeSlotService.updateStatus({
+    const timeSlot = await this.timeSlotService.updateStatusHandler({
       id,
       status: TimeSlotStatus.AVAILABLE,
     });
