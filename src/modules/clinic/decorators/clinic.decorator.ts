@@ -33,8 +33,6 @@ export const UpdateClinicDecorators = () => {
     HttpCode(HttpStatus.OK),
     Permission({
       permissions: [PERMISSIONS.CLINIC_UPDATE],
-      owner: true,
-      resource: 'clinic',
     }),
   );
 };
@@ -44,8 +42,6 @@ export const DeleteClinicDecorators = () => {
     HttpCode(HttpStatus.OK),
     Permission({
       permissions: [PERMISSIONS.CLINIC_DELETE],
-      owner: true,
-      resource: 'clinic',
     }),
   );
 };
@@ -55,8 +51,6 @@ export const UpdateClinicStatusDecorators = () => {
     HttpCode(HttpStatus.OK),
     Permission({
       permissions: [PERMISSIONS.CLINIC_UPDATE_STATUS],
-      owner: true,
-      resource: 'clinic',
     }),
   );
 };
