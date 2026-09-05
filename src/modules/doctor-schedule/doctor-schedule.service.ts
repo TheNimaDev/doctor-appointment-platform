@@ -9,6 +9,7 @@ import {
   DeleteDoctorSchedulePayload,
   DoctorScheduleResponse,
   DoctorSchedulesResponse,
+  FindAllDoctorSchedulesPayload,
   FindDoctorScheduleByIdPayload,
   FindDoctorSchedulesPayload,
   UpdateDoctorSchedulePayload,
@@ -208,5 +209,28 @@ export class DoctorScheduleService {
         error: 'Doctor Schedule Not Found',
       } as BaseException);
     }
+  }
+
+  /**
+   * Get all doctor schedules
+   */
+  async findAll(payload: FindAllDoctorSchedulesPayload): Promise<DoctorSchedulesResponse> {
+    const repository = this.getRepository(payload.manager);
+
+    const doctorSchedules = await repository.find({
+      where: {
+        ...(payload.status !== undefined && {
+          status: payload.status,
+        }),
+      },
+      order: {
+        dayOfWeek: 'ASC',
+        startTime: 'ASC',
+      },
+    });
+
+    return {
+      doctorSchedules,
+    };
   }
 }
