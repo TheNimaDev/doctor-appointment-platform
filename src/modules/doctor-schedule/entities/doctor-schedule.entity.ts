@@ -13,26 +13,26 @@ import {
 } from 'typeorm';
 
 import { DayOfWeek, ScheduleStatus } from '../enums';
-import { Clinic } from '@/modules/clinic/entities';
+import { DoctorClinic } from '@/modules/doctor-clinic/entities';
 import { TimeSlot } from '@/modules/time-slot/entities';
 
 @Entity('doctor_schedules')
-@Index(['clinicId'])
+@Index(['doctorClinicId'])
 @Index(['dayOfWeek'])
 @Index(['status'])
-@Unique(['clinicId', 'dayOfWeek', 'startTime', 'endTime'])
+@Unique(['doctorClinicId', 'dayOfWeek', 'startTime', 'endTime'])
 export class DoctorSchedule {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ type: 'uuid' })
-  clinicId: string;
+  doctorClinicId: string;
 
-  @ManyToOne(() => Clinic, (clinic) => clinic.doctorSchedules, {
+  @ManyToOne(() => DoctorClinic, (doctorClinic) => doctorClinic.doctorSchedules, {
     onDelete: 'RESTRICT',
   })
-  @JoinColumn({ name: 'clinicId' })
-  clinic: Clinic;
+  @JoinColumn({ name: 'doctorClinicId' })
+  doctorClinic: DoctorClinic;
 
   @Column({
     type: 'enum',

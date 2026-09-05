@@ -6,6 +6,7 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
@@ -13,6 +14,7 @@ import {
 
 import { Clinic } from '@/modules/clinic/entities';
 import { Doctor } from '@/modules/doctor/entities';
+import { DoctorSchedule } from '@/modules/doctor-schedule/entities';
 
 @Entity('doctor_clinics')
 @Unique(['doctorId', 'clinicId'])
@@ -39,6 +41,9 @@ export class DoctorClinic {
   })
   @JoinColumn({ name: 'clinicId' })
   clinic: Clinic;
+
+  @OneToMany(() => DoctorSchedule, (doctorSchedule) => doctorSchedule.doctorClinic)
+  doctorSchedules: DoctorSchedule[];
 
   @CreateDateColumn()
   createdAt: Date;
