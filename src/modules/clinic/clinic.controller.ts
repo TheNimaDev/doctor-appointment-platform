@@ -1,24 +1,24 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req } from '@nestjs/common';
 import { ClinicService } from './clinic.service';
 import { CreateClinicDto, UpdateClinicDto, UpdateClinicStatusDto } from './dto';
-import type { ApiResponse, ClinicResponse, ClinicsResponse } from '@/types';
+import type { AccessRequest, ApiResponse, ClinicResponse, ClinicsResponse } from '@/types';
 import * as ClinicDecorator from './decorators';
 
-@Controller('doctors/:doctorId/clinics')
+@Controller('clinics')
 export class ClinicController {
   constructor(private readonly clinicService: ClinicService) {}
 
   /**
-   * Create a new clinic for a doctor.
+   * Create a new clinic for the current user.
    */
   @Post()
   @ClinicDecorator.CreateClinicDecorators()
   async create(
-    @Param('doctorId') doctorId: string,
+    @Req() req: AccessRequest,
     @Body() createClinicDto: CreateClinicDto,
   ): Promise<ApiResponse<ClinicResponse>> {
     const data = await this.clinicService.create({
-      doctorId,
+      ownerId: req.user.userId,
       ...createClinicDto,
     });
 
@@ -29,33 +29,27 @@ export class ClinicController {
   }
 
   /**
-   * Get all clinics belonging to a doctor.
+   * Get all clinics.
    */
   @Get()
   @ClinicDecorator.FindClinicsDecorators()
-  async findByDoctorId(@Param('doctorId') doctorId: string): Promise<ApiResponse<ClinicsResponse>> {
-    const data = await this.clinicService.findByDoctorId({
-      doctorId,
-    });
+  async findAll(): Promise<ApiResponse<ClinicsResponse>> {
+    const data = await this.clinicService.findAll({});
 
     return {
-      message: 'Doctor clinics retrieved successfully.',
+      message: 'Clinics retrieved successfully.',
       data,
     };
   }
 
   /**
-   * Get a specific clinic belonging to a doctor.
+   * Get a specific clinic.
    */
-  @Get(':clinicId')
+  @Get(':id')
   @ClinicDecorator.FindClinicDecorators()
-  async findById(
-    @Param('doctorId') doctorId: string,
-    @Param('clinicId') clinicId: string,
-  ): Promise<ApiResponse<ClinicResponse>> {
+  async findById(@Param('id') id: string): Promise<ApiResponse<ClinicResponse>> {
     const data = await this.clinicService.findById({
-      id: clinicId,
-      doctorId,
+      id,
     });
 
     return {
@@ -65,35 +59,33 @@ export class ClinicController {
   }
 
   /**
-   * Update a clinic.
+   * Update the current user's clinic.
    */
-  @Patch(':clinicId')
+  @Patch('me')
   @ClinicDecorator.UpdateClinicDecorators()
   async update(
-    @Param('doctorId') doctorId: string,
-    @Param('clinicId') clinicId: string,
+    @Req() req: AccessRequest,
     @Body() updateClinicDto: UpdateClinicDto,
-  ): Promise<ApiResponse> {
-    await this.clinicService.update({
-      id: clinicId,
-      doctorId,
+  ): Promise<ApiResponse<ClinicResponse>> {
+    const data = await this.clinicService.update({
+      ownerId: req.user.userId,
       ...updateClinicDto,
     });
 
     return {
       message: 'Clinic updated successfully.',
+      data,
     };
   }
 
   /**
-   * Soft-delete a clinic.
+   * Soft-delete the current user's clinic.
    */
-  @Delete(':clinicId')
+  @Delete('me')
   @ClinicDecorator.DeleteClinicDecorators()
-  async delete(@Param('doctorId') doctorId: string, @Param('clinicId') clinicId: string): Promise<ApiResponse> {
+  async delete(@Req() req: AccessRequest): Promise<ApiResponse> {
     await this.clinicService.delete({
-      id: clinicId,
-      doctorId,
+      ownerId: req.user.userId,
     });
 
     return {
@@ -104,21 +96,20 @@ export class ClinicController {
   /**
    * Update the status of a clinic.
    */
-  @Patch(':clinicId/status')
+  @Patch(':id/status')
   @ClinicDecorator.UpdateClinicStatusDecorators()
   async updateStatus(
-    @Param('doctorId') doctorId: string,
-    @Param('clinicId') clinicId: string,
+    @Param('id') id: string,
     @Body() updateClinicStatusDto: UpdateClinicStatusDto,
-  ): Promise<ApiResponse> {
-    await this.clinicService.updateStatus({
-      id: clinicId,
-      doctorId,
+  ): Promise<ApiResponse<ClinicResponse>> {
+    const data = await this.clinicService.updateStatus({
+      id,
       ...updateClinicStatusDto,
     });
 
     return {
       message: 'Clinic status updated successfully.',
+      data,
     };
   }
 }
