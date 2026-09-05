@@ -236,7 +236,6 @@ Doctor:
 
 Dr Ahmad
 
-
 Specialties:
 
 Cardiology
@@ -246,16 +245,26 @@ Internal Medicine
 
 ---
 
-## One To Many
+## Doctor ↔ Clinic
 
----
+از طریق:
 
-## Doctor → Clinic
+```
+DoctorClinic
+```
+
+پیاده‌سازی می‌شود.
+
+ساختار:
 
 ```
 Doctor
 
-1
+N
+
+↓
+
+DoctorClinic
 
 ↓
 
@@ -266,11 +275,15 @@ Clinic
 
 Description:
 
-یک پزشک می‌تواند چند مطب داشته باشد.
+یک پزشک می‌تواند در چند Clinic فعالیت داشته باشد و هر Clinic نیز می‌تواند چند Doctor داشته باشد.
 
 ---
 
-## Doctor → Schedule
+## One To Many
+
+---
+
+## Doctor → DoctorClinic
 
 ```
 Doctor
@@ -281,12 +294,60 @@ Doctor
 
 N
 
-Schedule
+DoctorClinic
 ```
 
 Description:
 
-زمان‌های کاری پزشک.
+یک پزشک می‌تواند چند رابطه با Clinicهای مختلف داشته باشد.
+
+---
+
+## Doctor → TimeSlot
+
+```
+Doctor
+
+1
+
+↓
+
+N
+
+TimeSlot
+```
+
+Description:
+
+TimeSlotهای مربوط به پزشک.
+
+---
+
+## Doctor → DoctorSchedule
+
+```
+Doctor
+
+1
+
+↓
+
+N
+
+DoctorClinic
+
+1
+
+↓
+
+N
+
+DoctorSchedule
+```
+
+Description:
+
+زمان‌های کاری پزشک برای هر Clinic از طریق `DoctorClinic` مدیریت می‌شوند.
 
 ---
 
@@ -446,7 +507,7 @@ Rating مستقیماً قابل ویرایش نیست.
 
 Wrong:
 
-```
+```sql
 UPDATE doctors
 SET ratingAverage = 5
 ```
@@ -486,6 +547,7 @@ Used In:
 - Doctor Registration
 - Doctor Profile
 - Doctor Search
+- Doctor-Clinic Assignment
 - Appointment Booking
 - Medical Records
 - Prescription System
