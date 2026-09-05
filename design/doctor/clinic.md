@@ -2,60 +2,68 @@
 
 ## Purpose
 
-مدیریت مطب‌ها و محل‌های ارائه خدمات پزشکی توسط پزشکان.
+مدیریت مطب‌ها و محل‌های ارائه خدمات پزشکی.
 
-هر پزشک می‌تواند چندین مطب یا محل فعالیت داشته باشد.
+هر User می‌تواند حداکثر یک Clinic ایجاد و مالک آن باشد.
+
+هر Clinic می‌تواند با چند Doctor همکاری داشته باشد و هر Doctor نیز می‌تواند در چند Clinic فعالیت کند.
 
 Example:
 
-```
-Doctor:
+```text
+User:
 
-Dr. Ahmad
+Nima
 
+Clinic:
 
-Clinics:
+مطب تهران
 
-- مطب تهران
-- کلینیک غرب تهران
-- بیمارستان X
+Doctors:
+
+├── Dr. Ahmad
+├── Dr. Rezaei
+└── Dr. Mohammadi
 ```
 
 ---
 
 # Fields
 
-| Field       | Type          | Nullable | Description       |
-| ----------- | ------------- | -------- | ----------------- |
-| id          | UUID          | ❌       | Primary Key       |
-| doctorId    | UUID          | ❌       | FK → Doctor       |
-| name        | varchar(150)  | ❌       | نام مطب / کلینیک  |
-| address     | text          | ❌       | آدرس              |
-| city        | varchar(100)  | ❌       | شهر               |
-| phone       | varchar(20)   | ✅       | شماره تماس        |
-| latitude    | decimal(10,8) | ✅       | عرض جغرافیایی     |
-| longitude   | decimal(11,8) | ✅       | طول جغرافیایی     |
-| description | text          | ✅       | توضیحات           |
-| status      | enum          | ❌       | ACTIVE / INACTIVE |
-| createdAt   | datetime      | ❌       | زمان ایجاد        |
-| updatedAt   | datetime      | ❌       | زمان بروزرسانی    |
-| deletedAt   | datetime      | ✅       | Soft Delete       |
+| Field       | Type          | Nullable | Description                 |
+| ----------- | ------------- | -------- | --------------------------- |
+| id          | UUID          | ❌       | Primary Key                 |
+| ownerId     | UUID          | ❌       | FK → User                   |
+| name        | varchar(150)  | ❌       | نام مطب / کلینیک            |
+| address     | text          | ❌       | آدرس                        |
+| city        | varchar(100)  | ❌       | شهر                         |
+| phone       | varchar(20)   | ✅       | شماره تماس                  |
+| latitude    | decimal(10,8) | ✅       | عرض جغرافیایی               |
+| longitude   | decimal(11,8) | ✅       | طول جغرافیایی               |
+| description | text          | ✅       | توضیحات                     |
+| status      | enum          | ❌       | PENDING / ACTIVE / INACTIVE |
+| createdAt   | datetime      | ❌       | زمان ایجاد                  |
+| updatedAt   | datetime      | ❌       | زمان بروزرسانی              |
+| deletedAt   | datetime      | ✅       | Soft Delete                 |
 
 ---
 
 # Field Details
 
-## doctorId
+## ownerId
 
 مالک این Clinic را مشخص می‌کند.
 
+`ownerId` به `User` اشاره می‌کند، نه `Doctor`.
+
+هر User حداکثر می‌تواند یک Clinic داشته باشد.
+
 Example:
 
-```
-Doctor:
+```text
+User:
 
-Dr. Ahmad
-
+Nima
 
 Clinic:
 
@@ -66,11 +74,11 @@ Clinic:
 
 ## name
 
-نام محل فعالیت پزشک.
+نام محل ارائه خدمات پزشکی.
 
 Examples:
 
-```
+```text
 مطب شخصی دکتر احمدی
 
 کلینیک تخصصی قلب
@@ -84,7 +92,7 @@ Examples:
 
 Example:
 
-```
+```text
 تهران، خیابان ولیعصر، پلاک ۲۰
 ```
 
@@ -96,11 +104,10 @@ Example:
 
 Example:
 
-```
+```text
 latitude:
 
 35.6892
-
 
 longitude:
 
@@ -115,16 +122,16 @@ longitude:
 
 ```ts
 ACTIVE;
-
 INACTIVE;
+PENDING;
 ```
 
 ---
 
 # Indexes
 
-```
-INDEX(doctorId)
+```text
+UNIQUE(ownerId)
 
 INDEX(city)
 
@@ -135,41 +142,70 @@ INDEX(status)
 
 # Relations
 
-## Many To One
+## One To One
+
+---
+
+## Clinic → User
+
+```text
+User
+
+1
+
+↓
+
+1
+
+Clinic
+```
+
+Description:
+
+هر User حداکثر یک Clinic دارد و هر Clinic دقیقاً یک Owner دارد.
+
+---
+
+## Many To Many
 
 ---
 
 ## Clinic → Doctor
 
-```
+رابطه Clinic و Doctor به صورت Many-to-Many است و توسط Entity واسط `DoctorClinic` مدیریت می‌شود.
+
+```text
 Clinic
 
 N
 
 ↓
 
-1
+DoctorClinic
+
+↓
+
+N
 
 Doctor
 ```
 
 Description:
 
-هر Clinic متعلق به یک Doctor است.
+هر Clinic می‌تواند چند Doctor داشته باشد و هر Doctor نیز می‌تواند در چند Clinic فعالیت کند.
 
 Example:
 
-```
-Doctor:
+```text
+Clinic:
 
-Dr. Ahmad
+مطب تهران
 
+Doctors:
 
-Clinics:
-
-├── Clinic Tehran
-├── Clinic Karaj
-└── Clinic Hospital
+├── Dr. Ahmad
+├── Dr. Rezaei
+└── Dr. Mohammadi
 ```
 
 ---
@@ -178,9 +214,9 @@ Clinics:
 
 ---
 
-## Clinic → Appointment
+## Clinic → DoctorClinic
 
-```
+```text
 Clinic
 
 1
@@ -189,18 +225,18 @@ Clinic
 
 N
 
-Appointment
+DoctorClinic
 ```
 
 Description:
 
-تمام نوبت‌هایی که در این مطب ثبت شده‌اند.
+رابطه بین Clinic و Doctor را از طریق Entity واسط `DoctorClinic` مدیریت می‌کند.
 
 ---
 
-## Clinic → Schedule
+## Clinic → DoctorSchedule
 
-```
+```text
 Clinic
 
 1
@@ -209,48 +245,85 @@ Clinic
 
 N
 
-Schedule
+DoctorClinic
+
+1
+
+↓
+
+N
+
+DoctorSchedule
 ```
 
 Description:
 
-زمان‌های کاری پزشک در یک مطب خاص.
+زمان‌های کاری یک Doctor در یک Clinic خاص از طریق `DoctorClinic` مدیریت می‌شوند.
 
 ---
 
 # Constraints
 
-## Doctor Relation
+## Owner Relation
 
-هر Clinic باید یک Doctor داشته باشد.
+هر Clinic باید یک Owner داشته باشد.
 
-```
-doctorId cannot be null
+```text
+ownerId cannot be null
 ```
 
 ---
 
-## Clinic Name
+## One Clinic Per User
 
-نام مطب برای یک پزشک نباید تکراری باشد.
+هر User فقط می‌تواند یک Clinic داشته باشد.
 
 Database:
 
-```
-UNIQUE(doctorId, name)
+```text
+UNIQUE(ownerId)
 ```
 
 Example:
 
+Valid:
+
+```text
+User:
+
+Nima
+
+Clinic:
+
+مطب تهران
+```
+
 Wrong:
 
-```
-Dr Ahmad
+```text
+User:
 
-مطب تهران
+Nima
 
-مطب تهران
+Clinics:
+
+├── مطب تهران
+└── کلینیک غرب تهران
 ```
+
+---
+
+## Doctor-Clinic Relation
+
+یک Doctor می‌تواند در چند Clinic فعالیت کند و یک Clinic نیز می‌تواند چند Doctor داشته باشد.
+
+Database:
+
+```ts
+UNIQUE(doctorId, clinicId);
+```
+
+این Constraint از ایجاد رابطه تکراری بین یک Doctor و یک Clinic جلوگیری می‌کند.
 
 ---
 
@@ -258,11 +331,43 @@ Dr Ahmad
 
 ## Rule 1
 
-یک Doctor می‌تواند چند Clinic داشته باشد.
+یک User می‌تواند حداکثر یک Clinic داشته باشد.
 
 Example:
 
+```text
+Nima
+
+└── مطب تهران
 ```
+
+---
+
+## Rule 2
+
+Clinic جدید ابتدا با وضعیت `PENDING` ایجاد می‌شود.
+
+پس از تأیید توسط `SUPER_ADMIN`:
+
+```text
+PENDING
+
+↓
+
+ACTIVE
+```
+
+پس از تأیید، مالک Clinic نقش `CLINIC_ADMIN` دریافت می‌کند.
+
+---
+
+## Rule 3
+
+یک Doctor می‌تواند در چند Clinic فعالیت داشته باشد.
+
+Example:
+
+```text
 Dr Ahmad
 
 ├── مطب تهران
@@ -272,39 +377,41 @@ Dr Ahmad
 
 ---
 
-## Rule 2
+## Rule 4
 
-Clinic بدون Doctor وجود ندارد.
+یک Clinic می‌تواند چند Doctor داشته باشد.
 
-Wrong:
+Example:
 
-```
-Clinic
+```text
+Clinic تهران
 
-without Doctor
+├── Dr Ahmad
+├── Dr Rezaei
+└── Dr Mohammadi
 ```
 
 ---
 
-## Rule 3
+## Rule 5
 
 Clinic غیرفعال نباید برای رزرو نوبت نمایش داده شود.
 
 Example:
 
-```
+```text
 status = INACTIVE
 ```
 
 ---
 
-## Rule 4
+## Rule 6
 
 حذف Clinic باید Soft Delete باشد.
 
 Example:
 
-```
+```text
 deletedAt = 2026-07-24
 ```
 
@@ -315,6 +422,7 @@ deletedAt = 2026-07-24
 Used In:
 
 - Doctor Profile
+- Doctor-Clinic Assignment
 - Appointment Booking
 - Schedule Management
 - Patient Search
@@ -326,8 +434,7 @@ Used In:
 
 - Clinic Images
 - Clinic Facilities
-- Working Hours Per Clinic
-- Multiple Doctors In One Clinic
+- Advanced Working Hours Management
 - Insurance Support
 - Clinic Rating
 - Waiting Room Management
