@@ -3,7 +3,7 @@ import { Clinic } from '@/modules/clinic/entities';
 import { ClinicStatus } from '@/modules/clinic/enums';
 
 /** Clinic without relation data. */
-export type SafeClinic = Omit<Clinic, 'doctor'>;
+export type SafeClinic = Omit<Clinic, 'owner' | 'doctorClinics'>;
 
 /** Single clinic API response. */
 export interface ClinicResponse {
@@ -17,7 +17,7 @@ export interface ClinicsResponse {
 
 /** Parameters for creating a clinic. */
 export interface CreateClinicPayload {
-  doctorId: string;
+  ownerId: string;
   name: string;
   address: string;
   city: string;
@@ -28,9 +28,9 @@ export interface CreateClinicPayload {
   manager?: EntityManager;
 }
 
-/** Parameters for updating a clinic. */
+/** Parameters for updating a clinic by owner ID. */
 export interface UpdateClinicPayload {
-  id: string;
+  ownerId: string;
   name?: string;
   address?: string;
   city?: string;
@@ -39,13 +39,11 @@ export interface UpdateClinicPayload {
   longitude?: number | null;
   description?: string | null;
   manager?: EntityManager;
-  doctorId: string;
 }
 
 /** Parameters for updating clinic status. */
 export interface UpdateClinicStatusPayload {
   id: string;
-  doctorId: string;
   status: ClinicStatus;
   manager?: EntityManager;
 }
@@ -53,13 +51,12 @@ export interface UpdateClinicStatusPayload {
 /** Parameters for finding a clinic by ID. */
 export interface FindClinicByIdPayload {
   id: string;
-  doctorId: string;
   manager?: EntityManager;
 }
 
-/** Parameters for finding clinics by doctor ID. */
-export interface FindClinicsByDoctorIdPayload {
-  doctorId: string;
+/** Parameters for finding clinic by owner ID. */
+export interface FindClinicByOwnerIdPayload {
+  ownerId: string;
   manager?: EntityManager;
 }
 
@@ -70,7 +67,6 @@ export interface FindClinicsPayload {
 
 /** Parameters for deleting a clinic. */
 export interface DeleteClinicPayload {
-  id: string;
+  ownerId: string;
   manager?: EntityManager;
-  doctorId: string;
 }
