@@ -63,3 +63,9 @@ export interface DeleteDoctorSchedulePayload {
   clinicId: string;
   manager?: EntityManager;
 }
+
+/** Parameters for finding all doctor schedules. */
+export interface FindAllDoctorSchedulesPayload {
+  status?: ScheduleStatus;
+  manager?: EntityManager;
+}
