@@ -1,18 +1,21 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
+
 import { Clinic } from './entities';
+
 import {
   ClinicResponse,
   ClinicsResponse,
   CreateClinicPayload,
   DeleteClinicPayload,
   FindClinicByIdPayload,
-  FindClinicsByDoctorIdPayload,
+  FindClinicByOwnerIdPayload,
   FindClinicsPayload,
   UpdateClinicPayload,
   UpdateClinicStatusPayload,
 } from '@/types';
+
 import { BaseException } from '@/types';
 import { checkDatabaseError } from '@/lib';
 
@@ -41,7 +44,7 @@ export class ClinicService {
 
     try {
       const clinic = repository.create({
-        doctorId: payload.doctorId,
+        ownerId: payload.ownerId,
         name: payload.name,
         address: payload.address,
         city: payload.city,
@@ -61,8 +64,8 @@ export class ClinicService {
         e: error as Error,
         mainResource: 'Clinic',
         conflictField: 'name',
-        notFoundField: 'doctorId',
-        notFoundResource: 'Doctor',
+        notFoundField: 'ownerId',
+        notFoundResource: 'User',
       });
     }
   }
@@ -89,9 +92,6 @@ export class ClinicService {
     const clinic = await repository.findOne({
       where: {
         id: payload.id,
-        ...(payload.doctorId && {
-          doctorId: payload.doctorId,
-        }),
       },
     });
 
@@ -108,19 +108,26 @@ export class ClinicService {
   }
 
   /**
-   * Find all clinics belonging to a doctor.
+   * Find clinic belonging to an owner.
    */
-  async findByDoctorId(payload: FindClinicsByDoctorIdPayload): Promise<ClinicsResponse> {
+  async findByOwnerId(payload: FindClinicByOwnerIdPayload): Promise<ClinicResponse> {
     const repository = this.getRepository(payload.manager);
 
-    const clinics = await repository.find({
+    const clinic = await repository.findOne({
       where: {
-        doctorId: payload.doctorId,
+        ownerId: payload.ownerId,
       },
     });
 
+    if (!clinic) {
+      throw new NotFoundException({
+        message: 'Clinic not found in database.',
+        error: 'Clinic Not Found',
+      } as BaseException);
+    }
+
     return {
-      clinics,
+      clinic,
     };
   }
 
@@ -131,11 +138,12 @@ export class ClinicService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const clinic = await repository.preload({
-        id: payload.id,
-        ...(payload.doctorId !== undefined && {
-          doctorId: payload.doctorId,
-        }),
+      const { clinic } = await this.findByOwnerId({
+        ownerId: payload.ownerId,
+      });
+
+      const updatedClinic = await repository.preload({
+        id: clinic.id,
         ...(payload.name !== undefined && {
           name: payload.name,
         }),
@@ -159,17 +167,10 @@ export class ClinicService {
         }),
       });
 
-      if (!clinic || (payload.doctorId && clinic.doctorId !== payload.doctorId)) {
-        throw new NotFoundException({
-          message: 'Clinic not found in database.',
-          error: 'Clinic Not Found',
-        } as BaseException);
-      }
-
-      const updatedClinic = await repository.save(clinic);
+      const savedClinic = await repository.save(updatedClinic);
 
       return {
-        clinic: updatedClinic,
+        clinic: savedClinic,
       };
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -192,8 +193,7 @@ export class ClinicService {
 
     try {
       const result = await repository.softDelete({
-        id: payload.id,
-        doctorId: payload.doctorId,
+        ownerId: payload.ownerId,
       });
 
       if (result.affected === 0) {
@@ -226,7 +226,7 @@ export class ClinicService {
         status: payload.status,
       });
 
-      if (!clinic || (payload.doctorId && clinic.doctorId !== payload.doctorId)) {
+      if (!clinic) {
         throw new NotFoundException({
           message: 'Clinic not found in database.',
           error: 'Clinic Not Found',
