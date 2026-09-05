@@ -47,6 +47,12 @@ export interface FindAvailableTimeSlotsPayload {
   manager?: EntityManager;
 }
 
+/** Parameters for updating a time slot's status within a transaction. */
+export interface UpdateTimeSlotStatusHandlerPayload {
+  id: string;
+  status: TimeSlotStatus;
+}
+
 /** Parameters for updating a time slot's status. */
 export interface UpdateTimeSlotStatusPayload {
   id: string;
