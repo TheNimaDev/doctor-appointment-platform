@@ -18,3 +18,4 @@ export * from './doctor-schedule';
 export * from './time-slot';
 export * from './appointment';
 export * from './scheduler';
+export * from './doctor-clinic';

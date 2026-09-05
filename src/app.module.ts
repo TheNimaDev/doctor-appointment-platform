@@ -46,6 +46,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     Modules.TimeSlotModule,
     Modules.AppointmentModule,
     Modules.SchedulerModule,
+    Modules.DoctorClinicModule,
   ],
   providers: [
     {
