@@ -2,11 +2,11 @@
 
 ## Purpose
 
-مدیریت برنامه کاری پزشک در یک مطب یا محل ارائه خدمات.
+مدیریت برنامه کاری پزشک در یک Clinic.
 
-DoctorSchedule مشخص می‌کند که یک پزشک در چه روزهایی و چه بازه‌های زمانی در یک Clinic فعالیت دارد.
+DoctorSchedule مشخص می‌کند که یک پزشک در یک Clinic، در چه روزهایی و چه بازه‌های زمانی فعالیت دارد.
 
-Schedule مستقیماً به Doctor وصل نمی‌شود، بلکه از طریق Clinic مدیریت می‌شود.
+Schedule مستقیماً به Doctor یا Clinic وصل نمی‌شود، بلکه از طریق `DoctorClinic` به Doctor و Clinic مرتبط می‌شود.
 
 Structure:
 
@@ -17,9 +17,7 @@ Doctor
 
 ↓
 
-N
-
-Clinic
+DoctorClinic
 
 1
 
@@ -34,26 +32,26 @@ DoctorSchedule
 
 # Fields
 
-| Field        | Type     | Nullable | Description              |
-| ------------ | -------- | -------- | ------------------------ |
-| id           | UUID     | ❌       | Primary Key              |
-| clinicId     | UUID     | ❌       | FK → Clinic              |
-| dayOfWeek    | enum     | ❌       | روز هفته                 |
-| startTime    | time     | ❌       | ساعت شروع فعالیت         |
-| endTime      | time     | ❌       | ساعت پایان فعالیت        |
-| slotDuration | int      | ❌       | مدت زمان هر نوبت (دقیقه) |
-| status       | enum     | ❌       | ACTIVE / INACTIVE        |
-| createdAt    | datetime | ❌       | زمان ایجاد               |
-| updatedAt    | datetime | ❌       | زمان بروزرسانی           |
-| deletedAt    | datetime | ✅       | Soft Delete              |
+| Field          | Type     | Nullable | Description              |
+| -------------- | -------- | -------- | ------------------------ |
+| id             | UUID     | ❌       | Primary Key              |
+| doctorClinicId | UUID     | ❌       | FK → DoctorClinic        |
+| dayOfWeek      | enum     | ❌       | روز هفته                 |
+| startTime      | time     | ❌       | ساعت شروع فعالیت         |
+| endTime        | time     | ❌       | ساعت پایان فعالیت        |
+| slotDuration   | int      | ❌       | مدت زمان هر نوبت (دقیقه) |
+| status         | enum     | ❌       | ACTIVE / INACTIVE        |
+| createdAt      | datetime | ❌       | زمان ایجاد               |
+| updatedAt      | datetime | ❌       | زمان بروزرسانی           |
+| deletedAt      | datetime | ✅       | Soft Delete              |
 
 ---
 
 # Field Details
 
-## clinicId
+## doctorClinicId
 
-مشخص می‌کند این برنامه کاری مربوط به کدام مطب است.
+مشخص می‌کند این برنامه کاری مربوط به کدام پزشک در کدام Clinic است.
 
 Example:
 
@@ -62,15 +60,22 @@ Doctor:
 
 Dr Ahmad
 
+↓
+
+DoctorClinic
+
+↓
 
 Clinic:
 
 مطب تهران
 
+↓
 
 Schedule:
 
 Saturday
+
 09:00 - 13:00
 ```
 
@@ -177,11 +182,13 @@ INACTIVE;
 # Indexes
 
 ```
-INDEX(clinicId)
+INDEX(doctorClinicId)
 
 INDEX(dayOfWeek)
 
 INDEX(status)
+
+UNIQUE(doctorClinicId, dayOfWeek, startTime, endTime)
 ```
 
 ---
@@ -212,19 +219,31 @@ Invalid:
 
 ## Duplicate Schedule
 
-یک Clinic نمی‌تواند در یک روز، بازه زمانی تکراری داشته باشد.
+یک `DoctorClinic` نمی‌تواند در یک روز، بازه زمانی کاملاً تکراری داشته باشد.
 
 Example:
 
 Wrong:
 
-```
+```text
+Doctor:
+
+Dr Ahmad
+
+Clinic:
+
 Clinic Tehran
 
 Saturday
 
 09:00 - 13:00
 
+
+Doctor:
+
+Dr Ahmad
+
+Clinic:
 
 Clinic Tehran
 
@@ -237,7 +256,7 @@ Database:
 
 ```
 UNIQUE(
-clinicId,
+doctorClinicId,
 dayOfWeek,
 startTime,
 endTime
@@ -250,9 +269,9 @@ endTime
 
 ## Many To One
 
-### DoctorSchedule → Clinic
+### DoctorSchedule → DoctorClinic
 
-```
+```text
 DoctorSchedule
 
 N
@@ -261,12 +280,12 @@ N
 
 1
 
-Clinic
+DoctorClinic
 ```
 
 Description:
 
-هر Schedule متعلق به یک Clinic است.
+هر Schedule متعلق به یک `DoctorClinic` است.
 
 ---
 
@@ -354,12 +373,26 @@ Generated Slots:
 
 ## Rule 1
 
-Schedule باید متعلق به یک Clinic باشد.
+Schedule باید متعلق به یک `DoctorClinic` باشد.
 
 Wrong:
 
 ```
-Schedule without Clinic
+Schedule without DoctorClinic
+```
+
+Correct:
+
+```
+Doctor
+
+↓
+
+DoctorClinic
+
+↓
+
+DoctorSchedule
 ```
 
 ---
@@ -403,6 +436,7 @@ Used In:
 - Doctor Calendar
 - Appointment Booking
 - Available Slot Generation
+- Doctor-Clinic Management
 - Clinic Management
 
 ---
