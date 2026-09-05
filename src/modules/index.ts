@@ -17,3 +17,4 @@ export * from './user-role';
 export * from './doctor-schedule';
 export * from './time-slot';
 export * from './appointment';
+export * from './scheduler';
