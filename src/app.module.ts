@@ -10,6 +10,7 @@ import {
   ResponseInterceptor,
 } from '@/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -21,6 +22,9 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 
     // Configure event emitter
     EventEmitterModule.forRoot(),
+
+    // Initialize task scheduling
+    ScheduleModule.forRoot(),
 
     // Application modules
     Modules.DatabaseModule,
