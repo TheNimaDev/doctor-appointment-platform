@@ -13,6 +13,7 @@ import {
 } from 'typeorm';
 import { ClinicStatus } from '../enums';
 import { User } from '@/modules/user/entities';
+import { DoctorClinic } from '@/modules/doctor-clinic/entities';
 import { TimeSlot } from '@/modules/time-slot/entities';
 
 @Entity('clinics')
@@ -32,6 +33,9 @@ export class Clinic {
   })
   @JoinColumn({ name: 'ownerId' })
   owner: User;
+
+  @OneToMany(() => DoctorClinic, (doctorClinic) => doctorClinic.clinic)
+  doctorClinics: DoctorClinic[];
 
   @OneToMany(() => TimeSlot, (timeSlot) => timeSlot.clinic)
   timeSlots: TimeSlot[];

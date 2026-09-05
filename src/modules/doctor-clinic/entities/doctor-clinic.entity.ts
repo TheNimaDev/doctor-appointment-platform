@@ -4,10 +4,14 @@ import {
   DeleteDateColumn,
   Entity,
   Index,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
+
+import { Clinic } from '@/modules/clinic/entities';
 
 @Entity('doctor_clinics')
 @Unique(['doctorId', 'clinicId'])
@@ -22,6 +26,12 @@ export class DoctorClinic {
 
   @Column({ type: 'uuid' })
   clinicId: string;
+
+  @ManyToOne(() => Clinic, (clinic) => clinic.doctorClinics, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'clinicId' })
+  clinic: Clinic;
 
   @CreateDateColumn()
   createdAt: Date;
