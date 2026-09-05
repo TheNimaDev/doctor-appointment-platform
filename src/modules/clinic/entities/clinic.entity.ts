@@ -4,21 +4,17 @@ import {
   DeleteDateColumn,
   Entity,
   Index,
-  JoinColumn,
-  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
 import { ClinicStatus } from '../enums';
-import { Doctor } from '@/modules/doctor/entities';
-import { DoctorSchedule } from '@/modules/doctor-schedule/entities';
 import { TimeSlot } from '@/modules/time-slot/entities';
 
 @Entity('clinics')
-@Unique(['doctorId', 'name'])
-@Index(['doctorId'])
+@Unique(['ownerId'])
+@Index(['ownerId'])
 @Index(['city'])
 @Index(['status'])
 export class Clinic {
@@ -26,16 +22,7 @@ export class Clinic {
   id: string;
 
   @Column({ type: 'uuid' })
-  doctorId: string;
-
-  @ManyToOne(() => Doctor, (doctor) => doctor.clinics, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'doctorId' })
-  doctor: Doctor;
-
-  @OneToMany(() => DoctorSchedule, (doctorSchedule) => doctorSchedule.clinic)
-  doctorSchedules: DoctorSchedule[];
+  ownerId: string;
 
   @OneToMany(() => TimeSlot, (timeSlot) => timeSlot.clinic)
   timeSlots: TimeSlot[];
@@ -61,7 +48,7 @@ export class Clinic {
   @Column({ type: 'text', nullable: true })
   description: string | null;
 
-  @Column({ type: 'enum', enum: ClinicStatus, default: ClinicStatus.ACTIVE })
+  @Column({ type: 'enum', enum: ClinicStatus, default: ClinicStatus.PENDING })
   status: ClinicStatus;
 
   @CreateDateColumn()
