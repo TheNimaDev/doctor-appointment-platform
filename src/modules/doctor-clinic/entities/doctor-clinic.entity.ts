@@ -12,6 +12,7 @@ import {
 } from 'typeorm';
 
 import { Clinic } from '@/modules/clinic/entities';
+import { Doctor } from '@/modules/doctor/entities';
 
 @Entity('doctor_clinics')
 @Unique(['doctorId', 'clinicId'])
@@ -23,6 +24,12 @@ export class DoctorClinic {
 
   @Column({ type: 'uuid' })
   doctorId: string;
+
+  @ManyToOne(() => Doctor, (doctor) => doctor.doctorClinics, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'doctorId' })
+  doctor: Doctor;
 
   @Column({ type: 'uuid' })
   clinicId: string;

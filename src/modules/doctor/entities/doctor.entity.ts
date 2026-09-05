@@ -13,7 +13,7 @@ import {
 import { DoctorStatus } from '../enums';
 import { User } from '@/modules/user/entities';
 import { DoctorSpecialty } from '@/modules/doctor-specialty/entities';
-import { Clinic } from '@/modules/clinic/entities';
+import { DoctorClinic } from '@/modules/doctor-clinic/entities';
 import { TimeSlot } from '@/modules/time-slot/entities';
 
 @Entity('doctors')
@@ -35,8 +35,8 @@ export class Doctor {
   @OneToMany(() => DoctorSpecialty, (doctorSpecialty) => doctorSpecialty.doctor)
   doctorSpecialties: DoctorSpecialty[];
 
-  @OneToMany(() => Clinic, (clinic) => clinic.doctor)
-  clinics: Clinic[];
+  @OneToMany(() => DoctorClinic, (doctorClinic) => doctorClinic.doctor)
+  doctorClinics: DoctorClinic[];
 
   @OneToMany(() => TimeSlot, (timeSlot) => timeSlot.doctor)
   timeSlots: TimeSlot[];
