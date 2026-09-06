@@ -3,7 +3,6 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -14,13 +13,10 @@ import {
 
 import { TimeSlotStatus } from '../enums';
 import { DoctorSchedule } from '@/modules/doctor-schedule/entities';
-import { Doctor } from '@/modules/doctor/entities';
-import { Clinic } from '@/modules/clinic/entities';
 import { Appointment } from '@/modules/appointment/entities';
 
 @Entity('time_slots')
 @Unique(['scheduleId', 'date', 'startTime'])
-@Index(['doctorId', 'date', 'status'])
 export class TimeSlot {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -28,23 +24,11 @@ export class TimeSlot {
   @Column({ type: 'uuid' })
   scheduleId: string;
 
-  @ManyToOne(() => DoctorSchedule, (schedule) => schedule.timeSlots)
+  @ManyToOne(() => DoctorSchedule, (schedule) => schedule.timeSlots, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'scheduleId' })
   schedule: DoctorSchedule;
-
-  @Column({ type: 'uuid' })
-  doctorId: string;
-
-  @ManyToOne(() => Doctor, (doctor) => doctor.timeSlots)
-  @JoinColumn({ name: 'doctorId' })
-  doctor: Doctor;
-
-  @Column({ type: 'uuid' })
-  clinicId: string;
-
-  @ManyToOne(() => Clinic, (clinic) => clinic.timeSlots)
-  @JoinColumn({ name: 'clinicId' })
-  clinic: Clinic;
 
   @Column({ type: 'date' })
   date: string;
