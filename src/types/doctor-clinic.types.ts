@@ -21,6 +21,12 @@ export interface CreateDoctorClinicPayload {
   manager?: EntityManager;
 }
 
+/** Parameters for finding a doctor-clinic relation by Doctor and Clinic IDs. */
+export interface FindDoctorClinicByDoctorAndClinicPayload {
+  doctorId: string;
+  clinicId: string;
+  manager?: EntityManager;
+}
 
 /** Parameters for finding a doctor-clinic relation by doctor ID. */
 export interface FindDoctorClinicsByDoctorIdPayload {
