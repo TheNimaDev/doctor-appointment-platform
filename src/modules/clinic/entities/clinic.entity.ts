@@ -37,9 +37,6 @@ export class Clinic {
   @OneToMany(() => DoctorClinic, (doctorClinic) => doctorClinic.clinic)
   doctorClinics: DoctorClinic[];
 
-  @OneToMany(() => TimeSlot, (timeSlot) => timeSlot.clinic)
-  timeSlots: TimeSlot[];
-
   @Column({ type: 'varchar', length: 150 })
   name: string;
 
