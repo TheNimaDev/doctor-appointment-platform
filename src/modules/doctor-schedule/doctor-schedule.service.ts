@@ -15,12 +15,15 @@ import {
   UpdateDoctorSchedulePayload,
   UpdateDoctorScheduleStatusPayload,
 } from '@/types';
+import { DoctorClinicService } from '@/modules/doctor-clinic/doctor-clinic.service';
 
 @Injectable()
 export class DoctorScheduleService {
   constructor(
     @InjectRepository(DoctorSchedule)
     private readonly doctorScheduleRepository: Repository<DoctorSchedule>,
+
+    private readonly doctorClinicService: DoctorClinicService,
   ) {}
 
   /**
@@ -40,8 +43,13 @@ export class DoctorScheduleService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const schedule = repository.create({
+      const { doctorClinic } = await this.doctorClinicService.findByDoctorAndClinic({
         clinicId: payload.clinicId,
+        doctorId: payload.doctorId,
+      });
+
+      const schedule = repository.create({
+        doctorClinicId: doctorClinic.id,
         dayOfWeek: payload.dayOfWeek,
         startTime: payload.startTime,
         endTime: payload.endTime,
@@ -54,9 +62,14 @@ export class DoctorScheduleService {
         doctorSchedule: savedSchedule,
       };
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
       checkDatabaseError({
         e: error as Error,
         mainResource: 'DoctorSchedule',
+        conflictField: ['doctorClinicId', 'dayOfWeek', 'startTime', 'endTime'],
       });
     }
   }
@@ -67,10 +80,15 @@ export class DoctorScheduleService {
   async getById(payload: FindDoctorScheduleByIdPayload): Promise<DoctorScheduleResponse> {
     const repository = this.getRepository(payload.manager);
 
+    const { doctorClinic } = await this.doctorClinicService.findByDoctorAndClinic({
+      clinicId: payload.clinicId,
+      doctorId: payload.doctorId,
+    });
+
     const doctorSchedule = await repository.findOne({
       where: {
         id: payload.id,
-        clinicId: payload.clinicId,
+        doctorClinicId: doctorClinic.id,
       },
     });
 
@@ -87,14 +105,19 @@ export class DoctorScheduleService {
   }
 
   /**
-   * Get all schedules belonging to a clinic.
+   * Get all schedules belonging to a doctor-clinic relation.
    */
-  async findByClinicId(payload: FindDoctorSchedulesPayload): Promise<DoctorSchedulesResponse> {
+  async findByDoctorAndClinic(payload: FindDoctorSchedulesPayload): Promise<DoctorSchedulesResponse> {
     const repository = this.getRepository(payload.manager);
+
+    const { doctorClinic } = await this.doctorClinicService.findByDoctorAndClinic({
+      clinicId: payload.clinicId,
+      doctorId: payload.doctorId,
+    });
 
     const doctorSchedules = await repository.find({
       where: {
-        clinicId: payload.clinicId,
+        doctorClinicId: doctorClinic.id,
       },
       order: {
         dayOfWeek: 'ASC',
@@ -114,9 +137,14 @@ export class DoctorScheduleService {
     const repository = this.getRepository(payload.manager);
 
     try {
+      const { doctorClinic } = await this.doctorClinicService.findByDoctorAndClinic({
+        clinicId: payload.clinicId,
+        doctorId: payload.doctorId,
+      });
+
       const doctorSchedule = await repository.preload({
         id: payload.id,
-        clinicId: payload.clinicId,
+        doctorClinicId: doctorClinic.id,
         ...(payload.dayOfWeek !== undefined && {
           dayOfWeek: payload.dayOfWeek,
         }),
@@ -162,9 +190,14 @@ export class DoctorScheduleService {
     const repository = this.getRepository(payload.manager);
 
     try {
+      const { doctorClinic } = await this.doctorClinicService.findByDoctorAndClinic({
+        clinicId: payload.clinicId,
+        doctorId: payload.doctorId,
+      });
+
       const doctorSchedule = await repository.preload({
         id: payload.id,
-        clinicId: payload.clinicId,
+        doctorClinicId: doctorClinic.id,
         status: payload.status,
       });
 
@@ -198,9 +231,14 @@ export class DoctorScheduleService {
   async deleteDoctorSchedule(payload: DeleteDoctorSchedulePayload): Promise<void> {
     const repository = this.getRepository(payload.manager);
 
+    const { doctorClinic } = await this.doctorClinicService.findByDoctorAndClinic({
+      clinicId: payload.clinicId,
+      doctorId: payload.doctorId,
+    });
+
     const result = await repository.softDelete({
       id: payload.id,
-      clinicId: payload.clinicId,
+      doctorClinicId: doctorClinic.id,
     });
 
     if (result.affected === 0) {
@@ -212,7 +250,7 @@ export class DoctorScheduleService {
   }
 
   /**
-   * Get all doctor schedules
+   * Get all doctor schedules.
    */
   async findAll(payload: FindAllDoctorSchedulesPayload): Promise<DoctorSchedulesResponse> {
     const repository = this.getRepository(payload.manager);
