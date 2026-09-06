@@ -240,6 +240,24 @@ export const APPOINTMENT_PERMISSIONS = {
   },
 } as const satisfies PermissionStructure;
 
+export const DOCTOR_CLINIC_PERMISSIONS = {
+  DOCTOR_CLINIC_READ: {
+    name: 'doctor-clinic:read',
+    module: 'doctor-clinic',
+    action: 'read',
+  },
+  DOCTOR_CLINIC_CREATE: {
+    name: 'doctor-clinic:create',
+    module: 'doctor-clinic',
+    action: 'create',
+  },
+  DOCTOR_CLINIC_DELETE: {
+    name: 'doctor-clinic:delete',
+    module: 'doctor-clinic',
+    action: 'delete',
+  },
+} as const satisfies PermissionStructure;
+
 export const RAW_PERMISSIONS_OBJECT = {
   ...BASE_PERMISSIONS,
   ...USER_PERMISSIONS,
@@ -250,6 +268,7 @@ export const RAW_PERMISSIONS_OBJECT = {
   ...DOCTOR_SCHEDULE_PERMISSIONS,
   ...TIME_SLOT_PERMISSIONS,
   ...APPOINTMENT_PERMISSIONS,
+  ...DOCTOR_CLINIC_PERMISSIONS,
 } as const satisfies PermissionStructure;
 
 type ReturnPermissionObject = Readonly<{
