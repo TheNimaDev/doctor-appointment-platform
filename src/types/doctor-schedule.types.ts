@@ -3,7 +3,7 @@ import { DoctorSchedule } from '@/modules/doctor-schedule/entities';
 import { DayOfWeek, ScheduleStatus } from '@/modules/doctor-schedule/enums';
 
 /** Doctor schedule without relation data. */
-export type SafeDoctorSchedule = Omit<DoctorSchedule, 'clinic'>;
+export type SafeDoctorSchedule = Omit<DoctorSchedule, 'doctorClinic' | 'timeSlots'>;
 
 /** Doctor schedule API response. */
 export interface DoctorScheduleResponse {
@@ -15,8 +15,9 @@ export interface DoctorSchedulesResponse {
   doctorSchedules: SafeDoctorSchedule[];
 }
 
-/** Parameters for creating a new doctor schedule. */
+/** Parameters for creating a doctor schedule. */
 export interface CreateDoctorSchedulePayload {
+  doctorId: string;
   clinicId: string;
   dayOfWeek: DayOfWeek;
   startTime: string;
@@ -28,6 +29,7 @@ export interface CreateDoctorSchedulePayload {
 /** Parameters for updating a doctor schedule. */
 export interface UpdateDoctorSchedulePayload {
   id: string;
+  doctorId: string;
   clinicId: string;
   dayOfWeek?: DayOfWeek;
   startTime?: string;
@@ -39,12 +41,14 @@ export interface UpdateDoctorSchedulePayload {
 /** Parameters for finding a doctor schedule by ID. */
 export interface FindDoctorScheduleByIdPayload {
   id: string;
+  doctorId: string;
   clinicId: string;
   manager?: EntityManager;
 }
 
-/** Parameters for finding all doctor schedules. */
+/** Parameters for finding doctor schedules. */
 export interface FindDoctorSchedulesPayload {
+  doctorId: string;
   clinicId: string;
   manager?: EntityManager;
 }
@@ -52,6 +56,7 @@ export interface FindDoctorSchedulesPayload {
 /** Parameters for updating a doctor schedule status. */
 export interface UpdateDoctorScheduleStatusPayload {
   id: string;
+  doctorId: string;
   clinicId: string;
   status: ScheduleStatus;
   manager?: EntityManager;
@@ -60,6 +65,7 @@ export interface UpdateDoctorScheduleStatusPayload {
 /** Parameters for deleting a doctor schedule. */
 export interface DeleteDoctorSchedulePayload {
   id: string;
+  doctorId: string;
   clinicId: string;
   manager?: EntityManager;
 }
