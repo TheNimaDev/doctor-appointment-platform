@@ -9,6 +9,7 @@ import {
   DeleteDoctorClinicPayload,
   DoctorClinicResponse,
   DoctorClinicsResponse,
+  FindDoctorClinicByDoctorAndClinicPayload,
   FindDoctorClinicsByClinicIdPayload,
   FindDoctorClinicsByDoctorIdPayload,
 } from '@/types';
@@ -57,6 +58,31 @@ export class DoctorClinicService {
         conflictField: ['doctorId', 'clinicId'],
       });
     }
+  }
+
+  /**
+   * Find a doctor-clinic relation by Doctor and Clinic ID.
+   */
+  async findByDoctorAndClinic(payload: FindDoctorClinicByDoctorAndClinicPayload): Promise<DoctorClinicResponse> {
+    const repository = this.getRepository(payload.manager);
+
+    const doctorClinic = await repository.findOne({
+      where: {
+        doctorId: payload.doctorId,
+        clinicId: payload.clinicId,
+      },
+    });
+
+    if (!doctorClinic) {
+      throw new NotFoundException({
+        message: 'Doctor-clinic relation not found in database.',
+        error: 'DoctorClinic Not Found',
+      } as BaseException);
+    }
+
+    return {
+      doctorClinic,
+    };
   }
 
   /**
