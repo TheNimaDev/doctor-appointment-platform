@@ -31,20 +31,22 @@ export const OWNERSHIP_CONFIG: Record<string, OwnershipConfig> = {
 
   clinic: {
     entity: Clinic,
-    relations: {
-      doctor: true,
-    },
-    getUserId: (resource) => resource.doctor?.userId,
+    relations: {},
+    getUserId: (resource) => resource.ownerId,
   },
 
   'appointment-doctor': {
     entity: Appointment,
     relations: {
       timeSlot: {
-        doctor: true,
+        schedule: {
+          doctorClinic: {
+            doctor: true,
+          },
+        },
       },
     },
-    getUserId: (resource) => resource.timeSlot?.doctor?.userId,
+    getUserId: (resource) => resource.timeSlot?.schedule?.doctorClinic?.doctor?.userId,
   },
 
   'appointment-patient': {
@@ -58,19 +60,23 @@ export const OWNERSHIP_CONFIG: Record<string, OwnershipConfig> = {
   'doctor-schedule': {
     entity: DoctorSchedule,
     relations: {
-      clinic: {
+      doctorClinic: {
         doctor: true,
       },
     },
-    getUserId: (resource) => resource.clinic?.doctor?.userId,
+    getUserId: (resource) => resource.doctorClinic?.doctor?.userId,
   },
 
   'time-slot': {
     entity: TimeSlot,
     relations: {
-      doctor: true,
+      schedule: {
+        doctorClinic: {
+          doctor: true,
+        },
+      },
     },
-    getUserId: (resource) => resource.doctor?.userId,
+    getUserId: (resource) => resource.schedule?.doctorClinic?.doctor?.userId,
   },
 
   session: {
