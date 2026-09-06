@@ -84,14 +84,14 @@ TimeSlots:
 
 پزشکی که این Slot متعلق به او است.
 
-این فیلد برای Query سریع استفاده می‌شود.
+این فیلد برای Query سریع مربوط به پزشک استفاده می‌شود.
 
 Example:
 
 ```
 Find available slots:
 
-Doctor + Date
+Doctor + Date + Status
 ```
 
 ---
@@ -259,9 +259,13 @@ Date:
 
 ```
 TimeSlot
+
 N
+
 ↓
+
 1
+
 DoctorSchedule
 ```
 
@@ -279,9 +283,13 @@ Description:
 
 ```
 TimeSlot
+
 N
+
 ↓
+
 1
+
 Doctor
 ```
 
@@ -299,9 +307,13 @@ Description:
 
 ```
 TimeSlot
+
 N
+
 ↓
+
 1
+
 Clinic
 ```
 
@@ -311,17 +323,19 @@ Description:
 
 ---
 
-## One To One
-
----
+## One To Many
 
 ## TimeSlot → Appointment
 
 ```
 TimeSlot
+
 1
+
 ↓
-0..1
+
+0..N
+
 Appointment
 ```
 
@@ -338,6 +352,8 @@ Example:
 
 Appointment #125
 ```
+
+> Business Rule: یک Slot نباید همزمان توسط دو بیمار رزرو شود.
 
 ---
 
