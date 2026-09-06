@@ -1,6 +1,17 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
-
 import { Permission, PERMISSIONS } from '@/common';
+
+export const CreateMyDoctorScheduleDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.CREATED),
+
+    Permission({
+      permissions: [PERMISSIONS.DOCTOR_SCHEDULE_CREATE],
+      owner: true,
+      resource: 'doctor',
+    }),
+  );
+};
 
 export const CreateDoctorScheduleDecorators = () => {
   return applyDecorators(
@@ -9,7 +20,8 @@ export const CreateDoctorScheduleDecorators = () => {
     Permission({
       permissions: [PERMISSIONS.DOCTOR_SCHEDULE_CREATE],
       owner: true,
-      resource: 'doctor',
+      resource: 'clinic',
+      resourceIdParam: 'clinicId',
     }),
   );
 };
@@ -34,12 +46,37 @@ export const FindDoctorScheduleDecorators = () => {
   );
 };
 
+export const UpdateMyDoctorScheduleDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+
+    Permission({
+      permissions: [PERMISSIONS.DOCTOR_SCHEDULE_UPDATE],
+      owner: true,
+      resource: 'doctor',
+    }),
+  );
+};
+
 export const UpdateDoctorScheduleDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
 
     Permission({
       permissions: [PERMISSIONS.DOCTOR_SCHEDULE_UPDATE],
+      owner: true,
+      resource: 'clinic',
+      resourceIdParam: 'clinicId',
+    }),
+  );
+};
+
+export const UpdateMyDoctorScheduleStatusDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+
+    Permission({
+      permissions: [PERMISSIONS.DOCTOR_SCHEDULE_UPDATE_STATUS],
       owner: true,
       resource: 'doctor',
     }),
@@ -53,6 +90,19 @@ export const UpdateDoctorScheduleStatusDecorators = () => {
     Permission({
       permissions: [PERMISSIONS.DOCTOR_SCHEDULE_UPDATE_STATUS],
       owner: true,
+      resource: 'clinic',
+      resourceIdParam: 'clinicId',
+    }),
+  );
+};
+
+export const DeleteMyDoctorScheduleDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+
+    Permission({
+      permissions: [PERMISSIONS.DOCTOR_SCHEDULE_DELETE],
+      owner: true,
       resource: 'doctor',
     }),
   );
@@ -65,7 +115,8 @@ export const DeleteDoctorScheduleDecorators = () => {
     Permission({
       permissions: [PERMISSIONS.DOCTOR_SCHEDULE_DELETE],
       owner: true,
-      resource: 'doctor',
+      resource: 'clinic',
+      resourceIdParam: 'clinicId',
     }),
   );
 };
