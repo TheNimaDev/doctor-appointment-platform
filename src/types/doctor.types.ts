@@ -62,3 +62,23 @@ export interface DeleteDoctorPayload {
 export interface FindDoctorsPayload {
   manager?: EntityManager;
 }
+
+/**
+ * Identifies a doctor by either doctor ID or user ID.
+ */
+export type DoctorIdentifier =
+  | {
+      doctorId: string;
+      userId?: never;
+    }
+  | {
+      userId: string;
+      doctorId?: never;
+    };
+
+/**
+ * Parameters for resolving a doctor by user ID or doctor ID.
+ */
+export type ResolveDoctorPayload = DoctorIdentifier & {
+  manager?: EntityManager;
+};
