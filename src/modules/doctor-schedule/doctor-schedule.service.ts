@@ -16,6 +16,7 @@ import {
   UpdateDoctorScheduleStatusPayload,
 } from '@/types';
 import { DoctorClinicService } from '@/modules/doctor-clinic/doctor-clinic.service';
+import { DoctorService } from '@/modules/doctor/doctor.service';
 
 @Injectable()
 export class DoctorScheduleService {
@@ -24,6 +25,7 @@ export class DoctorScheduleService {
     private readonly doctorScheduleRepository: Repository<DoctorSchedule>,
 
     private readonly doctorClinicService: DoctorClinicService,
+    private readonly doctorService: DoctorService,
   ) {}
 
   /**
@@ -43,9 +45,12 @@ export class DoctorScheduleService {
     const repository = this.getRepository(payload.manager);
 
     try {
+      const { doctor } = await this.doctorService.resolveDoctor(payload);
+
       const { doctorClinic } = await this.doctorClinicService.findByDoctorAndClinic({
         clinicId: payload.clinicId,
-        doctorId: payload.doctorId,
+        doctorId: doctor.id,
+        manager: payload.manager,
       });
 
       const schedule = repository.create({
@@ -80,9 +85,12 @@ export class DoctorScheduleService {
   async getById(payload: FindDoctorScheduleByIdPayload): Promise<DoctorScheduleResponse> {
     const repository = this.getRepository(payload.manager);
 
+    const { doctor } = await this.doctorService.resolveDoctor(payload);
+
     const { doctorClinic } = await this.doctorClinicService.findByDoctorAndClinic({
       clinicId: payload.clinicId,
-      doctorId: payload.doctorId,
+      doctorId: doctor.id,
+      manager: payload.manager,
     });
 
     const doctorSchedule = await repository.findOne({
@@ -110,9 +118,12 @@ export class DoctorScheduleService {
   async findByDoctorAndClinic(payload: FindDoctorSchedulesPayload): Promise<DoctorSchedulesResponse> {
     const repository = this.getRepository(payload.manager);
 
+    const { doctor } = await this.doctorService.resolveDoctor(payload);
+
     const { doctorClinic } = await this.doctorClinicService.findByDoctorAndClinic({
       clinicId: payload.clinicId,
-      doctorId: payload.doctorId,
+      doctorId: doctor.id,
+      manager: payload.manager,
     });
 
     const doctorSchedules = await repository.find({
@@ -137,9 +148,12 @@ export class DoctorScheduleService {
     const repository = this.getRepository(payload.manager);
 
     try {
+      const { doctor } = await this.doctorService.resolveDoctor(payload);
+
       const { doctorClinic } = await this.doctorClinicService.findByDoctorAndClinic({
         clinicId: payload.clinicId,
-        doctorId: payload.doctorId,
+        doctorId: doctor.id,
+        manager: payload.manager,
       });
 
       const doctorSchedule = await repository.preload({
@@ -190,9 +204,12 @@ export class DoctorScheduleService {
     const repository = this.getRepository(payload.manager);
 
     try {
+      const { doctor } = await this.doctorService.resolveDoctor(payload);
+
       const { doctorClinic } = await this.doctorClinicService.findByDoctorAndClinic({
         clinicId: payload.clinicId,
-        doctorId: payload.doctorId,
+        doctorId: doctor.id,
+        manager: payload.manager,
       });
 
       const doctorSchedule = await repository.preload({
@@ -231,9 +248,12 @@ export class DoctorScheduleService {
   async deleteDoctorSchedule(payload: DeleteDoctorSchedulePayload): Promise<void> {
     const repository = this.getRepository(payload.manager);
 
+    const { doctor } = await this.doctorService.resolveDoctor(payload);
+
     const { doctorClinic } = await this.doctorClinicService.findByDoctorAndClinic({
       clinicId: payload.clinicId,
-      doctorId: payload.doctorId,
+      doctorId: doctor.id,
+      manager: payload.manager,
     });
 
     const result = await repository.softDelete({
