@@ -12,8 +12,9 @@ import {
   FindDoctorByUserIdPayload,
   FindDoctorsPayload,
   UpdateDoctorPayload,
-} from '@/types/doctor.types';
-import { BaseException } from '@/types';
+  BaseException,
+  ResolveDoctorPayload,
+} from '@/types';
 import { checkDatabaseError } from '@/lib';
 
 @Injectable()
@@ -222,5 +223,22 @@ export class DoctorService {
         mainResource: 'Doctor',
       });
     }
+  }
+
+  /**
+   * Resolve a doctor by either user ID or doctor ID.
+   */
+  async resolveDoctor(payload: ResolveDoctorPayload): Promise<DoctorResponse> {
+    if ('userId' in payload) {
+      return this.findByUserId({
+        userId: payload.userId,
+        manager: payload.manager,
+      });
+    }
+
+    return this.findById({
+      id: payload.doctorId,
+      manager: payload.manager,
+    });
   }
 }
