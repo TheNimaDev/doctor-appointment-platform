@@ -1,25 +1,29 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
-import { Permission, PERMISSIONS } from '@/common';
 
-export const FindTimeSlotsDecorators = () => {
-  return applyDecorators(
-    HttpCode(HttpStatus.OK),
-    Permission({
-      permissions: [PERMISSIONS.TIME_SLOT_MANAGE],
-    }),
-  );
-};
-
-export const FindTimeSlotDecorators = () => {
-  return applyDecorators(
-    HttpCode(HttpStatus.OK),
-    Permission({
-      permissions: [PERMISSIONS.TIME_SLOT_MANAGE],
-    }),
-  );
-};
+import { Permission, Public } from '@/common';
+import { PERMISSIONS } from '@/common/constants';
 
 export const FindAvailableTimeSlotsDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Public(),
+    Permission({
+      permissions: [PERMISSIONS.TIME_SLOT_READ],
+    }),
+  );
+};
+
+export const FindAvailableClinicTimeSlotsDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Public(),
+    Permission({
+      permissions: [PERMISSIONS.TIME_SLOT_READ],
+    }),
+  );
+};
+
+export const FindMyTimeSlotsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     Permission({
@@ -28,20 +32,95 @@ export const FindAvailableTimeSlotsDecorators = () => {
   );
 };
 
-export const BlockTimeSlotDecorators = () => {
+export const FindMyClinicTimeSlotsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     Permission({
-      permissions: [PERMISSIONS.TIME_SLOT_BLOCK],
+      permissions: [PERMISSIONS.TIME_SLOT_READ],
     }),
   );
 };
 
-export const UnblockTimeSlotDecorators = () => {
+export const FindMyTimeSlotDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.TIME_SLOT_READ],
+      owner: true,
+      resource: 'time-slot',
+    }),
+  );
+};
+
+export const FindMyClinicAdminTimeSlotsDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.TIME_SLOT_READ],
+    }),
+  );
+};
+
+export const FindMyClinicAdminDoctorTimeSlotsDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.TIME_SLOT_READ],
+    }),
+  );
+};
+
+export const FindMyClinicAdminTimeSlotDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.TIME_SLOT_READ],
+      clinicOwner: true,
+      resource: 'time-slot',
+    }),
+  );
+};
+
+export const BlockMyTimeSlotDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.TIME_SLOT_BLOCK],
+      owner: true,
+      resource: 'time-slot',
+    }),
+  );
+};
+
+export const UnblockMyTimeSlotDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     Permission({
       permissions: [PERMISSIONS.TIME_SLOT_UNBLOCK],
+      owner: true,
+      resource: 'time-slot',
+    }),
+  );
+};
+
+export const BlockMyClinicTimeSlotDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.TIME_SLOT_BLOCK],
+      clinicOwner: true,
+      resource: 'time-slot',
+    }),
+  );
+};
+
+export const UnblockMyClinicTimeSlotDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.TIME_SLOT_UNBLOCK],
+      clinicOwner: true,
+      resource: 'time-slot',
     }),
   );
 };
