@@ -3,7 +3,7 @@ import { TimeSlot } from '@/modules/time-slot/entities';
 import { TimeSlotStatus } from '@/modules/time-slot/enums';
 
 /** TimeSlot without relation data. */
-export type SafeTimeSlot = Omit<TimeSlot, 'schedule' | 'doctor' | 'clinic'>;
+export type SafeTimeSlot = Omit<TimeSlot, 'schedule' | 'appointments'>;
 
 /** TimeSlot API response. */
 export interface TimeSlotResponse {
@@ -18,8 +18,6 @@ export interface TimeSlotsResponse {
 /** Parameters for creating a new time slot. */
 export interface CreateTimeSlotPayload {
   scheduleId: string;
-  doctorId: string;
-  clinicId: string;
   date: string;
   startTime: string;
   endTime: string;
@@ -33,17 +31,62 @@ export interface FindTimeSlotByIdPayload {
   manager?: EntityManager;
 }
 
-/** Parameters for finding all time slots belonging to a doctor on a specific date. */
-export interface FindTimeSlotsByDoctorAndDatePayload {
+/** Parameters for finding available time slots for a doctor. */
+export interface FindAvailableByDoctorPayload {
   doctorId: string;
-  date: string;
+  date?: string;
   manager?: EntityManager;
 }
 
-/** Parameters for finding available time slots belonging to a doctor on a specific date. */
-export interface FindAvailableTimeSlotsPayload {
+/** Parameters for finding available time slots for a doctor in a clinic. */
+export interface FindAvailableByDoctorAndClinicPayload {
   doctorId: string;
-  date: string;
+  clinicId: string;
+  date?: string;
+  manager?: EntityManager;
+}
+
+/** Parameters for finding available time slots for a clinic. */
+export interface FindAvailableByClinicPayload {
+  clinicId: string;
+  date?: string;
+  manager?: EntityManager;
+}
+
+/** Parameters for finding the authenticated doctor's time slots. */
+export interface FindMyTimeSlotsPayload {
+  userId: string;
+  date?: string;
+  manager?: EntityManager;
+}
+
+/** Parameters for finding the authenticated doctor's time slots in a clinic. */
+export interface FindMyByClinicTimeSlotsPayload {
+  userId: string;
+  clinicId: string;
+  date?: string;
+  manager?: EntityManager;
+}
+
+/** Parameters for finding all time slots in the authenticated admin's clinic. */
+export interface FindMyClinicTimeSlotsPayload {
+  userId: string;
+  date?: string;
+  manager?: EntityManager;
+}
+
+/** Parameters for finding a doctor's time slots in the authenticated admin's clinic. */
+export interface FindMyClinicDoctorTimeSlotsPayload {
+  userId: string;
+  doctorId: string;
+  date?: string;
+  manager?: EntityManager;
+}
+
+/** Parameters for finding a time slot in the authenticated admin's clinic. */
+export interface GetMyClinicTimeSlotPayload {
+  id: string;
+  userId: string;
   manager?: EntityManager;
 }
 
