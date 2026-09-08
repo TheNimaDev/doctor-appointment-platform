@@ -13,7 +13,9 @@ import { DoctorSpecialty } from '@/modules/doctor-specialty/entities';
 interface OwnershipConfig {
   entity: EntityTarget<ObjectLiteral>;
   relations: FindOptionsRelations<ObjectLiteral>;
-  getUserId: (resource: ObjectLiteral) => string | undefined;
+
+  getUserId?: (resource: ObjectLiteral) => string | undefined;
+  getClinicOwnerId?: (resource: ObjectLiteral) => string | undefined;
 }
 
 export const OWNERSHIP_CONFIG: Record<string, OwnershipConfig> = {
@@ -33,6 +35,7 @@ export const OWNERSHIP_CONFIG: Record<string, OwnershipConfig> = {
     entity: Clinic,
     relations: {},
     getUserId: (resource) => resource.ownerId,
+    getClinicOwnerId: (resource) => resource.ownerId,
   },
 
   'appointment-doctor': {
@@ -42,19 +45,29 @@ export const OWNERSHIP_CONFIG: Record<string, OwnershipConfig> = {
         schedule: {
           doctorClinic: {
             doctor: true,
+            clinic: true,
           },
         },
       },
     },
     getUserId: (resource) => resource.timeSlot?.schedule?.doctorClinic?.doctor?.userId,
+    getClinicOwnerId: (resource) => resource.timeSlot?.schedule?.doctorClinic?.clinic?.ownerId,
   },
 
   'appointment-patient': {
     entity: Appointment,
     relations: {
+      timeSlot: {
+        schedule: {
+          doctorClinic: {
+            clinic: true,
+          },
+        },
+      },
       patient: true,
     },
     getUserId: (resource) => resource.patient?.userId,
+    getClinicOwnerId: (resource) => resource.timeSlot?.schedule?.doctorClinic?.clinic?.ownerId,
   },
 
   'doctor-schedule': {
@@ -62,9 +75,11 @@ export const OWNERSHIP_CONFIG: Record<string, OwnershipConfig> = {
     relations: {
       doctorClinic: {
         doctor: true,
+        clinic: true,
       },
     },
     getUserId: (resource) => resource.doctorClinic?.doctor?.userId,
+    getClinicOwnerId: (resource) => resource.doctorClinic?.clinic?.ownerId,
   },
 
   'time-slot': {
@@ -73,10 +88,12 @@ export const OWNERSHIP_CONFIG: Record<string, OwnershipConfig> = {
       schedule: {
         doctorClinic: {
           doctor: true,
+          clinic: true,
         },
       },
     },
     getUserId: (resource) => resource.schedule?.doctorClinic?.doctor?.userId,
+    getClinicOwnerId: (resource) => resource.schedule?.doctorClinic?.clinic?.ownerId,
   },
 
   session: {
