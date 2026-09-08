@@ -26,26 +26,27 @@ export class OwnershipGuard implements CanActivate {
       context.getClass(),
     ]) ?? {
       owner: false,
+      clinicOwner: false,
       permissions: [],
       requiredAll: false,
       resource: undefined,
       resourceIdParam: 'id',
     };
 
-    if (!metadata.owner) {
+    if (!metadata.owner && !metadata.clinicOwner) {
       return true;
     }
 
     if (!metadata.resource) {
       throw new InternalServerErrorException({
-        message: 'Ownership resource is required when owner is enabled.',
+        message: 'Ownership resource is required when ownership check is enabled.',
         error: 'Ownership Resource Not Defined',
       } as BaseException);
     }
 
     if (!metadata.resourceIdParam) {
       throw new InternalServerErrorException({
-        message: 'Ownership resource ID parameter is required when owner is enabled.',
+        message: 'Ownership resource ID parameter is required when ownership check is enabled.',
         error: 'Ownership Resource ID Parameter Not Defined',
       } as BaseException);
     }
@@ -92,19 +93,44 @@ export class OwnershipGuard implements CanActivate {
       } as BaseException);
     }
 
-    const ownerUserId = config.getUserId(resource);
-    if (!ownerUserId) {
-      throw new InternalServerErrorException({
-        message: `Unable to resolve owner for resource: ${metadata.resource}.`,
-        error: 'Ownership Resolution Failed',
-      } as BaseException);
+    if (metadata.owner) {
+      const ownerUserId = config.getUserId?.(resource);
+
+      if (!ownerUserId) {
+        throw new InternalServerErrorException({
+          message: `Unable to resolve owner for resource: ${metadata.resource}.`,
+          error: 'Ownership Resolution Failed',
+        } as BaseException);
+      }
+
+      if (ownerUserId !== userId) {
+        throw new ForbiddenException({
+          message: `You are not the owner of this ${this.formatResourceName(metadata.resource)}.`,
+          error: 'Ownership Verification Failed',
+        } as BaseException);
+      }
+
+      return true;
     }
 
-    if (ownerUserId !== userId) {
-      throw new ForbiddenException({
-        message: `You are not the owner of this ${this.formatResourceName(metadata.resource)}.`,
-        error: 'Ownership Verification Failed',
-      } as BaseException);
+    if (metadata.clinicOwner) {
+      const clinicOwnerId = config.getClinicOwnerId?.(resource);
+
+      if (!clinicOwnerId) {
+        throw new InternalServerErrorException({
+          message: `Unable to resolve clinic owner for resource: ${metadata.resource}.`,
+          error: 'Clinic Ownership Resolution Failed',
+        } as BaseException);
+      }
+
+      if (clinicOwnerId !== userId) {
+        throw new ForbiddenException({
+          message: `This ${this.formatResourceName(metadata.resource)} does not belong to your clinic.`,
+          error: 'Clinic Ownership Verification Failed',
+        } as BaseException);
+      }
+
+      return true;
     }
 
     return true;
