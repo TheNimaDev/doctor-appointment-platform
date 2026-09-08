@@ -1,23 +1,30 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { TimeSlot } from './entities';
 import { TimeSlotStatus } from './enums';
-import { checkDatabaseError, isDateTimeExpired } from '@/lib';
+import { TIME_SLOT_ALLOWED_TRANSITIONS } from './constants';
+import { DatabaseService } from '@/modules/database/database.service';
+import { DoctorService } from '@/modules/doctor/doctor.service';
 import {
   BaseException,
   CreateTimeSlotPayload,
   DeleteTimeSlotPayload,
-  FindAvailableTimeSlotsPayload,
+  FindAvailableByClinicPayload,
+  FindAvailableByDoctorAndClinicPayload,
+  FindAvailableByDoctorPayload,
+  FindMyByClinicTimeSlotsPayload,
+  FindMyClinicDoctorTimeSlotsPayload,
+  FindMyClinicTimeSlotsPayload,
+  FindMyTimeSlotsPayload,
   FindTimeSlotByIdPayload,
-  FindTimeSlotsByDoctorAndDatePayload,
+  GetMyClinicTimeSlotPayload,
   TimeSlotResponse,
   TimeSlotsResponse,
   UpdateTimeSlotStatusHandlerPayload,
   UpdateTimeSlotStatusPayload,
 } from '@/types';
-import { TIME_SLOT_ALLOWED_TRANSITIONS } from './constants';
-import { DatabaseService } from '../database/database.service';
+import { checkDatabaseError, isDateTimeExpired } from '@/lib';
 
 @Injectable()
 export class TimeSlotService {
@@ -26,6 +33,7 @@ export class TimeSlotService {
     private readonly timeSlotRepository: Repository<TimeSlot>,
 
     private readonly databaseService: DatabaseService,
+    private readonly doctorService: DoctorService,
   ) {}
 
   /**
@@ -40,9 +48,6 @@ export class TimeSlotService {
 
   /**
    * Create a new time slot.
-   *
-   * This method is intended to be used internally by the
-   * time-slot generation process.
    */
   async createTimeSlot(payload: CreateTimeSlotPayload): Promise<TimeSlotResponse> {
     const repository = this.getRepository(payload.manager);
@@ -91,17 +96,25 @@ export class TimeSlotService {
   }
 
   /**
-   * Get all time slots for a doctor on a specific date.
+   * Get available time slots for a doctor.
    */
-  async findByDoctorAndDate(payload: FindTimeSlotsByDoctorAndDatePayload): Promise<TimeSlotsResponse> {
+  async findAvailableByDoctor(payload: FindAvailableByDoctorPayload): Promise<TimeSlotsResponse> {
     const repository = this.getRepository(payload.manager);
 
     const timeSlots = await repository.find({
       where: {
-        doctorId: payload.doctorId,
-        date: payload.date,
+        schedule: {
+          doctorClinic: {
+            doctorId: payload.doctorId,
+          },
+        },
+        ...(payload.date && {
+          date: payload.date,
+        }),
+        status: TimeSlotStatus.AVAILABLE,
       },
       order: {
+        date: 'ASC',
         startTime: 'ASC',
       },
     });
@@ -112,24 +125,222 @@ export class TimeSlotService {
   }
 
   /**
-   * Get all available time slots for a doctor on a specific date.
+   * Get available time slots for a doctor in a specific clinic.
    */
-  async findAvailable(payload: FindAvailableTimeSlotsPayload): Promise<TimeSlotsResponse> {
+  async findAvailableByDoctorAndClinic(payload: FindAvailableByDoctorAndClinicPayload): Promise<TimeSlotsResponse> {
     const repository = this.getRepository(payload.manager);
 
     const timeSlots = await repository.find({
       where: {
-        doctorId: payload.doctorId,
-        date: payload.date,
+        schedule: {
+          doctorClinic: {
+            doctorId: payload.doctorId,
+            clinicId: payload.clinicId,
+          },
+        },
+        ...(payload.date && {
+          date: payload.date,
+        }),
         status: TimeSlotStatus.AVAILABLE,
       },
       order: {
+        date: 'ASC',
         startTime: 'ASC',
       },
     });
 
     return {
       timeSlots,
+    };
+  }
+
+  /**
+   * Get available time slots for a clinic.
+   *
+   * Public route.
+   */
+  async findAvailableByClinic(payload: FindAvailableByClinicPayload): Promise<TimeSlotsResponse> {
+    const repository = this.getRepository(payload.manager);
+
+    const timeSlots = await repository.find({
+      where: {
+        schedule: {
+          doctorClinic: {
+            clinicId: payload.clinicId,
+          },
+        },
+        ...(payload.date && {
+          date: payload.date,
+        }),
+        status: TimeSlotStatus.AVAILABLE,
+      },
+      order: {
+        date: 'ASC',
+        startTime: 'ASC',
+      },
+    });
+
+    return {
+      timeSlots,
+    };
+  }
+
+  /**
+   * Get all time slots belonging to the authenticated doctor.
+   */
+  async findMy(payload: FindMyTimeSlotsPayload): Promise<TimeSlotsResponse> {
+    const repository = this.getRepository(payload.manager);
+
+    const { doctor } = await this.doctorService.resolveDoctor({
+      userId: payload.userId,
+      manager: payload.manager,
+    });
+
+    const timeSlots = await repository.find({
+      where: {
+        schedule: {
+          doctorClinic: {
+            doctorId: doctor.id,
+          },
+        },
+        ...(payload.date && {
+          date: payload.date,
+        }),
+      },
+      order: {
+        date: 'ASC',
+        startTime: 'ASC',
+      },
+    });
+
+    return {
+      timeSlots,
+    };
+  }
+
+  /**
+   * Get the authenticated doctor's time slots in a specific clinic.
+   */
+  async findMyByClinic(payload: FindMyByClinicTimeSlotsPayload): Promise<TimeSlotsResponse> {
+    const repository = this.getRepository(payload.manager);
+
+    const { doctor } = await this.doctorService.resolveDoctor({
+      userId: payload.userId,
+      manager: payload.manager,
+    });
+
+    const timeSlots = await repository.find({
+      where: {
+        schedule: {
+          doctorClinic: {
+            doctorId: doctor.id,
+            clinicId: payload.clinicId,
+          },
+        },
+        ...(payload.date && {
+          date: payload.date,
+        }),
+      },
+      order: {
+        date: 'ASC',
+        startTime: 'ASC',
+      },
+    });
+
+    return {
+      timeSlots,
+    };
+  }
+
+  /**
+   * Get all time slots in the authenticated admin's clinic..
+   */
+  async findMyClinic(payload: FindMyClinicTimeSlotsPayload): Promise<TimeSlotsResponse> {
+    const repository = this.getRepository(payload.manager);
+
+    const timeSlots = await repository.find({
+      where: {
+        schedule: {
+          doctorClinic: {
+            clinic: {
+              ownerId: payload.userId,
+            },
+          },
+        },
+        ...(payload.date && {
+          date: payload.date,
+        }),
+      },
+      order: {
+        date: 'ASC',
+        startTime: 'ASC',
+      },
+    });
+
+    return {
+      timeSlots,
+    };
+  }
+
+  /**
+   * Get a specific doctor's time slots in the authenticated admin's clinic.
+   */
+  async findMyClinicDoctor(payload: FindMyClinicDoctorTimeSlotsPayload): Promise<TimeSlotsResponse> {
+    const repository = this.getRepository(payload.manager);
+
+    const timeSlots = await repository.find({
+      where: {
+        schedule: {
+          doctorClinic: {
+            doctorId: payload.doctorId,
+            clinic: {
+              ownerId: payload.userId,
+            },
+          },
+        },
+        ...(payload.date && {
+          date: payload.date,
+        }),
+      },
+      order: {
+        date: 'ASC',
+        startTime: 'ASC',
+      },
+    });
+
+    return {
+      timeSlots,
+    };
+  }
+
+  /**
+   * Get a specific time slot from the authenticated admin's clinic.
+   */
+  async getMyClinicTimeSlot(payload: GetMyClinicTimeSlotPayload): Promise<TimeSlotResponse> {
+    const repository = this.getRepository(payload.manager);
+
+    const timeSlot = await repository.findOne({
+      where: {
+        id: payload.id,
+        schedule: {
+          doctorClinic: {
+            clinic: {
+              ownerId: payload.userId,
+            },
+          },
+        },
+      },
+    });
+
+    if (!timeSlot) {
+      throw new NotFoundException({
+        message: 'Time slot not found in your clinic.',
+        error: 'Time Slot Not Found',
+      } as BaseException);
+    }
+
+    return {
+      timeSlot,
     };
   }
 
@@ -149,16 +360,11 @@ export class TimeSlotService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const timeSlot = await repository.findOne({
-        where: {
-          id: payload.id,
-        },
-        ...(payload.manager && {
-          lock: {
-            mode: 'pessimistic_write',
-          },
-        }),
+      const query = repository.createQueryBuilder('timeSlot').where('timeSlot.id = :id', {
+        id: payload.id,
       });
+
+      const timeSlot = await query.setLock('pessimistic_write').getOne();
 
       if (!timeSlot) {
         throw new NotFoundException({
