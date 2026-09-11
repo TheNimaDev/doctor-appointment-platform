@@ -1,7 +1,6 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
 
-import { Permission, Public } from '@/common';
-import { PERMISSIONS } from '@/common/constants';
+import { Permission, Public, PERMISSIONS } from '@/common';
 
 export const FindAvailableTimeSlotsDecorators = () => {
   return applyDecorators(
