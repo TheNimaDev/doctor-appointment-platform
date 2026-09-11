@@ -1,6 +1,5 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
-
-import { Permission, PERMISSIONS } from '@/common';
+import { Permission, PERMISSIONS, Public } from '@/common';
 
 export const CreateSpecialtyDecorators = () => {
   return applyDecorators(
@@ -14,6 +13,7 @@ export const CreateSpecialtyDecorators = () => {
 export const FindSpecialtiesDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    Public(),
     Permission({
       permissions: [PERMISSIONS.SPECIALTY_READ],
     }),
@@ -23,6 +23,7 @@ export const FindSpecialtiesDecorators = () => {
 export const FindSpecialtyDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    Public(),
     Permission({
       permissions: [PERMISSIONS.SPECIALTY_READ],
     }),
