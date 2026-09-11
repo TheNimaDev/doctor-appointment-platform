@@ -15,6 +15,7 @@ import { RefreshToken } from './entities';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import ms, { StringValue } from 'ms';
+import { SessionService } from '../session/session.service';
 
 @Injectable()
 export class RefreshTokenService {
@@ -22,6 +23,7 @@ export class RefreshTokenService {
     @InjectRepository(RefreshToken)
     private readonly refreshTokenRepository: Repository<RefreshToken>,
     private readonly configService: ConfigService,
+    private readonly sessionService: SessionService,
   ) {}
 
   /**
@@ -41,8 +43,13 @@ export class RefreshTokenService {
     const repository = this.getRepository(payload.manager);
 
     try {
+      const { session } = await this.sessionService.getById({
+        id: payload.sessionId,
+        manager: payload.manager,
+      });
+
       const existingToken = await this.findActiveRefreshToken({
-        sessionId: payload.sessionId,
+        sessionId: session.id,
         manager: payload.manager,
       });
 
@@ -65,7 +72,7 @@ export class RefreshTokenService {
 
       const refreshTokenEntity = repository.create({
         ...payload.clientInfo,
-        sessionId: payload.sessionId,
+        sessionId: session.id,
         tokenHash,
         expiresAt,
       });
@@ -90,9 +97,14 @@ export class RefreshTokenService {
   async findActiveRefreshToken(payload: FindActiveRefreshTokenPayload): Promise<RefreshToken | null> {
     const repository = this.getRepository(payload.manager);
 
+    const { session } = await this.sessionService.getById({
+      id: payload.sessionId,
+      manager: payload.manager,
+    });
+
     return repository.findOne({
       where: {
-        sessionId: payload.sessionId,
+        sessionId: session.id,
         revokedAt: IsNull(),
         expiresAt: MoreThan(getServerDateTime()),
       },
