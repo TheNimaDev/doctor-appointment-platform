@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { TimeSlot } from './entities';
@@ -25,6 +25,8 @@ import {
   UpdateTimeSlotStatusPayload,
 } from '@/types';
 import { checkDatabaseError, isDateTimeExpired } from '@/lib';
+import { DoctorClinicService } from '../doctor-clinic/doctor-clinic.service';
+import { ClinicService } from '../clinic/clinic.service';
 
 @Injectable()
 export class TimeSlotService {
@@ -34,6 +36,8 @@ export class TimeSlotService {
 
     private readonly databaseService: DatabaseService,
     private readonly doctorService: DoctorService,
+    private readonly doctorClinicService: DoctorClinicService,
+    private readonly clinicService: ClinicService,
   ) {}
 
   /**
@@ -101,11 +105,16 @@ export class TimeSlotService {
   async findAvailableByDoctor(payload: FindAvailableByDoctorPayload): Promise<TimeSlotsResponse> {
     const repository = this.getRepository(payload.manager);
 
+    const { doctor } = await this.doctorService.findById({
+      id: payload.doctorId,
+      manager: payload.manager,
+    });
+
     const timeSlots = await repository.find({
       where: {
         schedule: {
           doctorClinic: {
-            doctorId: payload.doctorId,
+            doctorId: doctor.id,
           },
         },
         ...(payload.date && {
@@ -130,13 +139,24 @@ export class TimeSlotService {
   async findAvailableByDoctorAndClinic(payload: FindAvailableByDoctorAndClinicPayload): Promise<TimeSlotsResponse> {
     const repository = this.getRepository(payload.manager);
 
+    const { doctor } = await this.doctorService.findById({
+      id: payload.doctorId,
+      manager: payload.manager,
+    });
+    const { clinic } = await this.clinicService.findById({
+      id: payload.clinicId,
+      manager: payload.manager,
+    });
+    const { doctorClinic } = await this.doctorClinicService.findByDoctorAndClinic({
+      clinicId: clinic.id,
+      doctorId: doctor.id,
+      manager: payload.manager,
+    });
+
     const timeSlots = await repository.find({
       where: {
         schedule: {
-          doctorClinic: {
-            doctorId: payload.doctorId,
-            clinicId: payload.clinicId,
-          },
+          doctorClinicId: doctorClinic.id,
         },
         ...(payload.date && {
           date: payload.date,
@@ -162,11 +182,16 @@ export class TimeSlotService {
   async findAvailableByClinic(payload: FindAvailableByClinicPayload): Promise<TimeSlotsResponse> {
     const repository = this.getRepository(payload.manager);
 
+    const { clinic } = await this.clinicService.findById({
+      id: payload.clinicId,
+      manager: payload.manager,
+    });
+
     const timeSlots = await repository.find({
       where: {
         schedule: {
           doctorClinic: {
-            clinicId: payload.clinicId,
+            clinicId: clinic.id,
           },
         },
         ...(payload.date && {
@@ -229,13 +254,20 @@ export class TimeSlotService {
       manager: payload.manager,
     });
 
+    const { clinic } = await this.clinicService.findById({
+      id: payload.clinicId,
+      manager: payload.manager,
+    });
+    const { doctorClinic } = await this.doctorClinicService.findByDoctorAndClinic({
+      clinicId: clinic.id,
+      doctorId: doctor.id,
+      manager: payload.manager,
+    });
+
     const timeSlots = await repository.find({
       where: {
         schedule: {
-          doctorClinic: {
-            doctorId: doctor.id,
-            clinicId: payload.clinicId,
-          },
+          doctorClinicId: doctorClinic.id,
         },
         ...(payload.date && {
           date: payload.date,
@@ -253,18 +285,21 @@ export class TimeSlotService {
   }
 
   /**
-   * Get all time slots in the authenticated admin's clinic..
+   * Get all time slots in the authenticated admin's clinic.
    */
   async findMyClinic(payload: FindMyClinicTimeSlotsPayload): Promise<TimeSlotsResponse> {
     const repository = this.getRepository(payload.manager);
+
+    const { clinic } = await this.clinicService.findByOwnerId({
+      ownerId: payload.userId,
+      manager: payload.manager,
+    });
 
     const timeSlots = await repository.find({
       where: {
         schedule: {
           doctorClinic: {
-            clinic: {
-              ownerId: payload.userId,
-            },
+            clinicId: clinic.id,
           },
         },
         ...(payload.date && {
@@ -288,15 +323,21 @@ export class TimeSlotService {
   async findMyClinicDoctor(payload: FindMyClinicDoctorTimeSlotsPayload): Promise<TimeSlotsResponse> {
     const repository = this.getRepository(payload.manager);
 
+    const { clinic } = await this.clinicService.findByOwnerId({
+      ownerId: payload.userId,
+      manager: payload.manager,
+    });
+
+    const { doctorClinic } = await this.doctorClinicService.findByDoctorAndClinic({
+      clinicId: clinic.id,
+      doctorId: payload.doctorId,
+      manager: payload.manager,
+    });
+
     const timeSlots = await repository.find({
       where: {
         schedule: {
-          doctorClinic: {
-            doctorId: payload.doctorId,
-            clinic: {
-              ownerId: payload.userId,
-            },
-          },
+          doctorClinicId: doctorClinic.id,
         },
         ...(payload.date && {
           date: payload.date,
@@ -319,14 +360,17 @@ export class TimeSlotService {
   async getMyClinicTimeSlot(payload: GetMyClinicTimeSlotPayload): Promise<TimeSlotResponse> {
     const repository = this.getRepository(payload.manager);
 
+    const { clinic } = await this.clinicService.findByOwnerId({
+      ownerId: payload.userId,
+      manager: payload.manager,
+    });
+
     const timeSlot = await repository.findOne({
       where: {
         id: payload.id,
         schedule: {
           doctorClinic: {
-            clinic: {
-              ownerId: payload.userId,
-            },
+            clinicId: clinic.id,
           },
         },
       },
