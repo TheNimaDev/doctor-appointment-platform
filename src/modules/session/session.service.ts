@@ -130,7 +130,7 @@ export class SessionService {
   /**
    * Get an active session by ID.
    */
-  async getById(payload: FindSessionByIdPayload): Promise<SessionResponse | null> {
+  async getById(payload: FindSessionByIdPayload): Promise<SessionResponse> {
     const repository = this.getRepository(payload.manager);
 
     const session = await repository.findOne({
@@ -141,7 +141,10 @@ export class SessionService {
     });
 
     if (!session) {
-      return null;
+      throw new NotFoundException({
+        message: 'Active session not found in database.',
+        error: 'Session Not Found',
+      } as BaseException);
     }
 
     return {
