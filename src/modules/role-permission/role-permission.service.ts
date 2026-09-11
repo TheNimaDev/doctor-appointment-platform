@@ -42,20 +42,20 @@ export class RolePermissionService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      await this.roleService.getById({
+      const { role } = await this.roleService.getById({
         id: payload.roleId,
         manager: payload.manager,
       });
 
-      await this.permissionService.getById({
+      const { permission } = await this.permissionService.getById({
         id: payload.permissionId,
         manager: payload.manager,
       });
 
       const existing = await repository.findOne({
         where: {
-          roleId: payload.roleId,
-          permissionId: payload.permissionId,
+          roleId: role.id,
+          permissionId: permission.id,
         },
       });
 
@@ -67,8 +67,8 @@ export class RolePermissionService {
       }
 
       const rolePermission = repository.create({
-        roleId: payload.roleId,
-        permissionId: payload.permissionId,
+        roleId: role.id,
+        permissionId: permission.id,
       });
 
       const savedRolePermission = await repository.save(rolePermission);
@@ -94,9 +94,14 @@ export class RolePermissionService {
   async findAll(payload: FindRolePermissionsPayload): Promise<RolePermissionsResponse> {
     const repository = this.getRepository(payload.manager);
 
+    const { role } = await this.roleService.getById({
+      id: payload.roleId,
+      manager: payload.manager,
+    });
+
     const rolePermissions = await repository.find({
       where: {
-        roleId: payload.roleId,
+        roleId: role.id,
       },
     });
 
@@ -111,10 +116,20 @@ export class RolePermissionService {
   async findOne(payload: FindRolePermissionPayload): Promise<RolePermissionResponse> {
     const repository = this.getRepository(payload.manager);
 
+    const { role } = await this.roleService.getById({
+      id: payload.roleId,
+      manager: payload.manager,
+    });
+
+    const { permission } = await this.permissionService.getById({
+      id: payload.permissionId,
+      manager: payload.manager,
+    });
+
     const rolePermission = await repository.findOne({
       where: {
-        roleId: payload.roleId,
-        permissionId: payload.permissionId,
+        roleId: role.id,
+        permissionId: permission.id,
       },
     });
 
@@ -137,8 +152,13 @@ export class RolePermissionService {
     const repository = this.getRepository(payload.manager);
 
     try {
+      const { role } = await this.roleService.getById({
+        id: payload.roleId,
+        manager: payload.manager,
+      });
+
       const result = await repository.softDelete({
-        roleId: payload.roleId,
+        roleId: role.id,
         permissionId: payload.permissionId,
       });
 
