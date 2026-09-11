@@ -115,9 +115,14 @@ export class UserRoleService {
   async findAll(payload: FindUserRolesPayload): Promise<UserRolesResponse> {
     const repository = this.getRepository(payload.manager);
 
+    const { user } = await this.userService.getById({
+      id: payload.userId,
+      manager: payload.manager,
+    });
+
     const userRoles = await repository.find({
       where: {
-        userId: payload.userId,
+        userId: user.id,
       },
     });
 
@@ -132,10 +137,20 @@ export class UserRoleService {
   async findOne(payload: FindUserRolePayload): Promise<UserRoleResponse> {
     const repository = this.getRepository(payload.manager);
 
+    const { user } = await this.userService.getById({
+      id: payload.userId,
+      manager: payload.manager,
+    });
+
+    const { role } = await this.roleService.getById({
+      id: payload.roleId,
+      manager: payload.manager,
+    });
+
     const userRole = await repository.findOne({
       where: {
-        userId: payload.userId,
-        roleId: payload.roleId,
+        userId: user.id,
+        roleId: role.id,
       },
     });
 
@@ -158,9 +173,19 @@ export class UserRoleService {
     const repository = this.getRepository(payload.manager);
 
     try {
+      const { user } = await this.userService.getById({
+        id: payload.userId,
+        manager: payload.manager,
+      });
+
+      const { role } = await this.roleService.getById({
+        id: payload.roleId,
+        manager: payload.manager,
+      });
+
       const result = await repository.softDelete({
-        userId: payload.userId,
-        roleId: payload.roleId,
+        userId: user.id,
+        roleId: role.id,
       });
 
       if (result.affected === 0) {
@@ -188,9 +213,19 @@ export class UserRoleService {
     const repository = this.getRepository(payload.manager);
 
     try {
+      const { user } = await this.userService.getById({
+        id: payload.userId,
+        manager: payload.manager,
+      });
+
+      const { role } = await this.roleService.getById({
+        id: payload.roleId,
+        manager: payload.manager,
+      });
+
       const userRole = repository.create({
-        userId: payload.userId,
-        roleId: payload.roleId,
+        userId: user.id,
+        roleId: role.id,
       });
 
       const savedUserRole = await repository.save(userRole);
