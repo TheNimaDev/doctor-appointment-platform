@@ -77,6 +77,19 @@ export type DoctorIdentifier =
     };
 
 /**
+ * Identifies a resource by either user ID or clinic owner ID.
+ */
+export type DoctorOrClinicOwnerIdentifier =
+  | {
+      userId: string;
+      clinicOwnerId?: never;
+    }
+  | {
+      clinicOwnerId: string;
+      userId?: never;
+    };
+
+/**
  * Parameters for resolving a doctor by user ID or doctor ID.
  */
 export type ResolveDoctorPayload = DoctorIdentifier & {
