@@ -5,9 +5,10 @@ import { DoctorScheduleController } from './doctor-schedule.controller';
 import { DoctorScheduleService } from './doctor-schedule.service';
 import { DoctorClinicModule } from '@/modules/doctor-clinic';
 import { DoctorModule } from '@/modules/doctor/doctor.module';
+import { ClinicModule } from '@/modules/clinic';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([DoctorSchedule]), DoctorClinicModule, DoctorModule],
+  imports: [TypeOrmModule.forFeature([DoctorSchedule]), DoctorClinicModule, DoctorModule, ClinicModule],
   controllers: [DoctorScheduleController],
   providers: [DoctorScheduleService],
 })
