@@ -16,7 +16,7 @@ export interface DoctorSpecialtiesResponse {
 
 /** Parameters for adding a specialty to a doctor. */
 export interface AddDoctorSpecialtyPayload {
-  doctorId: string;
+  userId: string;
   specialtyId: string;
   isPrimary?: boolean;
   manager?: EntityManager;
@@ -37,14 +37,14 @@ export interface FindDoctorSpecialtiesPayload {
 
 /** Parameters for setting a doctor's primary specialty. */
 export interface SetPrimaryDoctorSpecialtyPayload {
-  doctorId: string;
+  userId: string;
   specialtyId: string;
   manager?: EntityManager;
 }
 
 /** Parameters for removing a specialty from a doctor. */
 export interface RemoveDoctorSpecialtyPayload {
-  doctorId: string;
+  userId: string;
   specialtyId: string;
   manager?: EntityManager;
 }
