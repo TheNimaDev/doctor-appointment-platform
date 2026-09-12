@@ -1,27 +1,12 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
-import { Permission, PERMISSIONS } from '@/common';
 
-export const CreateMyDoctorScheduleDecorators = () => {
+import { Permission, Public, PERMISSIONS } from '@/common';
+
+export const FindAllDoctorSchedulesDecorators = () => {
   return applyDecorators(
-    HttpCode(HttpStatus.CREATED),
-
+    HttpCode(HttpStatus.OK),
     Permission({
-      permissions: [PERMISSIONS.DOCTOR_SCHEDULE_CREATE],
-      owner: true,
-      resource: 'doctor',
-    }),
-  );
-};
-
-export const CreateDoctorScheduleDecorators = () => {
-  return applyDecorators(
-    HttpCode(HttpStatus.CREATED),
-
-    Permission({
-      permissions: [PERMISSIONS.DOCTOR_SCHEDULE_CREATE],
-      owner: true,
-      resource: 'clinic',
-      resourceIdParam: 'clinicId',
+      permissions: [PERMISSIONS.OWNER_ALL],
     }),
   );
 };
@@ -29,7 +14,7 @@ export const CreateDoctorScheduleDecorators = () => {
 export const FindDoctorSchedulesDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
-
+    Public(),
     Permission({
       permissions: [PERMISSIONS.DOCTOR_SCHEDULE_READ],
     }),
@@ -39,9 +24,75 @@ export const FindDoctorSchedulesDecorators = () => {
 export const FindDoctorScheduleDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
-
+    Public(),
     Permission({
       permissions: [PERMISSIONS.DOCTOR_SCHEDULE_READ],
+    }),
+  );
+};
+
+export const FindMyDoctorScheduleDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.DOCTOR_SCHEDULE_READ],
+    }),
+  );
+};
+
+export const FindMyDoctorSchedulesDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.DOCTOR_SCHEDULE_READ],
+    }),
+  );
+};
+
+export const FindMyDoctorClinicSchedulesDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.DOCTOR_SCHEDULE_READ],
+    }),
+  );
+};
+
+export const FindMyClinicSchedulesDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.DOCTOR_SCHEDULE_READ],
+    }),
+  );
+};
+
+export const FindDoctorScheduleByClinicOwnerDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.DOCTOR_SCHEDULE_READ],
+      clinicOwner: true,
+      resource: 'doctor-schedule',
+      resourceIdParam: 'scheduleId',
+    }),
+  );
+};
+
+export const FindDoctorClinicSchedulesForClinicDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.DOCTOR_SCHEDULE_READ],
+    }),
+  );
+};
+
+export const CreateMyDoctorScheduleDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.CREATED),
+    Permission({
+      permissions: [PERMISSIONS.DOCTOR_SCHEDULE_CREATE],
     }),
   );
 };
@@ -49,11 +100,8 @@ export const FindDoctorScheduleDecorators = () => {
 export const UpdateMyDoctorScheduleDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
-
     Permission({
       permissions: [PERMISSIONS.DOCTOR_SCHEDULE_UPDATE],
-      owner: true,
-      resource: 'doctor',
     }),
   );
 };
@@ -61,12 +109,11 @@ export const UpdateMyDoctorScheduleDecorators = () => {
 export const UpdateDoctorScheduleDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
-
     Permission({
       permissions: [PERMISSIONS.DOCTOR_SCHEDULE_UPDATE],
-      owner: true,
-      resource: 'clinic',
-      resourceIdParam: 'clinicId',
+      clinicOwner: true,
+      resource: 'doctor-schedule',
+      resourceIdParam: 'scheduleId',
     }),
   );
 };
@@ -74,11 +121,8 @@ export const UpdateDoctorScheduleDecorators = () => {
 export const UpdateMyDoctorScheduleStatusDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
-
     Permission({
       permissions: [PERMISSIONS.DOCTOR_SCHEDULE_UPDATE_STATUS],
-      owner: true,
-      resource: 'doctor',
     }),
   );
 };
@@ -86,12 +130,11 @@ export const UpdateMyDoctorScheduleStatusDecorators = () => {
 export const UpdateDoctorScheduleStatusDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
-
     Permission({
       permissions: [PERMISSIONS.DOCTOR_SCHEDULE_UPDATE_STATUS],
-      owner: true,
-      resource: 'clinic',
-      resourceIdParam: 'clinicId',
+      clinicOwner: true,
+      resource: 'doctor-schedule',
+      resourceIdParam: 'scheduleId',
     }),
   );
 };
@@ -99,11 +142,8 @@ export const UpdateDoctorScheduleStatusDecorators = () => {
 export const DeleteMyDoctorScheduleDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
-
     Permission({
       permissions: [PERMISSIONS.DOCTOR_SCHEDULE_DELETE],
-      owner: true,
-      resource: 'doctor',
     }),
   );
 };
@@ -111,12 +151,11 @@ export const DeleteMyDoctorScheduleDecorators = () => {
 export const DeleteDoctorScheduleDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
-
     Permission({
       permissions: [PERMISSIONS.DOCTOR_SCHEDULE_DELETE],
-      owner: true,
-      resource: 'clinic',
-      resourceIdParam: 'clinicId',
+      clinicOwner: true,
+      resource: 'doctor-schedule',
+      resourceIdParam: 'scheduleId',
     }),
   );
 };
