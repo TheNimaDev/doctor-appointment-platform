@@ -1,7 +1,7 @@
 import { EntityManager } from 'typeorm';
 import { DoctorSchedule } from '@/modules/doctor-schedule/entities';
 import { DayOfWeek, ScheduleStatus } from '@/modules/doctor-schedule/enums';
-import { DoctorIdentifier } from './doctor.types';
+import { DoctorIdentifier, DoctorOrClinicOwnerIdentifier } from './doctor.types';
 
 /** Doctor schedule without relation data. */
 export type SafeDoctorSchedule = Omit<DoctorSchedule, 'doctorClinic' | 'timeSlots'>;
@@ -17,7 +17,8 @@ export interface DoctorSchedulesResponse {
 }
 
 /** Parameters for creating a doctor schedule. */
-export type CreateDoctorSchedulePayload = DoctorIdentifier & {
+export type CreateDoctorSchedulePayload = {
+  userId: string;
   clinicId: string;
   dayOfWeek: DayOfWeek;
   startTime: string;
@@ -27,9 +28,8 @@ export type CreateDoctorSchedulePayload = DoctorIdentifier & {
 };
 
 /** Parameters for updating a doctor schedule. */
-export type UpdateDoctorSchedulePayload = DoctorIdentifier & {
+export type UpdateDoctorSchedulePayload = DoctorOrClinicOwnerIdentifier & {
   id: string;
-  clinicId: string;
   dayOfWeek?: DayOfWeek;
   startTime?: string;
   endTime?: string;
@@ -37,31 +37,74 @@ export type UpdateDoctorSchedulePayload = DoctorIdentifier & {
   manager?: EntityManager;
 };
 
-/** Parameters for finding a doctor schedule by ID. */
-export type FindDoctorScheduleByIdPayload = DoctorIdentifier & {
+/** Parameters for finding a doctor active schedule by ID. */
+export interface FindActiveDoctorScheduleByIdPayload {
   id: string;
+  manager?: EntityManager;
+}
+
+/** Parameters for finding a doctor schedule by ID. */
+export type FindDoctorScheduleByIdPayload = DoctorOrClinicOwnerIdentifier & {
+  id: string;
+  manager?: EntityManager;
+};
+
+/** Parameters for finding active clinic schedules. */
+export type FindActiveClinicSchedulesPayload = {
   clinicId: string;
+  manager?: EntityManager;
+};
+
+/** Parameters for finding clinic schedules. */
+export type FindClinicSchedulesPayload = {
+  userId: string;
+  manager?: EntityManager;
+};
+
+/** Parameters for finding active doctor schedules. */
+export type FindActiveDoctorSchedulesPayload = DoctorIdentifier & {
   manager?: EntityManager;
 };
 
 /** Parameters for finding doctor schedules. */
-export type FindDoctorSchedulesPayload = DoctorIdentifier & {
+export type FindDoctorSchedulesPayload = {
+  userId: string;
+  manager?: EntityManager;
+};
+
+/** Parameters for finding active doctor-clinic schedules. */
+export type FindActiveDoctorClinicSchedulesPayload = DoctorIdentifier & {
   clinicId: string;
   manager?: EntityManager;
 };
 
+/** Parameters for finding doctor-clinic schedules. */
+export type FindDoctorClinicSchedulesPayload =
+  | {
+      userId: string;
+      clinicId: string;
+      clinicOwnerId?: never;
+      doctorId?: never;
+      manager?: EntityManager;
+    }
+  | {
+      userId?: never;
+      clinicId?: never;
+      clinicOwnerId: string;
+      doctorId: string;
+      manager?: EntityManager;
+    };
+
 /** Parameters for updating a doctor schedule status. */
-export type UpdateDoctorScheduleStatusPayload = DoctorIdentifier & {
+export type UpdateDoctorScheduleStatusPayload = DoctorOrClinicOwnerIdentifier & {
   id: string;
-  clinicId: string;
   status: ScheduleStatus;
   manager?: EntityManager;
 };
 
 /** Parameters for deleting a doctor schedule. */
-export type DeleteDoctorSchedulePayload = DoctorIdentifier & {
+export type DeleteDoctorSchedulePayload = DoctorOrClinicOwnerIdentifier & {
   id: string;
-  clinicId: string;
   manager?: EntityManager;
 };
 
