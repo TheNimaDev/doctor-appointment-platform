@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { MailService } from '@/modules/mail/mail.service';
 import { EVENTS } from '@/common';
-import type { EmailChangeVerificationEvent, PasswordResetEvent, SignupVerificationEvent } from '@/types';
+import type { EmailChangeVerificationEvent, PasswordResetEvent, SendMailParams, SignupVerificationEvent } from '@/types';
 import { EmailService } from '@/modules/email/email.service';
 import { EmailStatus } from '../enums';
 
@@ -14,40 +14,54 @@ export class EmailListener {
   ) {}
 
   /**
-   * Handle signup verification events and send the verification email.
+   * Send an email and update its delivery status.
    */
-  @OnEvent(EVENTS.SIGNUP_VERIFICATION)
-  async handleSignupVerification(payload: SignupVerificationEvent): Promise<void> {
-    const verifyUrl = `http://localhost:3000/account-action?action=verify-email&token=${payload.token}`;
-
+  private async sendEmail(emailId: string, mail: SendMailParams): Promise<void> {
     try {
-      await this.mailService.send({
-        to: payload.email,
-        subject: 'Verify your email',
-        html: `
-          <h2>Welcome to Doctor Platform</h2>
-
-          <p>Please verify your email using the link below:</p>
-
-          <a href="${verifyUrl}">
-            Verify Email
-          </a>
-
-          <p>This link expires in 10 minutes.</p>
-        `,
-      });
+      await this.mailService.send(mail);
 
       await this.emailService.updateEmailStatus({
-        emailId: payload.emailId,
+        emailId,
         status: EmailStatus.SENT,
       });
     } catch (error) {
       await this.emailService.updateEmailStatus({
-        emailId: payload.emailId,
+        emailId,
         status: EmailStatus.FAILED,
         errorMessage: error instanceof Error ? error.message : 'Unknown email error',
       });
     }
+  }
+
+  /**
+   * Get the frontend account action URL.
+   */
+  private getAccountActionUrl(action: string, token: string): string {
+    return `http://localhost:3000/account-action?action=${action}&token=${token}`;
+  }
+
+  /**
+   * Handle signup verification events and send the verification email.
+   */
+  @OnEvent(EVENTS.SIGNUP_VERIFICATION)
+  async handleSignupVerification(payload: SignupVerificationEvent): Promise<void> {
+    const verifyUrl = this.getAccountActionUrl('verify-email', payload.token);
+
+    await this.sendEmail(payload.emailId, {
+      to: payload.email,
+      subject: 'Verify your email',
+      html: `
+        <h2>Welcome to Doctor Platform</h2>
+
+        <p>Please verify your email using the link below:</p>
+
+        <a href="${verifyUrl}">
+          Verify Email
+        </a>
+
+        <p>This link expires in 10 minutes.</p>
+      `,
+    });
   }
 
   /**
@@ -55,38 +69,25 @@ export class EmailListener {
    */
   @OnEvent(EVENTS.PASSWORD_RESET)
   async handlePasswordReset(payload: PasswordResetEvent): Promise<void> {
-    const resetUrl = `http://localhost:3000/account-action?action=reset-password&token=${payload.token}`;
+    const resetUrl = this.getAccountActionUrl('reset-password', payload.token);
 
-    try {
-      await this.mailService.send({
-        to: payload.email,
-        subject: 'Reset your password',
-        html: `
-          <h2>Password Reset</h2>
+    await this.sendEmail(payload.emailId, {
+      to: payload.email,
+      subject: 'Reset your password',
+      html: `
+        <h2>Password Reset</h2>
 
-          <p>You requested to reset your password.</p>
+        <p>You requested to reset your password.</p>
 
-          <p>Please use the link below to reset your password:</p>
+        <p>Please use the link below to reset your password:</p>
 
-          <a href="${resetUrl}">
-            Reset Password
-          </a>
+        <a href="${resetUrl}">
+          Reset Password
+        </a>
 
-          <p>This link expires in 10 minutes.</p>
-        `,
-      });
-
-      await this.emailService.updateEmailStatus({
-        emailId: payload.emailId,
-        status: EmailStatus.SENT,
-      });
-    } catch (error) {
-      await this.emailService.updateEmailStatus({
-        emailId: payload.emailId,
-        status: EmailStatus.FAILED,
-        errorMessage: error instanceof Error ? error.message : 'Unknown email error',
-      });
-    }
+        <p>This link expires in 10 minutes.</p>
+      `,
+    });
   }
 
   /**
@@ -94,13 +95,12 @@ export class EmailListener {
    */
   @OnEvent(EVENTS.EMAIL_CHANGE_VERIFICATION)
   async handleEmailChangeVerification(payload: EmailChangeVerificationEvent): Promise<void> {
-    const changeEmailUrl = `http://localhost:3000/account-action?action=change-email&token=${payload.token}`;
+    const changeEmailUrl = this.getAccountActionUrl('change-email', payload.token);
 
-    try {
-      await this.mailService.send({
-        to: payload.email,
-        subject: 'Verify your email change request',
-        html: `
+    await this.sendEmail(payload.emailId, {
+      to: payload.email,
+      subject: 'Verify your email change request',
+      html: `
         <h2>Email Change Verification</h2>
 
         <p>You requested to change your email address.</p>
@@ -119,18 +119,6 @@ export class EmailListener {
           If you did not request this change, you can safely ignore this email.
         </p>
       `,
-      });
-
-      await this.emailService.updateEmailStatus({
-        emailId: payload.emailId,
-        status: EmailStatus.SENT,
-      });
-    } catch (error) {
-      await this.emailService.updateEmailStatus({
-        emailId: payload.emailId,
-        status: EmailStatus.FAILED,
-        errorMessage: error instanceof Error ? error.message : 'Unknown email error',
-      });
-    }
+    });
   }
 }
