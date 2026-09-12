@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Email } from './entities';
 import { EmailStatus } from './enums';
@@ -15,6 +15,7 @@ import {
 import { checkDatabaseError, generateRandomToken, getServerDateTime, hashToken } from '@/lib';
 import { ConfigService } from '@nestjs/config';
 import ms, { StringValue } from 'ms';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class EmailService {
@@ -22,6 +23,7 @@ export class EmailService {
     @InjectRepository(Email)
     private readonly emailRepository: Repository<Email>,
     private readonly configService: ConfigService,
+    private readonly userService: UserService,
   ) {}
 
   /**
@@ -41,9 +43,14 @@ export class EmailService {
     const repository = this.getRepository(payload.manager);
 
     try {
+      const { user } = await this.userService.getById({
+        id: payload.userId,
+        manager: payload.manager,
+      });
+
       const existingEmail = await repository.findOne({
         where: {
-          userId: payload.userId,
+          userId: user.id,
           type: payload.type,
           usedAt: IsNull(),
           revokedAt: IsNull(),
@@ -63,7 +70,7 @@ export class EmailService {
       const expiresAt = new Date(getServerDateTime().getTime() + ms(expiresIn));
 
       const email = repository.create({
-        userId: payload.userId,
+        userId: user.id,
         tokenHash,
         type: payload.type,
         status: EmailStatus.PENDING,
@@ -90,9 +97,14 @@ export class EmailService {
   async findActiveEmail(payload: FindActiveEmailPayload): Promise<EmailResponse | null> {
     const repository = this.getRepository(payload.manager);
 
+    const { user } = await this.userService.getById({
+      id: payload.userId,
+      manager: payload.manager,
+    });
+
     const email = await repository.findOne({
       where: {
-        userId: payload.userId,
+        userId: user.id,
         type: payload.type,
         usedAt: IsNull(),
         revokedAt: IsNull(),
@@ -196,8 +208,19 @@ export class EmailService {
         updateData.errorMessage = payload.errorMessage ?? null;
       }
 
-      await repository.update(payload.emailId, updateData);
+      const result = await repository.update(payload.emailId, updateData);
+
+      if (result.affected === 0) {
+        throw new NotFoundException({
+          message: 'Email not found in database.',
+          error: 'Email Not Found',
+        } as BaseException);
+      }
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
       checkDatabaseError({
         e: error as Error,
         mainResource: 'Email',
