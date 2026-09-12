@@ -13,14 +13,16 @@ import {
 } from '@/types/doctor-specialty.types';
 import { BaseException } from '@/types';
 import { checkDatabaseError } from '@/lib';
-import { Doctor } from '@/modules/doctor/entities';
-import { Specialty } from '@/modules/specialty/entities';
+import { DoctorService } from '@/modules/doctor/doctor.service';
+import { SpecialtyService } from '@/modules/specialty/specialty.service';
 
 @Injectable()
 export class DoctorSpecialtyService {
   constructor(
     @InjectRepository(DoctorSpecialty)
     private readonly doctorSpecialtyRepository: Repository<DoctorSpecialty>,
+    private readonly doctorService: DoctorService,
+    private readonly specialtyService: SpecialtyService,
   ) {}
 
   /**
@@ -40,42 +42,20 @@ export class DoctorSpecialtyService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const doctorRepository =
-        payload.manager?.getRepository(Doctor) ?? this.doctorSpecialtyRepository.manager.getRepository(Doctor);
-
-      const specialtyRepository =
-        payload.manager?.getRepository(Specialty) ?? this.doctorSpecialtyRepository.manager.getRepository(Specialty);
-
-      const doctor = await doctorRepository.findOne({
-        where: {
-          id: payload.doctorId,
-        },
+      const { doctor } = await this.doctorService.findByUserId({
+        userId: payload.userId,
+        manager: payload.manager,
       });
 
-      if (!doctor) {
-        throw new NotFoundException({
-          message: 'Doctor not found in database.',
-          error: 'Doctor Not Found',
-        } as BaseException);
-      }
-
-      const specialty = await specialtyRepository.findOne({
-        where: {
-          id: payload.specialtyId,
-        },
+      const { specialty } = await this.specialtyService.getById({
+        id: payload.specialtyId,
+        manager: payload.manager,
       });
-
-      if (!specialty) {
-        throw new NotFoundException({
-          message: 'Specialty not found in database.',
-          error: 'Specialty Not Found',
-        } as BaseException);
-      }
 
       const existing = await repository.findOne({
         where: {
-          doctorId: payload.doctorId,
-          specialtyId: payload.specialtyId,
+          doctorId: doctor.id,
+          specialtyId: specialty.id,
         },
       });
 
@@ -89,7 +69,7 @@ export class DoctorSpecialtyService {
       if (payload.isPrimary) {
         await repository.update(
           {
-            doctorId: payload.doctorId,
+            doctorId: doctor.id,
           },
           {
             isPrimary: false,
@@ -98,7 +78,7 @@ export class DoctorSpecialtyService {
       }
 
       const doctorSpecialty = repository.create({
-        doctorId: payload.doctorId,
+        doctorId: doctor.id,
         specialtyId: payload.specialtyId,
         isPrimary: payload.isPrimary ?? false,
       });
@@ -126,9 +106,14 @@ export class DoctorSpecialtyService {
   async findAll(payload: FindDoctorSpecialtiesPayload): Promise<DoctorSpecialtiesResponse> {
     const repository = this.getRepository(payload.manager);
 
+    const { doctor } = await this.doctorService.findById({
+      id: payload.doctorId,
+      manager: payload.manager,
+    });
+
     const doctorSpecialties = await repository.find({
       where: {
-        doctorId: payload.doctorId,
+        doctorId: doctor.id,
       },
     });
 
@@ -143,10 +128,20 @@ export class DoctorSpecialtyService {
   async findOne(payload: FindDoctorSpecialtyPayload): Promise<DoctorSpecialtyResponse> {
     const repository = this.getRepository(payload.manager);
 
+    const { doctor } = await this.doctorService.findById({
+      id: payload.doctorId,
+      manager: payload.manager,
+    });
+
+    const { specialty } = await this.specialtyService.getById({
+      id: payload.specialtyId,
+      manager: payload.manager,
+    });
+
     const doctorSpecialty = await repository.findOne({
       where: {
-        doctorId: payload.doctorId,
-        specialtyId: payload.specialtyId,
+        doctorId: doctor.id,
+        specialtyId: specialty.id,
       },
     });
 
@@ -169,15 +164,20 @@ export class DoctorSpecialtyService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      await this.findOne({
-        doctorId: payload.doctorId,
+      const { doctor } = await this.doctorService.findByUserId({
+        userId: payload.userId,
+        manager: payload.manager,
+      });
+
+      const { doctorSpecialty } = await this.findOne({
+        doctorId: doctor.id,
         specialtyId: payload.specialtyId,
         manager: payload.manager,
       });
 
       await repository.update(
         {
-          doctorId: payload.doctorId,
+          doctorId: doctor.id,
         },
         {
           isPrimary: false,
@@ -186,8 +186,7 @@ export class DoctorSpecialtyService {
 
       await repository.update(
         {
-          doctorId: payload.doctorId,
-          specialtyId: payload.specialtyId,
+          id: doctorSpecialty.id,
         },
         {
           isPrimary: true,
@@ -195,7 +194,7 @@ export class DoctorSpecialtyService {
       );
 
       return this.findOne({
-        doctorId: payload.doctorId,
+        doctorId: doctor.id,
         specialtyId: payload.specialtyId,
         manager: payload.manager,
       });
@@ -218,9 +217,19 @@ export class DoctorSpecialtyService {
     const repository = this.getRepository(payload.manager);
 
     try {
+      const { doctor } = await this.doctorService.findByUserId({
+        userId: payload.userId,
+        manager: payload.manager,
+      });
+
+      const { specialty } = await this.specialtyService.getById({
+        id: payload.specialtyId,
+        manager: payload.manager,
+      });
+
       const result = await repository.softDelete({
-        doctorId: payload.doctorId,
-        specialtyId: payload.specialtyId,
+        doctorId: doctor.id,
+        specialtyId: specialty.id,
       });
 
       if (result.affected === 0) {
