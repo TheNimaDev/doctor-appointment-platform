@@ -1,24 +1,24 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req } from '@nestjs/common';
 import { DoctorSpecialtyService } from './doctor-specialty.service';
 import { AddDoctorSpecialtyDto } from './dto';
-import type { ApiResponse, DoctorSpecialtiesResponse, DoctorSpecialtyResponse } from '@/types';
+import type { AccessRequest, ApiResponse, DoctorSpecialtiesResponse, DoctorSpecialtyResponse } from '@/types';
 import * as DoctorSpecialtyDecorator from './decorators';
 
-@Controller('doctors/:doctorId/specialties')
+@Controller('doctor-specialties')
 export class DoctorSpecialtyController {
   constructor(private readonly doctorSpecialtyService: DoctorSpecialtyService) {}
 
   /**
    * Add a specialty to a doctor.
    */
-  @Post()
+  @Post('my')
   @DoctorSpecialtyDecorator.AddDoctorSpecialtyDecorators()
   async add(
-    @Param('doctorId') doctorId: string,
+    @Req() req: AccessRequest,
     @Body() addDoctorSpecialtyDto: AddDoctorSpecialtyDto,
   ): Promise<ApiResponse<DoctorSpecialtyResponse>> {
     const data = await this.doctorSpecialtyService.add({
-      doctorId,
+      userId: req.user.userId,
       ...addDoctorSpecialtyDto,
     });
 
@@ -31,7 +31,7 @@ export class DoctorSpecialtyController {
   /**
    * Get all specialties assigned to a doctor.
    */
-  @Get()
+  @Get('doctors/:doctorId')
   @DoctorSpecialtyDecorator.FindDoctorSpecialtiesDecorators()
   async findAll(@Param('doctorId') doctorId: string): Promise<ApiResponse<DoctorSpecialtiesResponse>> {
     const data = await this.doctorSpecialtyService.findAll({
@@ -47,14 +47,14 @@ export class DoctorSpecialtyController {
   /**
    * Set a doctor's specialty as primary.
    */
-  @Patch(':specialtyId/primary')
+  @Patch('my/:specialtyId/primary')
   @DoctorSpecialtyDecorator.SetDoctorSpecialtyPrimaryDecorators()
   async setPrimary(
-    @Param('doctorId') doctorId: string,
+    @Req() req: AccessRequest,
     @Param('specialtyId') specialtyId: string,
   ): Promise<ApiResponse<DoctorSpecialtyResponse>> {
     const data = await this.doctorSpecialtyService.setPrimary({
-      doctorId,
+      userId: req.user.userId,
       specialtyId,
     });
 
@@ -67,11 +67,11 @@ export class DoctorSpecialtyController {
   /**
    * Soft-delete a specialty from a doctor.
    */
-  @Delete(':specialtyId')
+  @Delete('my/:specialtyId')
   @DoctorSpecialtyDecorator.RemoveDoctorSpecialtyDecorators()
-  async remove(@Param('doctorId') doctorId: string, @Param('specialtyId') specialtyId: string): Promise<ApiResponse> {
+  async remove(@Req() req: AccessRequest, @Param('specialtyId') specialtyId: string): Promise<ApiResponse> {
     await this.doctorSpecialtyService.remove({
-      doctorId,
+      userId: req.user.userId,
       specialtyId,
     });
 
