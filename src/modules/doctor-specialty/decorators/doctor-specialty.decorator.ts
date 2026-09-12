@@ -1,13 +1,11 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
-import { Permission, PERMISSIONS } from '@/common';
+import { Permission, PERMISSIONS, Public } from '@/common';
 
 export const AddDoctorSpecialtyDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.CREATED),
     Permission({
       permissions: [PERMISSIONS.DOCTOR_UPDATE],
-      owner: true,
-      resource: 'doctor',
     }),
   );
 };
@@ -15,6 +13,7 @@ export const AddDoctorSpecialtyDecorators = () => {
 export const FindDoctorSpecialtiesDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    Public(),
     Permission({
       permissions: [PERMISSIONS.DOCTOR_READ],
     }),
@@ -26,8 +25,6 @@ export const SetDoctorSpecialtyPrimaryDecorators = () => {
     HttpCode(HttpStatus.OK),
     Permission({
       permissions: [PERMISSIONS.DOCTOR_UPDATE],
-      owner: true,
-      resource: 'doctor',
     }),
   );
 };
@@ -37,8 +34,6 @@ export const RemoveDoctorSpecialtyDecorators = () => {
     HttpCode(HttpStatus.OK),
     Permission({
       permissions: [PERMISSIONS.DOCTOR_UPDATE],
-      owner: true,
-      resource: 'doctor',
     }),
   );
 };
