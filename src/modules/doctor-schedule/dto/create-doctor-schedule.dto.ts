@@ -1,7 +1,11 @@
-import { IsEnum, IsNotEmpty, IsString, Max, Min, IsNumber, Matches } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsString, Max, Min, IsNumber, Matches, IsUUID } from 'class-validator';
 import { DayOfWeek } from '../enums';
 
 export class CreateDoctorScheduleDto {
+  @IsNotEmpty()
+  @IsUUID()
+  clinicId: string;
+
   @IsNotEmpty()
   @IsEnum(DayOfWeek)
   dayOfWeek: DayOfWeek;
