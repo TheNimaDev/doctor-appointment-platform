@@ -1,5 +1,6 @@
 import { EntityManager } from 'typeorm';
 import { Doctor } from '@/modules/doctor/entities';
+import { DoctorStatus } from '@/modules/doctor/enums';
 
 /** Doctor without user and relation data. */
 export type SafeDoctor = Omit<Doctor, 'user' | 'doctorSpecialties' | 'clinics'>;
@@ -25,41 +26,43 @@ export interface CreateDoctorPayload {
 }
 
 /** Parameters for updating a doctor. */
-export interface UpdateDoctorPayload {
-  id: string;
+export type UpdateDoctorPayload = DoctorIdentifier & {
   medicalCode?: string;
   bio?: string | null;
   experienceYears?: number;
   consultationFee?: string;
   manager?: EntityManager;
-}
+};
 
 /** Parameters for finding a doctor by ID. */
 export interface FindDoctorByIdPayload {
   id: string;
+  status?: DoctorStatus;
   manager?: EntityManager;
 }
 
 /** Parameters for finding a doctor by user ID. */
 export interface FindDoctorByUserIdPayload {
   userId: string;
+  status?: DoctorStatus;
   manager?: EntityManager;
 }
 
 /** Parameters for finding a doctor by medical code. */
 export interface FindDoctorByMedicalCodePayload {
   medicalCode: string;
+  status?: DoctorStatus;
   manager?: EntityManager;
 }
 
 /** Parameters for deleting a doctor. */
-export interface DeleteDoctorPayload {
-  id: string;
+export type DeleteDoctorPayload = DoctorIdentifier & {
   manager?: EntityManager;
-}
+};
 
 /** Parameters for finding all doctors. */
 export interface FindDoctorsPayload {
+  status?: DoctorStatus;
   manager?: EntityManager;
 }
 
