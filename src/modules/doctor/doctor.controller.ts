@@ -1,7 +1,7 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req } from '@nestjs/common';
 import { DoctorService } from './doctor.service';
-import { CreateDoctorDto, UpdateDoctorDto } from './dto';
-import type { ApiResponse, DoctorResponse, DoctorsResponse } from '@/types';
+import { CreateDoctorDto, FindDoctorDto, UpdateDoctorDto } from './dto';
+import type { AccessRequest, ApiResponse, DoctorResponse, DoctorsResponse } from '@/types';
 import * as DoctorDecorator from './decorators';
 
 @Controller('doctors')
@@ -13,23 +13,27 @@ export class DoctorController {
    */
   @Post()
   @DoctorDecorator.CreateDoctorDecorators()
-  async create(@Body() createDoctorDto: CreateDoctorDto): Promise<ApiResponse<DoctorResponse>> {
+  async create(
+    @Req() req: AccessRequest,
+    @Body() createDoctorDto: CreateDoctorDto,
+  ): Promise<ApiResponse<DoctorResponse>> {
     const data = await this.doctorService.create({
+      userId: req.user.userId,
       ...createDoctorDto,
     });
 
     return {
-      message: 'Doctor created successfully.',
+      message: 'Doctor request created successfully.',
       data,
     };
   }
 
   /**
-   * Get all doctors.
+   * Get all active doctors.
    */
   @Get()
   @DoctorDecorator.FindDoctorsDecorators()
-  async findAll(): Promise<ApiResponse<DoctorsResponse>> {
+  async findAllActive(): Promise<ApiResponse<DoctorsResponse>> {
     const data = await this.doctorService.findAll({});
 
     return {
@@ -39,17 +43,70 @@ export class DoctorController {
   }
 
   /**
-   * Get a doctor by ID.
+   * Get all doctors with any status.
+   */
+  @Get('all')
+  @DoctorDecorator.FindDoctorsWithAllStatusDecorators()
+  async findAll(@Query() findDoctorDto: FindDoctorDto): Promise<ApiResponse<DoctorsResponse>> {
+    const data = await this.doctorService.findAll({
+      ...findDoctorDto,
+    });
+
+    return {
+      message: 'Doctors retrieved successfully.',
+      data,
+    };
+  }
+
+  /**
+   * Get an active doctor by ID.
    */
   @Get(':id')
   @DoctorDecorator.FindDoctorDecorators()
-  async findById(@Param('id') id: string): Promise<ApiResponse<DoctorResponse>> {
+  async findActiveById(@Param('id') id: string): Promise<ApiResponse<DoctorResponse>> {
     const data = await this.doctorService.findById({
       id,
     });
 
     return {
       message: 'Doctor retrieved successfully.',
+      data,
+    };
+  }
+
+  /**
+   * Get a doctor by ID with any status.
+   */
+  @Get('all/:id')
+  @DoctorDecorator.FindDoctorWithAllStatusDecorators()
+  async findById(@Query() findDoctorDto: FindDoctorDto, @Param('id') id: string): Promise<ApiResponse<DoctorResponse>> {
+    const data = await this.doctorService.findById({
+      id,
+      ...findDoctorDto,
+    });
+
+    return {
+      message: 'Doctor retrieved successfully.',
+      data,
+    };
+  }
+
+  /**
+   * Update authenticated doctor profile.
+   */
+  @Patch()
+  @DoctorDecorator.UpdateMyDoctorDecorators()
+  async updateMy(
+    @Req() req: AccessRequest,
+    @Body() updateDoctorDto: UpdateDoctorDto,
+  ): Promise<ApiResponse<DoctorResponse>> {
+    const data = await this.doctorService.update({
+      userId: req.user.userId,
+      ...updateDoctorDto,
+    });
+
+    return {
+      message: 'Doctor updated successfully.',
       data,
     };
   }
@@ -64,7 +121,7 @@ export class DoctorController {
     @Body() updateDoctorDto: UpdateDoctorDto,
   ): Promise<ApiResponse<DoctorResponse>> {
     const data = await this.doctorService.update({
-      id,
+      doctorId: id,
       ...updateDoctorDto,
     });
 
@@ -75,13 +132,28 @@ export class DoctorController {
   }
 
   /**
+   * Soft-delete authenticated doctor profile.
+   */
+  @Delete()
+  @DoctorDecorator.DeleteMyDoctorDecorators()
+  async deleteMy(@Req() req: AccessRequest): Promise<ApiResponse> {
+    await this.doctorService.delete({
+      userId: req.user.userId,
+    });
+
+    return {
+      message: 'Doctor deleted successfully.',
+    };
+  }
+
+  /**
    * Soft-delete a doctor profile.
    */
   @Delete(':id')
   @DoctorDecorator.DeleteDoctorDecorators()
   async delete(@Param('id') id: string): Promise<ApiResponse> {
     await this.doctorService.delete({
-      id,
+      doctorId: id,
     });
 
     return {
