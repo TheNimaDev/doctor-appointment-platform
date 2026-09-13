@@ -1,10 +1,6 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 
 export class CreateDoctorDto {
-  @IsNotEmpty()
-  @IsUUID()
-  userId: string;
-
   @IsNotEmpty()
   @IsString()
   @MaxLength(50)
