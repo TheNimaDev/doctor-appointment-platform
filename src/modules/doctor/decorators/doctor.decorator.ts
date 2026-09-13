@@ -66,7 +66,7 @@ export const UpdateDoctorDecorators = () => {
   );
 };
 
-export const DeleteMyoDctorDecorators = () => {
+export const DeleteMyDoctorDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     Permission({
