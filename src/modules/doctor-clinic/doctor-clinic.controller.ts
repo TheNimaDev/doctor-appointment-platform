@@ -1,6 +1,6 @@
-import { Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Post, Req } from '@nestjs/common';
 import { DoctorClinicService } from './doctor-clinic.service';
-import type { ApiResponse, DoctorClinicResponse, DoctorClinicsResponse } from '@/types';
+import type { AccessRequest, ApiResponse, DoctorClinicResponse, DoctorClinicsResponse } from '@/types';
 import * as DoctorClinicDecorator from './decorators';
 
 @Controller('doctor-clinics')
@@ -10,15 +10,15 @@ export class DoctorClinicController {
   /**
    * Create a doctor-clinic relation.
    */
-  @Post(':clinicId/:doctorId')
+  @Post(':doctorId')
   @DoctorClinicDecorator.CreateDoctorClinicDecorators()
   async create(
-    @Param('clinicId') clinicId: string,
+    @Req() req: AccessRequest,
     @Param('doctorId') doctorId: string,
   ): Promise<ApiResponse<DoctorClinicResponse>> {
     const data = await this.doctorClinicService.create({
       doctorId,
-      clinicId,
+      clinicOwnerId: req.user.userId,
     });
 
     return {
@@ -60,14 +60,46 @@ export class DoctorClinicController {
   }
 
   /**
+   * Get all doctors associated with the current user's clinic.
+   */
+  @Get('my-clinic')
+  @DoctorClinicDecorator.FindMyClinicDoctorsDecorators()
+  async findByClinic(@Req() req: AccessRequest): Promise<ApiResponse<DoctorClinicsResponse>> {
+    const data = await this.doctorClinicService.findClinicDoctors({
+      clinicOwnerId: req.user.userId,
+    });
+
+    return {
+      message: 'Clinic doctors retrieved successfully.',
+      data,
+    };
+  }
+
+  /**
+   * Get all clinics associated with the current doctor.
+   */
+  @Get('my')
+  @DoctorClinicDecorator.FindMyDoctorClinicsDecorators()
+  async findByDoctor(@Req() req: AccessRequest): Promise<ApiResponse<DoctorClinicsResponse>> {
+    const data = await this.doctorClinicService.findDoctorClinics({
+      userId: req.user.userId,
+    });
+
+    return {
+      message: 'Doctor clinics retrieved successfully.',
+      data,
+    };
+  }
+
+  /**
    * Delete a doctor-clinic relation.
    */
-  @Delete(':clinicId/:doctorId')
+  @Delete(':doctorId')
   @DoctorClinicDecorator.DeleteDoctorClinicDecorators()
-  async delete(@Param('clinicId') clinicId: string, @Param('doctorId') doctorId: string): Promise<ApiResponse> {
+  async delete(@Req() req: AccessRequest, @Param('doctorId') doctorId: string): Promise<ApiResponse> {
     await this.doctorClinicService.delete({
       doctorId,
-      clinicId,
+      clinicOwnerId: req.user.userId,
     });
 
     return {
