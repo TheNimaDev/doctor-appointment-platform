@@ -16,6 +16,7 @@ import {
   ResolveDoctorPayload,
 } from '@/types';
 import { checkDatabaseError } from '@/lib';
+import { DoctorStatus } from './enums';
 
 @Injectable()
 export class DoctorService {
@@ -35,7 +36,7 @@ export class DoctorService {
   }
 
   /**
-   * Create a new doctor profile.
+   * Create a new doctor profile request.
    */
   async create(payload: CreateDoctorPayload): Promise<DoctorResponse> {
     const repository = this.getRepository(payload.manager);
@@ -69,7 +70,16 @@ export class DoctorService {
   async findAll(payload: FindDoctorsPayload): Promise<DoctorsResponse> {
     const repository = this.getRepository(payload.manager);
 
-    const doctors = await repository.find();
+    const status = payload?.status ? payload.status : DoctorStatus.ACTIVE;
+
+    const doctors = await repository.find({
+      where: {
+        status,
+      },
+      order: {
+        createdAt: 'ASC',
+      },
+    });
 
     return {
       doctors,
@@ -82,9 +92,12 @@ export class DoctorService {
   async findById(payload: FindDoctorByIdPayload): Promise<DoctorResponse> {
     const repository = this.getRepository(payload.manager);
 
+    const status = payload?.status ? payload.status : DoctorStatus.ACTIVE;
+
     const doctor = await repository.findOne({
       where: {
         id: payload.id,
+        status,
       },
     });
 
@@ -106,9 +119,12 @@ export class DoctorService {
   async findByUserId(payload: FindDoctorByUserIdPayload): Promise<DoctorResponse> {
     const repository = this.getRepository(payload.manager);
 
+    const status = payload?.status ? payload.status : DoctorStatus.ACTIVE;
+
     const doctor = await repository.findOne({
       where: {
         userId: payload.userId,
+        status,
       },
     });
 
@@ -130,9 +146,12 @@ export class DoctorService {
   async findByMedicalCode(payload: FindDoctorByMedicalCodePayload): Promise<DoctorResponse> {
     const repository = this.getRepository(payload.manager);
 
+    const status = payload?.status ? payload.status : DoctorStatus.ACTIVE;
+
     const doctor = await repository.findOne({
       where: {
         medicalCode: payload.medicalCode,
+        status,
       },
     });
 
@@ -149,14 +168,16 @@ export class DoctorService {
   }
 
   /**
-   * Update an existing doctor profile.
+   * Update a doctor profile.
    */
   async update(payload: UpdateDoctorPayload): Promise<DoctorResponse> {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const doctor = await repository.preload({
-        id: payload.id,
+      const { doctor } = await this.resolveDoctor(payload);
+
+      const updatedDoctor = await repository.preload({
+        id: doctor.id,
         ...(payload.medicalCode !== undefined && {
           medicalCode: payload.medicalCode,
         }),
@@ -171,17 +192,17 @@ export class DoctorService {
         }),
       });
 
-      if (!doctor) {
+      if (!updatedDoctor) {
         throw new NotFoundException({
           message: 'Doctor not found in database.',
           error: 'Doctor Not Found',
         } as BaseException);
       }
 
-      const updatedDoctor = await repository.save(doctor);
+      const savedDoctor = await repository.save(updatedDoctor);
 
       return {
-        doctor: updatedDoctor,
+        doctor: savedDoctor,
       };
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -203,8 +224,10 @@ export class DoctorService {
     const repository = this.getRepository(payload.manager);
 
     try {
+      const { doctor } = await this.resolveDoctor(payload);
+
       const result = await repository.softDelete({
-        id: payload.id,
+        id: doctor.id,
       });
 
       if (result.affected === 0) {
