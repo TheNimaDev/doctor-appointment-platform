@@ -1,8 +1,8 @@
-import { IsEnum, IsNotEmpty } from 'class-validator';
+import { IsEnum, IsOptional } from 'class-validator';
 import { DoctorStatus } from '../enums';
 
 export class FindDoctorDto {
-  @IsNotEmpty()
+  @IsOptional()
   @IsEnum(DoctorStatus)
-  status: DoctorStatus;
+  status?: DoctorStatus;
 }
