@@ -87,17 +87,39 @@ export class DoctorService {
   }
 
   /**
+   * Find an active doctor by ID.
+   */
+  async findActiveById(payload: FindDoctorByIdPayload): Promise<DoctorResponse> {
+    const repository = this.getRepository(payload.manager);
+
+    const doctor = await repository.findOne({
+      where: {
+        id: payload.id,
+        status: DoctorStatus.ACTIVE,
+      },
+    });
+
+    if (!doctor) {
+      throw new NotFoundException({
+        message: 'Doctor not found in database.',
+        error: 'Doctor Not Found',
+      } as BaseException);
+    }
+
+    return {
+      doctor,
+    };
+  }
+
+  /**
    * Find a doctor by ID.
    */
   async findById(payload: FindDoctorByIdPayload): Promise<DoctorResponse> {
     const repository = this.getRepository(payload.manager);
 
-    const status = payload?.status ? payload.status : DoctorStatus.ACTIVE;
-
     const doctor = await repository.findOne({
       where: {
         id: payload.id,
-        status,
       },
     });
 
