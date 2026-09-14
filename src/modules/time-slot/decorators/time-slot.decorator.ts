@@ -51,6 +51,16 @@ export const FindMyTimeSlotDecorators = () => {
   );
 };
 
+export const FindAvailableTimeSlotDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Public(),
+    Permission({
+      permissions: [PERMISSIONS.TIME_SLOT_READ],
+    }),
+  );
+};
+
 export const FindMyClinicAdminTimeSlotsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
