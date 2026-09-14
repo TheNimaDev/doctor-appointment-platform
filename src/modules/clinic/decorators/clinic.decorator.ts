@@ -1,5 +1,5 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
-import { Permission, PERMISSIONS } from '@/common';
+import { Permission, PERMISSIONS, Public } from '@/common';
 
 export const CreateClinicDecorators = () => {
   return applyDecorators(
@@ -13,8 +13,18 @@ export const CreateClinicDecorators = () => {
 export const FindClinicsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    Public(),
     Permission({
       permissions: [PERMISSIONS.CLINIC_READ],
+    }),
+  );
+};
+
+export const FindClinicsWithAllStatusDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.OWNER_ALL],
     }),
   );
 };
@@ -22,13 +32,23 @@ export const FindClinicsDecorators = () => {
 export const FindClinicDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    Public(),
     Permission({
       permissions: [PERMISSIONS.CLINIC_READ],
     }),
   );
 };
 
-export const UpdateClinicDecorators = () => {
+export const FindClinicWithAllStatusDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.OWNER_ALL],
+    }),
+  );
+};
+
+export const UpdateMyClinicDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     Permission({
@@ -37,7 +57,16 @@ export const UpdateClinicDecorators = () => {
   );
 };
 
-export const DeleteClinicDecorators = () => {
+export const UpdateClinicDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.OWNER_ALL],
+    }),
+  );
+};
+
+export const DeleteMyClinicDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     Permission({
@@ -46,11 +75,11 @@ export const DeleteClinicDecorators = () => {
   );
 };
 
-export const UpdateClinicStatusDecorators = () => {
+export const DeleteClinicDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     Permission({
-      permissions: [PERMISSIONS.CLINIC_UPDATE_STATUS],
+      permissions: [PERMISSIONS.OWNER_ALL],
     }),
   );
 };
