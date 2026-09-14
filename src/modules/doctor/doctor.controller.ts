@@ -64,7 +64,7 @@ export class DoctorController {
   @Get(':id')
   @DoctorDecorator.FindDoctorDecorators()
   async findActiveById(@Param('id') id: string): Promise<ApiResponse<DoctorResponse>> {
-    const data = await this.doctorService.findById({
+    const data = await this.doctorService.findActiveById({
       id,
     });
 
@@ -79,10 +79,9 @@ export class DoctorController {
    */
   @Get('all/:id')
   @DoctorDecorator.FindDoctorWithAllStatusDecorators()
-  async findById(@Query() findDoctorDto: FindDoctorDto, @Param('id') id: string): Promise<ApiResponse<DoctorResponse>> {
+  async findById(@Param('id') id: string): Promise<ApiResponse<DoctorResponse>> {
     const data = await this.doctorService.findById({
       id,
-      ...findDoctorDto,
     });
 
     return {
