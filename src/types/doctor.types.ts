@@ -37,7 +37,6 @@ export type UpdateDoctorPayload = DoctorIdentifier & {
 /** Parameters for finding a doctor by ID. */
 export interface FindDoctorByIdPayload {
   id: string;
-  status?: DoctorStatus;
   manager?: EntityManager;
 }
 
