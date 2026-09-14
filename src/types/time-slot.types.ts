@@ -25,6 +25,13 @@ export interface CreateTimeSlotPayload {
   manager?: EntityManager;
 }
 
+/** Parameters for finding a time slot in the authenticated doctor. */
+export interface GetMyTimeSlotPayload {
+  id: string;
+  userId: string;
+  manager?: EntityManager;
+}
+
 /** Parameters for finding a time slot by ID. */
 export interface FindTimeSlotByIdPayload {
   id: string;
