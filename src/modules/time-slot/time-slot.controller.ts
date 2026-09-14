@@ -114,7 +114,7 @@ export class TimeSlotController {
    *
    * Includes all statuses.
    */
-  @Get('my/clinic')
+  @Get('my-clinic')
   @TimeSlotDecorator.FindMyClinicAdminTimeSlotsDecorators()
   async findMyClinic(@Req() req: AccessRequest, @Query('date') date?: string): Promise<ApiResponse<TimeSlotsResponse>> {
     const data = await this.timeSlotService.findMyClinic({
@@ -131,7 +131,7 @@ export class TimeSlotController {
   /**
    * Get time slots of a specific doctor in the authenticated admin's clinic.
    */
-  @Get('my/clinic/doctors/:doctorId')
+  @Get('my-clinic/doctors/:doctorId')
   @TimeSlotDecorator.FindMyClinicAdminDoctorTimeSlotsDecorators()
   async findMyClinicDoctor(
     @Req() req: AccessRequest,
@@ -153,7 +153,7 @@ export class TimeSlotController {
   /**
    * Get a specific time slot from the authenticated admin's clinic.
    */
-  @Get('my/clinic/:id')
+  @Get('my-clinic/:id')
   @TimeSlotDecorator.FindMyClinicAdminTimeSlotDecorators()
   async findMyClinicById(@Req() req: AccessRequest, @Param('id') id: string): Promise<ApiResponse<TimeSlotResponse>> {
     const data = await this.timeSlotService.getMyClinicTimeSlot({
@@ -172,8 +172,25 @@ export class TimeSlotController {
    */
   @Get('my/:id')
   @TimeSlotDecorator.FindMyTimeSlotDecorators()
-  async findMyById(@Param('id') id: string): Promise<ApiResponse<TimeSlotResponse>> {
-    const data = await this.timeSlotService.getById({
+  async findMyById(@Req() req: AccessRequest, @Param('id') id: string): Promise<ApiResponse<TimeSlotResponse>> {
+    const data = await this.timeSlotService.getMyTimeSlot({
+      id,
+      userId: req.user.userId,
+    });
+
+    return {
+      message: 'Time slot retrieved successfully.',
+      data,
+    };
+  }
+
+  /**
+   * Get an available time slot.
+   */
+  @Get(':id')
+  @TimeSlotDecorator.FindAvailableTimeSlotDecorators()
+  async findById(@Param('id') id: string): Promise<ApiResponse<TimeSlotResponse>> {
+    const data = await this.timeSlotService.getAvailableById({
       id,
     });
 
@@ -220,7 +237,7 @@ export class TimeSlotController {
   /**
    * Block a time slot belonging to a doctor in the admin's clinic.
    */
-  @Patch('my/clinic/:id/block')
+  @Patch('my-clinic/:id/block')
   @TimeSlotDecorator.BlockMyClinicTimeSlotDecorators()
   async blockMyClinic(@Param('id') id: string): Promise<ApiResponse<TimeSlotResponse>> {
     const data = await this.timeSlotService.updateStatusHandler({
@@ -237,7 +254,7 @@ export class TimeSlotController {
   /**
    * Unblock a time slot belonging to a doctor in the admin's clinic.
    */
-  @Patch('my/clinic/:id/unblock')
+  @Patch('my-clinic/:id/unblock')
   @TimeSlotDecorator.UnblockMyClinicTimeSlotDecorators()
   async unblockMyClinic(@Param('id') id: string): Promise<ApiResponse<TimeSlotResponse>> {
     const data = await this.timeSlotService.updateStatusHandler({
