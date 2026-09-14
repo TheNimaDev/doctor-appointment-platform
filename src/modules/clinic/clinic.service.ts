@@ -1,9 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
-
 import { Clinic } from './entities';
-
 import {
   ClinicResponse,
   ClinicsResponse,
@@ -12,12 +10,12 @@ import {
   FindClinicByIdPayload,
   FindClinicByOwnerIdPayload,
   FindClinicsPayload,
+  ResolveClinicPayload,
   UpdateClinicPayload,
-  UpdateClinicStatusPayload,
 } from '@/types';
-
 import { BaseException } from '@/types';
 import { checkDatabaseError } from '@/lib';
+import { ClinicStatus } from './enums';
 
 @Injectable()
 export class ClinicService {
@@ -76,10 +74,44 @@ export class ClinicService {
   async findAll(payload: FindClinicsPayload): Promise<ClinicsResponse> {
     const repository = this.getRepository(payload.manager);
 
-    const clinics = await repository.find();
+    const status = payload?.status ? payload.status : ClinicStatus.ACTIVE;
+
+    const clinics = await repository.find({
+      where: {
+        status,
+      },
+      order: {
+        createdAt: 'ASC',
+      },
+    });
 
     return {
       clinics,
+    };
+  }
+
+  /**
+   * Find an active clinic by ID.
+   */
+  async findActiveById(payload: FindClinicByIdPayload): Promise<ClinicResponse> {
+    const repository = this.getRepository(payload.manager);
+
+    const clinic = await repository.findOne({
+      where: {
+        id: payload.id,
+        status: ClinicStatus.ACTIVE,
+      },
+    });
+
+    if (!clinic) {
+      throw new NotFoundException({
+        message: 'Clinic not found in database.',
+        error: 'Clinic Not Found',
+      } as BaseException);
+    }
+
+    return {
+      clinic,
     };
   }
 
@@ -138,9 +170,7 @@ export class ClinicService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const { clinic } = await this.findByOwnerId({
-        ownerId: payload.ownerId,
-      });
+      const { clinic } = await this.resolveClinic(payload);
 
       const updatedClinic = await repository.preload({
         id: clinic.id,
@@ -167,6 +197,13 @@ export class ClinicService {
         }),
       });
 
+      if (!updatedClinic) {
+        throw new NotFoundException({
+          message: 'Clinic not found in database.',
+          error: 'Clinic Not Found',
+        } as BaseException);
+      }
+
       const savedClinic = await repository.save(updatedClinic);
 
       return {
@@ -192,8 +229,10 @@ export class ClinicService {
     const repository = this.getRepository(payload.manager);
 
     try {
+      const { clinic } = await this.resolveClinic(payload);
+
       const result = await repository.softDelete({
-        ownerId: payload.ownerId,
+        id: clinic.id,
       });
 
       if (result.affected === 0) {
@@ -214,39 +253,21 @@ export class ClinicService {
     }
   }
 
+
   /**
-   * Update the status of a clinic.
+   * Resolve a clinic by either owner ID or clinic ID.
    */
-  async updateStatus(payload: UpdateClinicStatusPayload): Promise<ClinicResponse> {
-    const repository = this.getRepository(payload.manager);
-
-    try {
-      const clinic = await repository.preload({
-        id: payload.id,
-        status: payload.status,
-      });
-
-      if (!clinic) {
-        throw new NotFoundException({
-          message: 'Clinic not found in database.',
-          error: 'Clinic Not Found',
-        } as BaseException);
-      }
-
-      const updatedClinic = await repository.save(clinic);
-
-      return {
-        clinic: updatedClinic,
-      };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-
-      checkDatabaseError({
-        e: error as Error,
-        mainResource: 'Clinic',
+  async resolveClinic(payload: ResolveClinicPayload): Promise<ClinicResponse> {
+    if ('ownerId' in payload) {
+      return this.findByOwnerId({
+        ownerId: payload.ownerId,
+        manager: payload.manager,
       });
     }
+
+    return this.findById({
+      id: payload.clinicId,
+      manager: payload.manager,
+    });
   }
 }
