@@ -19,6 +19,7 @@ import {
   FindMyTimeSlotsPayload,
   FindTimeSlotByIdPayload,
   GetMyClinicTimeSlotPayload,
+  GetMyTimeSlotPayload,
   TimeSlotResponse,
   TimeSlotsResponse,
   UpdateTimeSlotStatusHandlerPayload,
@@ -76,6 +77,31 @@ export class TimeSlotService {
   }
 
   /**
+   * Get an available time slot by ID.
+   */
+  async getAvailableById(payload: FindTimeSlotByIdPayload): Promise<TimeSlotResponse> {
+    const repository = this.getRepository(payload.manager);
+
+    const timeSlot = await repository.findOne({
+      where: {
+        id: payload.id,
+        status: TimeSlotStatus.AVAILABLE,
+      },
+    });
+
+    if (!timeSlot) {
+      throw new NotFoundException({
+        message: 'Time slot not found in database.',
+        error: 'Time Slot Not Found',
+      } as BaseException);
+    }
+
+    return {
+      timeSlot,
+    };
+  }
+
+  /**
    * Get a time slot by ID.
    */
   async getById(payload: FindTimeSlotByIdPayload): Promise<TimeSlotResponse> {
@@ -84,6 +110,40 @@ export class TimeSlotService {
     const timeSlot = await repository.findOne({
       where: {
         id: payload.id,
+      },
+    });
+
+    if (!timeSlot) {
+      throw new NotFoundException({
+        message: 'Time slot not found in database.',
+        error: 'Time Slot Not Found',
+      } as BaseException);
+    }
+
+    return {
+      timeSlot,
+    };
+  }
+
+  /**
+   * Get a specific time slot from the authenticated doctor.
+   */
+  async getMyTimeSlot(payload: GetMyTimeSlotPayload): Promise<TimeSlotResponse> {
+    const repository = this.getRepository(payload.manager);
+
+    const { doctor } = await this.doctorService.findByUserId({
+      userId: payload.userId,
+      manager: payload.manager,
+    });
+
+    const timeSlot = await repository.findOne({
+      where: {
+        id: payload.id,
+        schedule: {
+          doctorClinic: {
+            doctorId: doctor.id,
+          },
+        },
       },
     });
 
