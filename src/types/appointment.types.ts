@@ -22,19 +22,30 @@ export interface ReserveAppointmentPayload {
   notes?: string;
 }
 
-/** Parameters required to create an appointment. */
-export interface CreateAppointmentPayload extends ReserveAppointmentPayload {
-  manager?: EntityManager;
-}
-
 /** Parameters required to find an appointment by ID. */
 export interface FindAppointmentByIdPayload {
   id: string;
   manager?: EntityManager;
 }
 
+/** Parameters required to find a admin clinic's appointments. */
+export interface FindMyClinicAppointmentsPayload {
+  ownerId: string;
+  status?: AppointmentStatus;
+  manager?: EntityManager;
+}
+
+/** Parameters required to find a admin clinic's appointment by ID. */
+export interface FindMyClinicAppointmentPayload {
+  id: string;
+  ownerId: string;
+  status?: AppointmentStatus;
+  manager?: EntityManager;
+}
+
 /** Parameters required to find all appointments. */
 export interface FindAppointmentsPayload {
+  status?: AppointmentStatus;
   manager?: EntityManager;
 }
 
