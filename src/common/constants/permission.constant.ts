@@ -165,12 +165,6 @@ export const TIME_SLOT_PERMISSIONS = {
     action: 'read',
   },
 
-  TIME_SLOT_MANAGE: {
-    name: 'time-slot:manage',
-    module: 'time-slot',
-    action: 'manage',
-  },
-
   TIME_SLOT_BLOCK: {
     name: 'time-slot:block',
     module: 'time-slot',
@@ -185,12 +179,6 @@ export const TIME_SLOT_PERMISSIONS = {
 } as const satisfies PermissionStructure;
 
 export const APPOINTMENT_PERMISSIONS = {
-  APPOINTMENT_READ_ALL: {
-    name: 'appointment:read-all',
-    module: 'appointment',
-    action: 'read',
-  },
-
   APPOINTMENT_READ_PATIENT: {
     name: 'appointment:read-patient',
     module: 'appointment',
