@@ -14,6 +14,7 @@ import {
   UpdateDoctorPayload,
   BaseException,
   ResolveDoctorPayload,
+  UpdateDoctorStatusPayload,
 } from '@/types';
 import { checkDatabaseError } from '@/lib';
 import { DoctorStatus } from './enums';
@@ -235,6 +236,40 @@ export class DoctorService {
         e: error as Error,
         mainResource: 'Doctor',
         conflictField: 'medicalCode',
+      });
+    }
+  }
+
+  /**
+   * Update a doctor profile status.
+   */
+  async updateStatus(payload: UpdateDoctorStatusPayload): Promise<DoctorResponse> {
+    const repository = this.getRepository(payload.manager);
+
+    try {
+      const { doctor } = await this.resolveDoctor(payload);
+
+      const updatedDoctor = await repository.preload({
+        id: doctor.id,
+        status: payload.status,
+      });
+
+      if (!updatedDoctor) {
+        throw new NotFoundException({
+          message: 'Doctor not found in database.',
+          error: 'Doctor Not Found',
+        } as BaseException);
+      }
+
+      const savedDoctor = await repository.save(updatedDoctor);
+
+      return {
+        doctor: savedDoctor,
+      };
+    } catch (error) {
+      checkDatabaseError({
+        e: error as Error,
+        mainResource: 'Doctor',
       });
     }
   }
