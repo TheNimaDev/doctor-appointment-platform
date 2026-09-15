@@ -12,6 +12,7 @@ import {
   FindClinicsPayload,
   ResolveClinicPayload,
   UpdateClinicPayload,
+  UpdateClinicStatusPayload,
 } from '@/types';
 import { BaseException } from '@/types';
 import { checkDatabaseError } from '@/lib';
@@ -223,6 +224,44 @@ export class ClinicService {
   }
 
   /**
+   * Update a clinic status.
+   */
+  async updateStatus(payload: UpdateClinicStatusPayload): Promise<ClinicResponse> {
+    const repository = this.getRepository(payload.manager);
+
+    try {
+      const { clinic } = await this.resolveClinic(payload);
+
+      const updatedClinic = await repository.preload({
+        id: clinic.id,
+        status: payload.status,
+      });
+
+      if (!updatedClinic) {
+        throw new NotFoundException({
+          message: 'Clinic not found in database.',
+          error: 'Clinic Not Found',
+        } as BaseException);
+      }
+
+      const savedClinic = await repository.save(updatedClinic);
+
+      return {
+        clinic: savedClinic,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      checkDatabaseError({
+        e: error as Error,
+        mainResource: 'Clinic',
+      });
+    }
+  }
+
+  /**
    * Soft-delete a clinic.
    */
   async delete(payload: DeleteClinicPayload): Promise<void> {
@@ -252,7 +291,6 @@ export class ClinicService {
       });
     }
   }
-
 
   /**
    * Resolve a clinic by either owner ID or clinic ID.
