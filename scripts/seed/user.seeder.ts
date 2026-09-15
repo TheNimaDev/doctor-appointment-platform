@@ -5,7 +5,7 @@ import { ROLES } from '@/common';
 import { UserRoleService } from '@/modules/user-role/user-role.service';
 import { RoleService } from '@/modules/role/role.service';
 import { UserStatus } from '@/modules/user/enums';
-import { ALL_SEED_USERS } from './seed/seed-constants';
+import { ALL_SEED_USERS } from './seed-constants';
 
 export async function seedUsers(
   userService: UserService,
