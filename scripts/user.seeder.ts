@@ -5,38 +5,7 @@ import { ROLES } from '@/common';
 import { UserRoleService } from '@/modules/user-role/user-role.service';
 import { RoleService } from '@/modules/role/role.service';
 import { UserStatus } from '@/modules/user/enums';
-import { Role } from '@/modules/role/entities';
-
-const SEED_USERS = [
-  {
-    email: 'superadmin@example.com',
-    password: '12345678',
-    firstName: 'Super',
-    lastName: 'Admin',
-    role: ROLES.SUPER_ADMIN,
-  },
-  {
-    email: 'doctor@example.com',
-    password: '12345678',
-    firstName: 'Nima',
-    lastName: 'Doctor',
-    role: ROLES.DOCTOR,
-  },
-  {
-    email: 'clinicadmin@example.com',
-    password: '12345678',
-    firstName: 'Clinic',
-    lastName: 'Admin',
-    role: ROLES.CLINIC_ADMIN,
-  },
-  {
-    email: 'patient@example.com',
-    password: '12345678',
-    firstName: 'Nima',
-    lastName: 'Patient',
-    role: ROLES.PATIENT,
-  },
-] as const;
+import { ALL_SEED_USERS } from './seed/seed-constants';
 
 export async function seedUsers(
   userService: UserService,
@@ -44,14 +13,13 @@ export async function seedUsers(
   userRoleService: UserRoleService,
   manager: EntityManager,
 ): Promise<void> {
-  const patientRole = await manager.findOne(Role, {
-    where: {
-      name: ROLES.PATIENT,
-    },
+  const { role: patientRole } = await roleService.findByName({
+    name: ROLES.PATIENT,
+    manager,
   });
 
-  for (const userData of SEED_USERS) {
-    const { role: userRole, ...userDate } = userData;
+  for (const seedUser of ALL_SEED_USERS) {
+    const { role: userRole, ...userData } = seedUser;
 
     const exists = await manager.findOne(User, {
       where: {
@@ -62,10 +30,11 @@ export async function seedUsers(
     if (exists) {
       continue;
     }
+
     const { user } = await userService.createUser({
-      ...userDate,
-      manager,
+      ...userData,
       status: UserStatus.ACTIVE,
+      manager,
     });
 
     const { role } = await roleService.findByName({
@@ -73,21 +42,24 @@ export async function seedUsers(
       manager,
     });
 
-    if (role.name !== ROLES.SUPER_ADMIN) {
-      await userRoleService.add({
+    if (role.name === ROLES.SUPER_ADMIN) {
+      await userRoleService.assignSuperAdmin({
         userId: user.id,
-        roleId: patientRole.id,
+        roleId: role.id,
         manager,
       });
-      if (patientRole.id !== role.id) {
-        await userRoleService.add({
-          userId: user.id,
-          roleId: role.id,
-          manager,
-        });
-      }
-    } else {
-      await userRoleService.assignSuperAdmin({
+
+      continue;
+    }
+
+    await userRoleService.add({
+      userId: user.id,
+      roleId: patientRole.id,
+      manager,
+    });
+
+    if (patientRole.id !== role.id) {
+      await userRoleService.add({
         userId: user.id,
         roleId: role.id,
         manager,
@@ -95,5 +67,5 @@ export async function seedUsers(
     }
   }
 
-  console.log(`✅ ${SEED_USERS.length} users seeded.`);
+  console.log(`✅ ${ALL_SEED_USERS.length} users seeded.`);
 }
