@@ -34,6 +34,12 @@ export type UpdateDoctorPayload = DoctorIdentifier & {
   manager?: EntityManager;
 };
 
+/** Parameters for updating a doctor status. */
+export type UpdateDoctorStatusPayload = DoctorIdentifier & {
+  status: DoctorStatus;
+  manager?: EntityManager;
+};
+
 /** Parameters for finding a doctor by ID. */
 export interface FindDoctorByIdPayload {
   id: string;
