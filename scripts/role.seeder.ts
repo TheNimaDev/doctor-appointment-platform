@@ -133,21 +133,6 @@ export async function seedRoles(manager: EntityManager): Promise<void> {
   });
 
   await seedRole(manager, {
-    role: ROLES.ASSISTANT,
-    description: 'Assistant with limited access to assigned clinic resources.',
-    permissions: [
-      ...Object.values(DOCTOR_SCHEDULE_PERMISSIONS).map((permission) => permission.name),
-      ...Object.values(TIME_SLOT_PERMISSIONS).map((permission) => permission.name),
-
-      PERMISSIONS.APPOINTMENT_READ_DOCTOR,
-      PERMISSIONS.APPOINTMENT_CONFIRM,
-      PERMISSIONS.APPOINTMENT_REJECT,
-      PERMISSIONS.APPOINTMENT_COMPLETE,
-      PERMISSIONS.APPOINTMENT_NO_SHOW,
-    ],
-  });
-
-  await seedRole(manager, {
     role: ROLES.PATIENT,
     description: 'Patient with access to personal profile and public medical resources.',
     permissions: [

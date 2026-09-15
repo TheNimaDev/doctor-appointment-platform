@@ -30,13 +30,6 @@ const SEED_USERS = [
     role: ROLES.CLINIC_ADMIN,
   },
   {
-    email: 'assistant@example.com',
-    password: '12345678',
-    firstName: 'Clinic',
-    lastName: 'Assistant',
-    role: ROLES.ASSISTANT,
-  },
-  {
     email: 'patient@example.com',
     password: '12345678',
     firstName: 'Nima',
