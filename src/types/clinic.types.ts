@@ -38,7 +38,13 @@ export type UpdateClinicPayload = ClinicIdentifier & {
   longitude?: number | null;
   description?: string | null;
   manager?: EntityManager;
-}
+};
+
+/** Parameters for updating a clinic status. */
+export type UpdateClinicStatusPayload = ClinicIdentifier & {
+  status: ClinicStatus;
+  manager?: EntityManager;
+};
 
 /** Parameters for finding a clinic by ID. */
 export interface FindClinicByIdPayload {
