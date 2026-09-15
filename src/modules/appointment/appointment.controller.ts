@@ -92,26 +92,6 @@ export class AppointmentController {
   }
 
   /**
-   * Get an appointment by ID belonging to the current patient.
-   */
-  @Get(':id')
-  @AppointmentDecorator.FindPatientAppointmentDecorators()
-  async getPatientAppointmentById(
-    @Req() req: AccessRequest,
-    @Param('id') id: string,
-  ): Promise<ApiResponse<AppointmentResponse>> {
-    const data = await this.appointmentService.getPatientAppointmentById({
-      id,
-      userId: req.user.userId,
-    });
-
-    return {
-      message: 'Patient appointment retrieved successfully.',
-      data,
-    };
-  }
-
-  /**
    * Get an appointment by ID belonging to the current doctor.
    */
   @Get('doctor/:id')
@@ -127,6 +107,62 @@ export class AppointmentController {
 
     return {
       message: 'Doctor appointment retrieved successfully.',
+      data,
+    };
+  }
+
+  /**
+   * Get all appointments belonging to the current admin's clinic.
+   */
+  @Get('my-clinic')
+  @AppointmentDecorator.FindMyClinicAppointmentsDecorators()
+  async getMyClinicAppointments(@Req() req: AccessRequest): Promise<ApiResponse<AppointmentsResponse>> {
+    const data = await this.appointmentService.findMyClinicAppointments({
+      ownerId: req.user.userId,
+    });
+
+    return {
+      message: 'Clinic appointments retrieved successfully.',
+      data,
+    };
+  }
+
+  /**
+   * Get all appointments belonging to the current admin's clinic.
+   */
+  @Get('my-clinic/:id')
+  @AppointmentDecorator.FindMyClinicAppointmentDecorators()
+  async getMyClinicAppointmentById(
+    @Req() req: AccessRequest,
+    @Param('id') id: string,
+  ): Promise<ApiResponse<AppointmentResponse>> {
+    const data = await this.appointmentService.getMyClinicAppointmentsById({
+      ownerId: req.user.userId,
+      id,
+    });
+
+    return {
+      message: 'Clinic appointment retrieved successfully.',
+      data,
+    };
+  }
+
+  /**
+   * Get an appointment by ID belonging to the current patient.
+   */
+  @Get(':id')
+  @AppointmentDecorator.FindPatientAppointmentDecorators()
+  async getPatientAppointmentById(
+    @Req() req: AccessRequest,
+    @Param('id') id: string,
+  ): Promise<ApiResponse<AppointmentResponse>> {
+    const data = await this.appointmentService.getPatientAppointmentById({
+      id,
+      userId: req.user.userId,
+    });
+
+    return {
+      message: 'Patient appointment retrieved successfully.',
       data,
     };
   }
