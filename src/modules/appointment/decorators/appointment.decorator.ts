@@ -5,7 +5,7 @@ export const FindAppointmentsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     Permission({
-      permissions: [PERMISSIONS.APPOINTMENT_READ_ALL],
+      permissions: [PERMISSIONS.OWNER_ALL],
     }),
   );
 };
@@ -14,7 +14,7 @@ export const FindAppointmentDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     Permission({
-      permissions: [PERMISSIONS.APPOINTMENT_READ_ALL],
+      permissions: [PERMISSIONS.OWNER_ALL],
     }),
   );
 };
@@ -63,6 +63,26 @@ export const FindDoctorAppointmentDecorators = () => {
     Permission({
       permissions: [PERMISSIONS.APPOINTMENT_READ_DOCTOR],
       owner: true,
+      resource: 'appointment-doctor',
+    }),
+  );
+};
+
+export const FindMyClinicAppointmentsDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.APPOINTMENT_READ_DOCTOR],
+    }),
+  );
+};
+
+export const FindMyClinicAppointmentDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.APPOINTMENT_READ_DOCTOR],
+      clinicOwner: true,
       resource: 'appointment-doctor',
     }),
   );
