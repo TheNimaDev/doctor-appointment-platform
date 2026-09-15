@@ -1,3 +1,4 @@
+export * from './clinic.seeder';
 export * from './doctor.seeder';
 export * from './permission.seeder';
 export * from './role.seeder';
