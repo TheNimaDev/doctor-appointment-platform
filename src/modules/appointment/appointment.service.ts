@@ -5,7 +5,6 @@ import { Appointment } from './entities';
 import { checkDatabaseError } from '@/lib';
 import {
   BaseException,
-  CreateAppointmentPayload,
   FindAppointmentByIdPayload,
   FindAppointmentsPayload,
   AppointmentResponse,
@@ -17,6 +16,8 @@ import {
   FindPatientAppointmentByIdPayload,
   UpdateAppointmentStatusPayload,
   HandleAppointmentStatusPayload,
+  FindMyClinicAppointmentsPayload,
+  FindMyClinicAppointmentPayload,
 } from '@/types';
 import { TimeSlotService } from '@/modules/time-slot/time-slot.service';
 import { TimeSlotStatus } from '@/modules/time-slot/enums';
@@ -24,6 +25,7 @@ import { DatabaseService } from '@/modules/database/database.service';
 import { DoctorService } from '@/modules/doctor/doctor.service';
 import { AppointmentStatus } from './enums';
 import { APPOINTMENT_ALLOWED_TRANSITIONS } from './constants';
+import { ClinicService } from '@/modules/clinic/clinic.service';
 
 @Injectable()
 export class AppointmentService {
@@ -34,6 +36,7 @@ export class AppointmentService {
     private readonly databaseService: DatabaseService,
     private readonly timeSlotService: TimeSlotService,
     private readonly doctorService: DoctorService,
+    private readonly clinicService: ClinicService,
   ) {}
 
   /**
@@ -47,29 +50,75 @@ export class AppointmentService {
   }
 
   /**
-   * Create a new appointment.
+   * Get all appointments from the authenticated admin's clinic.
    */
-  async createAppointment(payload: CreateAppointmentPayload): Promise<AppointmentResponse> {
+  async findMyClinicAppointments(payload: FindMyClinicAppointmentsPayload): Promise<AppointmentsResponse> {
     const repository = this.getRepository(payload.manager);
 
-    try {
-      const appointment = repository.create({
-        patientId: payload.patientId,
-        timeSlotId: payload.timeSlotId,
-        notes: payload.notes,
-      });
+    const status = payload?.status ? payload.status : AppointmentStatus.PENDING;
 
-      const savedAppointment = await repository.save(appointment);
+    const { clinic } = await this.clinicService.findByOwnerId({
+      ownerId: payload.ownerId,
+      manager: payload.manager,
+    });
 
-      return {
-        appointment: savedAppointment,
-      };
-    } catch (error) {
-      checkDatabaseError({
-        e: error as Error,
-        mainResource: 'Appointment',
-      });
+    const appointments = await repository.find({
+      where: {
+        timeSlot: {
+          schedule: {
+            doctorClinic: {
+              clinicId: clinic.id,
+            },
+          },
+        },
+        status,
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+
+    return {
+      appointments,
+    };
+  }
+
+  /**
+   * Get an appointment from the authenticated admin's clinic.
+   */
+  async getMyClinicAppointmentsById(payload: FindMyClinicAppointmentPayload): Promise<AppointmentResponse> {
+    const repository = this.getRepository(payload.manager);
+
+    const status = payload?.status ? payload.status : AppointmentStatus.PENDING;
+
+    const { clinic } = await this.clinicService.findByOwnerId({
+      ownerId: payload.ownerId,
+      manager: payload.manager,
+    });
+
+    const appointment = await repository.findOne({
+      where: {
+        timeSlot: {
+          schedule: {
+            doctorClinic: {
+              clinicId: clinic.id,
+            },
+          },
+        },
+        status,
+      },
+    });
+
+    if (!appointment) {
+      throw new NotFoundException({
+        message: 'Appointment not found in your clinic.',
+        error: 'Appointment Not Found',
+      } as BaseException);
     }
+
+    return {
+      appointment,
+    };
   }
 
   /**
@@ -78,7 +127,12 @@ export class AppointmentService {
   async findAll(payload: FindAppointmentsPayload): Promise<AppointmentsResponse> {
     const repository = this.getRepository(payload.manager);
 
+    const status = payload?.status ? payload.status : AppointmentStatus.PENDING;
+
     const appointments = await repository.find({
+      where: {
+        status,
+      },
       order: {
         createdAt: 'DESC',
       },
@@ -117,25 +171,45 @@ export class AppointmentService {
    * Reserve an appointment.
    */
   async reserveAppointment(payload: ReserveAppointmentPayload): Promise<AppointmentResponse> {
-    const appointment = await this.databaseService.dataSource.transaction(async (manager) => {
-      const { appointment } = await this.createAppointment({
-        patientId: payload.patientId,
-        timeSlotId: payload.timeSlotId,
-        notes: payload.notes,
-        manager,
-      });
+    try {
+      const appointment = await this.databaseService.dataSource.transaction(async (manager) => {
+        const repository = this.getRepository(manager);
 
-      await this.timeSlotService.updateStatus({
-        id: payload.timeSlotId,
-        status: TimeSlotStatus.BOOKED,
-        manager,
-      });
+        const { timeSlot } = await this.timeSlotService.updateStatus({
+          id: payload.timeSlotId,
+          status: TimeSlotStatus.BOOKED,
+          manager,
+        });
 
-      return appointment;
-    });
-    return {
-      appointment,
-    };
+        // TODO: Get patient ID from user ID after implementing Patient module.
+        // const { patient } = await this.patientService.findByUserId({
+        //   userId: payload.userId,
+        //   manager: payload.manager,
+        // });
+
+        const appointment = repository.create({
+          patientId: payload.patientId, // TODO: Replace with patient.id
+          timeSlotId: timeSlot.id,
+          notes: payload.notes,
+        });
+
+        const savedAppointment = await repository.save(appointment);
+
+        return savedAppointment;
+      });
+      return {
+        appointment,
+      };
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      checkDatabaseError({
+        e: error as Error,
+        mainResource: 'Appointment',
+      });
+    }
   }
 
   /**
@@ -209,7 +283,11 @@ export class AppointmentService {
     const appointments = await repository.find({
       where: {
         timeSlot: {
-          doctorId: doctor.id,
+          schedule: {
+            doctorClinic: {
+              doctorId: doctor.id,
+            },
+          },
         },
       },
       order: {
@@ -237,7 +315,11 @@ export class AppointmentService {
       where: {
         id: payload.id,
         timeSlot: {
-          doctorId: doctor.id,
+          schedule: {
+            doctorClinic: {
+              doctorId: doctor.id,
+            },
+          },
         },
       },
     });
