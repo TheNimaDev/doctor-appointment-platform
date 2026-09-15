@@ -3,12 +3,13 @@ import { NestFactory } from '@nestjs/core';
 import { INestApplicationContext } from '@nestjs/common';
 import { CliModule } from '@/modules/cli/cli.module';
 import { DatabaseService } from '@/modules/database/database.service';
-import { seedRoles } from './role.seeder';
-import { seedPermissions } from './permission.seeder';
 import { UserService } from '@/modules/user/user.service';
-import { seedUsers } from './user.seeder';
 import { RoleService } from '@/modules/role/role.service';
 import { UserRoleService } from '@/modules/user-role/user-role.service';
+import { DoctorService } from '@/modules/doctor/doctor.service';
+import { ClinicService } from '@/modules/clinic/clinic.service';
+import { DoctorClinicService } from '@/modules/doctor-clinic/doctor-clinic.service';
+import { seedRoles, seedPermissions, seedUsers, seedDoctors, seedClinics, seedDoctorClinics } from './seed/';
 
 async function bootstrap(): Promise<void> {
   const app: INestApplicationContext = await NestFactory.createApplicationContext(CliModule);
@@ -19,6 +20,9 @@ async function bootstrap(): Promise<void> {
   const userService = app.get(UserService);
   const roleService = app.get(RoleService);
   const userRoleService = app.get(UserRoleService);
+  const doctorService = app.get(DoctorService);
+  const clinicService = app.get(ClinicService);
+  const doctorClinicService = app.get(DoctorClinicService);
 
   try {
     await dataSource.transaction(async (manager) => {
@@ -35,6 +39,9 @@ async function bootstrap(): Promise<void> {
 
       if (isDevelopment) {
         await seedUsers(userService, roleService, userRoleService, manager);
+        await seedDoctors(doctorService, manager);
+        await seedClinics(clinicService, manager);
+        await seedDoctorClinics(doctorClinicService, manager);
       }
 
       console.log('\n=========================================');
