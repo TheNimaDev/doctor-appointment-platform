@@ -1,9 +1,6 @@
 import { Module } from '@nestjs/common';
-import { DatabaseModule } from '@/modules/database';
-import { UserModule } from '@/modules/user';
-import { RoleModule } from '@/modules/role';
-import { UserRoleModule } from '@/modules/user-role';
 import { ConfigModule } from '@nestjs/config';
+import { DatabaseModule, UserModule, RoleModule, UserRoleModule, DoctorModule, ClinicModule, DoctorClinicModule } from '@/modules';
 
 @Module({
   imports: [
@@ -15,6 +12,9 @@ import { ConfigModule } from '@nestjs/config';
     UserModule,
     RoleModule,
     UserRoleModule,
+    DoctorModule,
+    ClinicModule,
+    DoctorClinicModule,
   ],
 })
 export class CliModule {}
