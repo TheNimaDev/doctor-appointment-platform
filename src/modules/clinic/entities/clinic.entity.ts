@@ -14,11 +14,9 @@ import {
 import { ClinicStatus } from '../enums';
 import { User } from '@/modules/user/entities';
 import { DoctorClinic } from '@/modules/doctor-clinic/entities';
-import { TimeSlot } from '@/modules/time-slot/entities';
 
 @Entity('clinics')
 @Unique(['ownerId'])
-@Index(['ownerId'])
 @Index(['city'])
 @Index(['status'])
 export class Clinic {
