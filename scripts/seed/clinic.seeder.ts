@@ -27,7 +27,7 @@ export async function seedClinics(clinicService: ClinicService, manager: EntityM
       continue;
     }
 
-    await clinicService.create({
+    const { clinic } = await clinicService.create({
       ownerId: user.id,
       name: seedClinic.name,
       city: seedClinic.city,
@@ -36,7 +36,7 @@ export async function seedClinics(clinicService: ClinicService, manager: EntityM
     });
 
     await clinicService.updateStatus({
-      ownerId: user.id,
+      clinicId: clinic.id,
       status: ClinicStatus.ACTIVE,
       manager,
     });

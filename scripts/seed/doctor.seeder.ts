@@ -28,7 +28,7 @@ export async function seedDoctors(doctorService: DoctorService, manager: EntityM
       continue;
     }
 
-    await doctorService.create({
+    const { doctor } = await doctorService.create({
       userId: user.id,
       medicalCode: seedDoctor.medicalCode,
       experienceYears: seedDoctor.experienceYears,
@@ -37,8 +37,8 @@ export async function seedDoctors(doctorService: DoctorService, manager: EntityM
     });
 
     await doctorService.updateStatus({
-      userId: user.id,
-      status: DoctorStatus.ACTIVE,
+      doctorId: doctor.id,
+      status: DoctorStatus.ACTIVE,  
       manager,
     });
 
