@@ -249,22 +249,12 @@ export class DoctorService {
     try {
       const { doctor } = await this.resolveDoctor(payload);
 
-      const updatedDoctor = await repository.preload({
-        id: doctor.id,
-        status: payload.status,
-      });
+      doctor.status = payload.status;
 
-      if (!updatedDoctor) {
-        throw new NotFoundException({
-          message: 'Doctor not found in database.',
-          error: 'Doctor Not Found',
-        } as BaseException);
-      }
-
-      const savedDoctor = await repository.save(updatedDoctor);
+      const updatedDoctor = await repository.save(doctor);
 
       return {
-        doctor: savedDoctor,
+        doctor: updatedDoctor,
       };
     } catch (error) {
       checkDatabaseError({
