@@ -232,22 +232,12 @@ export class ClinicService {
     try {
       const { clinic } = await this.resolveClinic(payload);
 
-      const updatedClinic = await repository.preload({
-        id: clinic.id,
-        status: payload.status,
-      });
+      clinic.status = payload.status;
 
-      if (!updatedClinic) {
-        throw new NotFoundException({
-          message: 'Clinic not found in database.',
-          error: 'Clinic Not Found',
-        } as BaseException);
-      }
-
-      const savedClinic = await repository.save(updatedClinic);
+      const updatedClinic = await repository.save(clinic);
 
       return {
-        clinic: savedClinic,
+        clinic: updatedClinic,
       };
     } catch (error) {
       if (error instanceof NotFoundException) {
