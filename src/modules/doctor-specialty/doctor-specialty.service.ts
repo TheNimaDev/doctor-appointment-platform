@@ -6,6 +6,7 @@ import {
   AddDoctorSpecialtyPayload,
   DoctorSpecialtiesResponse,
   DoctorSpecialtyResponse,
+  FindDoctorSpecialtiesByUserIdPayload,
   FindDoctorSpecialtiesPayload,
   FindDoctorSpecialtyPayload,
   RemoveDoctorSpecialtyPayload,
@@ -216,6 +217,28 @@ export class DoctorSpecialtyService {
         mainResource: 'Doctor Specialty',
       });
     }
+  }
+
+  /**
+   * Find all specialties assigned to a doctor by user ID.
+   */
+  async findAllByUserId(payload: FindDoctorSpecialtiesByUserIdPayload): Promise<DoctorSpecialtiesResponse> {
+    const repository = this.getRepository(payload.manager);
+
+    const { doctor } = await this.doctorService.findByUserId({
+      userId: payload.userId,
+      manager: payload.manager,
+    });
+
+    const doctorSpecialties = await repository.find({
+      where: {
+        doctorId: doctor.id,
+      },
+    });
+
+    return {
+      doctorSpecialties,
+    };
   }
 
   /**
