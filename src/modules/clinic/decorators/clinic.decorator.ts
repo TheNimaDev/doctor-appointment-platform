@@ -10,6 +10,15 @@ export const CreateClinicDecorators = () => {
   );
 };
 
+export const FindMyClinicDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.CLINIC_READ],
+    }),
+  );
+};
+
 export const FindClinicsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
