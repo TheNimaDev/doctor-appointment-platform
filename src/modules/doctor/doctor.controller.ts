@@ -43,6 +43,22 @@ export class DoctorController {
   }
 
   /**
+   * Get the authenticated doctor's profile.
+   */
+  @Get('my')
+  @DoctorDecorator.FindMyDoctorDecorators()
+  async findMy(@Req() req: AccessRequest): Promise<ApiResponse<DoctorResponse>> {
+    const data = await this.doctorService.findByUserId({
+      userId: req.user.userId,
+    });
+
+    return {
+      message: 'Doctor profile retrieved successfully.',
+      data,
+    };
+  }
+
+  /**
    * Get all doctors with any status.
    */
   @Get('all')
