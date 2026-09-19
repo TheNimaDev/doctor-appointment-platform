@@ -504,24 +504,28 @@ export class DoctorScheduleService {
       });
     }
 
-    const result = await repository.softDelete({
-      id: payload.id,
-      doctorClinic: {
-        ...(payload.userId !== undefined && {
-          doctor: { userId: payload.userId },
-        }),
-        ...(payload.clinicOwnerId !== undefined && {
-          clinic: { ownerId: payload.clinicOwnerId },
-        }),
+    const doctorSchedule = await repository.findOne({
+      where: {
+        id: payload.id,
+        doctorClinic: {
+          ...(payload.userId !== undefined && {
+            doctor: { userId: payload.userId },
+          }),
+          ...(payload.clinicOwnerId !== undefined && {
+            clinic: { ownerId: payload.clinicOwnerId },
+          }),
+        },
       },
     });
 
-    if (result.affected === 0) {
+    if (!doctorSchedule) {
       throw new NotFoundException({
         message: 'Doctor schedule not found in database.',
         error: 'Doctor Schedule Not Found',
       } as BaseException);
     }
+
+    await repository.softRemove(doctorSchedule);
   }
 
   /**
