@@ -18,7 +18,7 @@ export class DoctorScheduleController {
     const data = await this.doctorScheduleService.findAll({ status });
 
     return {
-      message: 'Clinic schedules retrieved successfully.',
+      message: 'Doctor schedules retrieved successfully.',
       data,
     };
   }
@@ -84,9 +84,9 @@ export class DoctorScheduleController {
   /**
    * Get all schedules of the authenticated doctor.
    */
-  @Get('my/schedules')
+  @Get('my')
   @DoctorScheduleDecorator.FindMyDoctorSchedulesDecorators()
-  async findByDoctor(@Req() req: AccessRequest): Promise<ApiResponse<DoctorSchedulesResponse>> {
+  async findMySchedules(@Req() req: AccessRequest): Promise<ApiResponse<DoctorSchedulesResponse>> {
     const data = await this.doctorScheduleService.findByDoctor({
       userId: req.user.userId,
     });
@@ -102,7 +102,7 @@ export class DoctorScheduleController {
    */
   @Get('my/clinic/:clinicId')
   @DoctorScheduleDecorator.FindMyDoctorClinicSchedulesDecorators()
-  async findByDoctorAndClinic(
+  async findMyClinicSchedulesByDoctorId(
     @Req() req: AccessRequest,
     @Param('clinicId') clinicId: string,
   ): Promise<ApiResponse<DoctorSchedulesResponse>> {
@@ -142,9 +142,9 @@ export class DoctorScheduleController {
    *
    * Clinic admin endpoint.
    */
-  @Get('my-clinic/schedules')
+  @Get('my-clinic')
   @DoctorScheduleDecorator.FindMyClinicSchedulesDecorators()
-  async findByClinic(@Req() req: AccessRequest): Promise<ApiResponse<DoctorSchedulesResponse>> {
+  async findMyClinicSchedules(@Req() req: AccessRequest): Promise<ApiResponse<DoctorSchedulesResponse>> {
     const data = await this.doctorScheduleService.findByClinic({
       userId: req.user.userId,
     });
