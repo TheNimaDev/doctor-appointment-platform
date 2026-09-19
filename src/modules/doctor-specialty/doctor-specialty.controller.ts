@@ -29,6 +29,22 @@ export class DoctorSpecialtyController {
   }
 
   /**
+   * Find all specialties assigned to the current doctor.
+   */
+  @Get('my')
+  @DoctorSpecialtyDecorator.FindMyDoctorSpecialtiesDecorators()
+  async findMySpecialties(@Req() req: AccessRequest): Promise<ApiResponse<DoctorSpecialtiesResponse>> {
+    const data = await this.doctorSpecialtyService.findAllByUserId({
+      userId: req.user.userId,
+    });
+
+    return {
+      message: 'Doctor specialties retrieved successfully.',
+      data,
+    };
+  }
+
+  /**
    * Get all specialties assigned to a doctor.
    */
   @Get('doctors/:doctorId')
