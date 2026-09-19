@@ -29,6 +29,22 @@ export class ClinicController {
   }
 
   /**
+   * Get the current user's clinic.
+   */
+  @Get('my')
+  @ClinicDecorator.FindMyClinicDecorators()
+  async findMy(@Req() req: AccessRequest): Promise<ApiResponse<ClinicResponse>> {
+    const data = await this.clinicService.findByOwnerId({
+      ownerId: req.user.userId,
+    });
+
+    return {
+      message: 'Clinic retrieved successfully.',
+      data,
+    };
+  }
+
+  /**
    * Get all active clinics.
    */
   @Get()
