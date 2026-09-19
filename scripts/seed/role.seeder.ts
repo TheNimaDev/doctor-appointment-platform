@@ -5,6 +5,7 @@ import { RolePermission } from '@/modules/role-permission/entities';
 
 import {
   CLINIC_PERMISSIONS,
+  DOCTOR_CLINIC_PERMISSIONS,
   DOCTOR_PERMISSIONS,
   DOCTOR_SCHEDULE_PERMISSIONS,
   DOCTOR_SPECIALTY_PERMISSIONS,
@@ -103,6 +104,7 @@ export async function seedRoles(manager: EntityManager): Promise<void> {
     description: 'Administrator responsible for managing assigned clinics and related medical resources.',
     permissions: [
       ...Object.values(CLINIC_PERMISSIONS).map((permission) => permission.name),
+      ...Object.values(DOCTOR_CLINIC_PERMISSIONS).map((permission) => permission.name),
       ...Object.values(DOCTOR_SCHEDULE_PERMISSIONS).map((permission) => permission.name),
       ...Object.values(TIME_SLOT_PERMISSIONS).map((permission) => permission.name),
 
@@ -146,6 +148,7 @@ export async function seedRoles(manager: EntityManager): Promise<void> {
       PERMISSIONS.APPOINTMENT_READ_PATIENT,
       PERMISSIONS.APPOINTMENT_RESERVE,
       PERMISSIONS.APPOINTMENT_CANCEL,
+      PERMISSIONS.DOCTOR_CLINIC_READ,
     ],
   });
 }
