@@ -66,7 +66,15 @@ export class DoctorSpecialtyService {
         } as BaseException);
       }
 
-      if (payload.isPrimary) {
+      const hasSpecialty = await repository.exists({
+        where: {
+          doctorId: doctor.id,
+        },
+      });
+
+      const isPrimary = !hasSpecialty || (payload.isPrimary ?? false);
+
+      if (isPrimary) {
         await repository.update(
           {
             doctorId: doctor.id,
@@ -79,8 +87,8 @@ export class DoctorSpecialtyService {
 
       const doctorSpecialty = repository.create({
         doctorId: doctor.id,
-        specialtyId: payload.specialtyId,
-        isPrimary: payload.isPrimary ?? false,
+        specialtyId: specialty.id,
+        isPrimary,
       });
 
       const savedDoctorSpecialty = await repository.save(doctorSpecialty);
