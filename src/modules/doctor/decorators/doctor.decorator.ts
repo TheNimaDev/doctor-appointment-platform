@@ -20,6 +20,15 @@ export const FindDoctorsDecorators = () => {
   );
 };
 
+export const FindMyDoctorDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.DOCTOR_READ],
+    }),
+  );
+};
+
 export const FindDoctorsWithAllStatusDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
