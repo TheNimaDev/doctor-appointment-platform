@@ -207,7 +207,7 @@ export class DoctorScheduleService {
 
     const doctorSchedules = await repository.find({
       where: {
-        doctorClinicId: In(doctorClinics),
+        doctorClinicId: In(doctorClinics.map((doctorClinic) => doctorClinic.id)),
       },
       order: {
         dayOfWeek: 'ASC',
@@ -266,7 +266,7 @@ export class DoctorScheduleService {
 
     const doctorSchedules = await repository.find({
       where: {
-        doctorClinicId: In(doctorClinics),
+        doctorClinicId: In(doctorClinics.map((doctorClinic) => doctorClinic.id)),
       },
       order: {
         dayOfWeek: 'ASC',
