@@ -10,6 +10,15 @@ export const AddDoctorSpecialtyDecorators = () => {
   );
 };
 
+export const FindMyDoctorSpecialtiesDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Permission({
+      permissions: [PERMISSIONS.DOCTOR_READ],
+    }),
+  );
+};
+
 export const FindDoctorSpecialtiesDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
