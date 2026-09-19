@@ -42,6 +42,12 @@ export interface SetPrimaryDoctorSpecialtyPayload {
   manager?: EntityManager;
 }
 
+/** Parameters for finding all specialties associated with a doctor's user ID. */
+export interface FindDoctorSpecialtiesByUserIdPayload {
+  userId: string;
+  manager?: EntityManager;
+}
+
 /** Parameters for removing a specialty from a doctor. */
 export interface RemoveDoctorSpecialtyPayload {
   userId: string;
