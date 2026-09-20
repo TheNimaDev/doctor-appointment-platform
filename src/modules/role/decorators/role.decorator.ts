@@ -56,6 +56,18 @@ export const FindRoleDecorators = () => {
 export const UpdateRoleDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiParam({
+      name: 'id',
+      description: 'Role ID',
+      type: String,
+      format: 'uuid',
+      example: '7f8c4f2e-9f6c-4f2d-8d13-2a4f8c9b7e61',
+    }),
+    ApiBody({ type: RoleDto.UpdateRoleDto }),
+    ApiOkResponse({ type: RoleRes.UpdateRoleResponse }),
+    ApiBadRequestResponse({ type: RoleRes.UpdateRoleBadRequestResponse }),
+    ApiConflictResponse({ type: RoleRes.UpdateRoleConflictResponse }),
+    ApiNotFoundResponse({ type: RoleRes.UpdateRoleNotFoundResponse }),
     Permission({
       permissions: [PERMISSIONS.OWNER_ALL],
     }),
