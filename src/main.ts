@@ -6,6 +6,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
 import { join } from 'node:path';
 import { getServerTimestamp } from './lib';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 let PORT: number;
 let BASE_URL: string;
@@ -22,6 +23,36 @@ async function bootstrap() {
 
   // Set global API prefix
   app.setGlobalPrefix(BASE_URL);
+
+  // Configure Swagger API documentation
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle(APP_NAME)
+    .setDescription('Doctor Appointment Platform API')
+    .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
+      'access-token',
+    )
+    .addCookieAuth('refreshToken', {
+      type: 'apiKey',
+      in: 'cookie',
+      name: 'refreshToken',
+    })
+    .build();
+
+  const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup(`${BASE_URL}/docs`, app, swaggerDocument, {
+    swaggerOptions: {
+      withCredentials: true,
+      persistAuthorization: true,
+      defaultModelsExpandDepth: -1,
+    },
+    jsonDocumentUrl: `${BASE_URL}/docs-json`,
+  });
 
   // Serve static files from the public directory.
   app.useStaticAssets(join(process.cwd(), 'public'));
@@ -93,6 +124,9 @@ ${colors.dim}${colors.gray}─────────────────�
 
 ${colors.green}●${colors.reset} ${colors.bold}Server Address${colors.reset}     ${colors.green}${colors.underline}http://localhost:${PORT}${colors.reset}
 ${colors.magenta}●${colors.reset} ${colors.bold}API Base Path${colors.reset}      ${colors.magenta}${colors.underline}${baseUrl}${colors.reset}
+${colors.blue}●${colors.reset} ${colors.bold}Swagger UI${colors.reset}         ${colors.blue}${colors.underline}${baseUrl}/docs${colors.reset}
+${colors.cyan}●${colors.reset} ${colors.bold}Swagger JSON${colors.reset}       ${colors.cyan}${colors.underline}${baseUrl}/docs-json${colors.reset}
+
 
 ${colors.dim}${colors.gray}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}
 
