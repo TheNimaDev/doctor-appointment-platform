@@ -30,3 +30,14 @@ export interface BaseException {
   message: string;
   error: string;
 }
+
+/** Validation error for a specific request field. */
+export interface ValidationFieldError {
+  field: string;
+  error: string;
+}
+
+/** Standard API exception response. */
+export interface ExceptionResponse extends BaseException {
+  errors?: ValidationFieldError[];
+}
