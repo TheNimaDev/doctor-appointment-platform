@@ -98,6 +98,7 @@ export class AppointmentService {
 
     const appointment = await repository.findOne({
       where: {
+        id: payload.id,
         timeSlot: {
           schedule: {
             doctorClinic: {
