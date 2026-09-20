@@ -2,18 +2,20 @@ import 'dotenv/config';
 import { ApiProperty } from '@nestjs/swagger';
 import { getHttpStatusMessage } from '@/lib';
 import type { PermissionsKeyType } from '@/common';
-import type { ApiResponse, BaseApiResponseData } from '@/types';
+import type { ApiResponse, BaseApiResponseData, ValidationFieldError } from '@/types';
 
 const BASE_URL = process.env.BASE_URL ?? 'api/v1';
 
 function getFormatPath(path: string): string {
   const normalizedBaseUrl = BASE_URL.replace(/^\/|\/$/g, '');
+  const normalizedPath = path.replace(/^\/+/, '');
+  const baseUrlPrefix = `${normalizedBaseUrl}/`;
 
-  if (path.startsWith(normalizedBaseUrl) || path.startsWith(`/${normalizedBaseUrl}`)) {
+  if (normalizedPath === normalizedBaseUrl || normalizedPath.startsWith(baseUrlPrefix)) {
     return path;
   }
 
-  return `/${normalizedBaseUrl}/${path.replace(/^\/+/, '')}`;
+  return `/${normalizedBaseUrl}/${normalizedPath}`;
 }
 
 interface GetNormalErrorTypes {
@@ -65,9 +67,9 @@ export function getUnauthorizedResponse(path: string) {
 
   return {
     [className]: class extends getNormalErrorResponse({
-      message: 'Access token missing or expired.',
+      message: 'Invalid or expired access token',
       statusCode: 401,
-      error: 'Access Token Expired',
+      error: 'Invalid Access Token',
       path,
     }) {},
   }[className];
@@ -222,4 +224,66 @@ export function getBaseOkResponseSchema<T>(props: GetBaseOkResponseParams<T>) {
   }
 
   return BaseOkResponse;
+}
+
+interface GetValidationErrorResponseProps {
+  path: string;
+  errors: ValidationFieldError[];
+}
+
+/**
+ * Create a validation error response schema for Swagger.
+ */
+export function getValidationErrorResponse(props: GetValidationErrorResponseProps) {
+  const className = getDynamicClassName('ValidationError', props.path);
+
+  return {
+    [className]: class extends getValidationErrorClass(props) {},
+  }[className];
+}
+
+function getValidationErrorClass(props: GetValidationErrorResponseProps) {
+  class ValidationErrorResponse {
+    @ApiProperty({ example: 400 })
+    statusCode: number;
+
+    @ApiProperty({ example: false })
+    success: boolean;
+
+    @ApiProperty({ example: getHttpStatusMessage(400) })
+    detail: string;
+
+    @ApiProperty({ example: getFormatPath(props.path) })
+    path: string;
+
+    @ApiProperty({ example: '2026-02-08T02:11:20.630Z' })
+    timestamp: string;
+
+    @ApiProperty({ example: 'Validation failed.' })
+    message: string;
+
+    @ApiProperty({ example: 'Bad Request' })
+    error: string;
+
+    @ApiProperty({
+      example: props.errors,
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          field: {
+            type: 'string',
+            example: 'email',
+          },
+          error: {
+            type: 'string',
+            example: 'Invalid email address',
+          },
+        },
+      },
+    })
+    errors: ValidationFieldError[];
+  }
+
+  return ValidationErrorResponse;
 }
