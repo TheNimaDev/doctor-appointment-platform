@@ -54,6 +54,22 @@ export const AddUserRoleDecorators = () => {
 export const RemoveUserRoleDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiParam({
+      name: 'userId',
+      description: 'User ID',
+      type: String,
+      format: 'uuid',
+      example: '2b4d7e9a-1c3f-4b5d-8e7f-9a1b2c3d4e5f',
+    }),
+    ApiParam({
+      name: 'roleId',
+      description: 'Role ID',
+      type: String,
+      format: 'uuid',
+      example: '4c6e8f1a-3d5b-4f7c-9a2e-1b3d5f7c9e0a',
+    }),
+    ApiOkResponse({ type: UserRoleRes.RemoveUserRoleResponse }),
+    ApiNotFoundResponse({ type: UserRoleRes.RemoveUserRoleNotFoundResponse }),
     Permission({
       permissions: [PERMISSIONS.OWNER_ALL],
     }),
