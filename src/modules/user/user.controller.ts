@@ -14,13 +14,13 @@ export class UserController {
   @Get('me')
   @UserDecorator.GetMeDecorators()
   async getMe(@Req() req: AccessRequest): Promise<ApiResponse<UserResponse>> {
-    const user = await this.userService.getById({
+    const data = await this.userService.getById({
       id: req.user.userId,
     });
 
     return {
       message: 'User retrieved successfully.',
-      data: user,
+      data,
     };
   }
 
@@ -33,14 +33,14 @@ export class UserController {
     @Req() req: AccessRequest,
     @Body() updateProfileDto: UpdateProfileDto,
   ): Promise<ApiResponse<UserResponse>> {
-    const user = await this.userService.updateProfile({
+    const data = await this.userService.updateProfile({
       userId: req.user.userId,
       ...updateProfileDto,
     });
 
     return {
       message: 'Profile updated successfully.',
-      data: user,
+      data,
     };
   }
 
