@@ -1,11 +1,23 @@
 import { applyDecorators, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+} from '@nestjs/swagger';
 import { RefreshTokenGuard } from '@/common/guards';
 import { Public } from '@/common';
+import * as AuthRes from '../res';
+import * as AuthDto from '../dto';
 
 export const RegisterDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.CREATED),
-    Public()
+    ApiBody({ type: AuthDto.RegisterDto }),
+    ApiCreatedResponse({ type: AuthRes.RegisterResponse }),
+    ApiBadRequestResponse({ type: AuthRes.RegisterBadRequestResponse }),
+    ApiConflictResponse({ type: AuthRes.RegisterConflictResponse }),
+    Public(),
   );
 };
 
