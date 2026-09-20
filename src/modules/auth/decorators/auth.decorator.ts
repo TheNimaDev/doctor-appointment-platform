@@ -77,7 +77,11 @@ export const LogoutAllDecorators = () => {
 export const VerifyEmailResendDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
-    Public()
+    ApiBody({ type: AuthDto.ResendVerificationEmailDto }),
+    ApiOkResponse({ type: AuthRes.VerifyEmailResendResponse }),
+    ApiUnauthorizedResponse({ type: AuthRes.VerifyEmailResendUnauthorizedResponse }),
+    ApiBadRequestResponse({ type: AuthRes.VerifyEmailResendBadRequestResponse }),
+    Public(),
   );
 };
 
