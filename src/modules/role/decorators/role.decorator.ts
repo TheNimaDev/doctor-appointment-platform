@@ -1,5 +1,11 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiBadRequestResponse, ApiBody, ApiConflictResponse, ApiCreatedResponse } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiOkResponse,
+} from '@nestjs/swagger';
 import { Permission, PERMISSIONS } from '@/common';
 import * as RoleRes from '../res';
 import * as RoleDto from '../dto';
@@ -20,6 +26,7 @@ export const CreateRoleDecorators = () => {
 export const FindRolesDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiOkResponse({ type: RoleRes.FindRolesResponse }),
     Permission({
       permissions: [PERMISSIONS.OWNER_ALL],
     }),
