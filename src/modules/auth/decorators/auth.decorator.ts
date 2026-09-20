@@ -63,6 +63,9 @@ export const LogoutDecorators = () => {
 export const LogoutAllDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiOkResponse({ type: AuthRes.LogoutAllResponse }),
+    ApiUnauthorizedResponse({ type: AuthRes.LogoutAllUnauthorizedResponse }),
+    ApiNotFoundResponse({ type: AuthRes.LogoutAllNotFoundResponse }),
     Public({
       isPublicAccess: false,
       isPublicPermission: true,
