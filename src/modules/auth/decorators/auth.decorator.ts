@@ -141,6 +141,10 @@ export const ChangeEmailDecorators = () => {
 export const ConfirmChangeEmailDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBody({ type: AuthDto.ConfirmChangeEmailDto }),
+    ApiOkResponse({ type: AuthRes.ConfirmChangeEmailResponse }),
+    ApiBadRequestResponse({ type: AuthRes.ConfirmChangeEmailBadRequestResponse }),
+    ApiConflictResponse({ type: AuthRes.ConfirmChangeEmailConflictResponse }),
     Public(),
   );
 };
