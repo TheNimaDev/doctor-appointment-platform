@@ -6,3 +6,4 @@ export * from './logout-all.response';
 export * from './verify-email-resend.response';
 export * from './refresh.response';
 export * from './change-password.response';
+export * from './forgot-password.response';

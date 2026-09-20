@@ -111,7 +111,10 @@ export const ChangePasswordDecorators = () => {
 export const ForgotPasswordDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
-    Public()
+    ApiBody({ type: AuthDto.ForgotPasswordDto }),
+    ApiOkResponse({ type: AuthRes.ForgotPasswordResponse }),
+    ApiBadRequestResponse({ type: AuthRes.ForgotPasswordBadRequestResponse }),
+    Public(),
   );
 };
 
