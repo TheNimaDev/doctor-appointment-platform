@@ -101,6 +101,10 @@ export const RefreshDecorators = () => {
 export const ChangePasswordDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBody({ type: AuthDto.ChangePasswordDto }),
+    ApiOkResponse({ type: AuthRes.ChangePasswordResponse }),
+    ApiUnauthorizedResponse({ type: AuthRes.ChangePasswordUnauthorizedResponse }),
+    ApiBadRequestResponse({ type: AuthRes.ChangePasswordBadRequestResponse }),
   );
 };
 
