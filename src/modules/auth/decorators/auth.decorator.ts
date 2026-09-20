@@ -4,6 +4,7 @@ import {
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiQuery,
   ApiUnauthorizedResponse,
@@ -48,6 +49,9 @@ export const LoginDecorators = () => {
 export const LogoutDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiOkResponse({ type: AuthRes.LogoutResponse }),
+    ApiUnauthorizedResponse({ type: AuthRes.LogoutUnauthorizedResponse }),
+    ApiNotFoundResponse({ type: AuthRes.LogoutNotFoundResponse }),
     Public({
       isPublicAccess: false,
       isPublicPermission: true,
