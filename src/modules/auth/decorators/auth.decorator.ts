@@ -6,6 +6,7 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiQuery,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { RefreshTokenGuard } from '@/common/guards';
 import { Public } from '@/common';
@@ -36,7 +37,11 @@ export const VerifyEmailDecorators = () => {
 export const LoginDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
-    Public()
+    ApiBody({ type: AuthDto.LoginDto }),
+    ApiOkResponse({ type: AuthRes.LoginResponseSchema }),
+    ApiUnauthorizedResponse({ type: AuthRes.LoginUnauthorizedResponse }),
+    ApiBadRequestResponse({ type: AuthRes.LoginBadRequestResponse }),
+    Public(),
   );
 };
 
