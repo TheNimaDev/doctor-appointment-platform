@@ -8,3 +8,4 @@ export * from './refresh.response';
 export * from './change-password.response';
 export * from './forgot-password.response';
 export * from './reset-password.response';
+export * from './change-email.response';

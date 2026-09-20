@@ -131,6 +131,10 @@ export const ResetPasswordDecorators = () => {
 export const ChangeEmailDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBody({ type: AuthDto.ChangeEmailDto }),
+    ApiOkResponse({ type: AuthRes.ChangeEmailResponse }),
+    ApiUnauthorizedResponse({ type: AuthRes.ChangeEmailUnauthorizedResponse }),
+    ApiBadRequestResponse({ type: AuthRes.ChangeEmailBadRequestResponse }),
   );
 };
 
