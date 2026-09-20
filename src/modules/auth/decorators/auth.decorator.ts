@@ -88,6 +88,8 @@ export const VerifyEmailResendDecorators = () => {
 export const RefreshDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiOkResponse({ type: AuthRes.RefreshResponse }),
+    ApiUnauthorizedResponse({ type: AuthRes.RefreshUnauthorizedResponse }),
     Public({
       isPublicAccess: false,
       isPublicPermission: true,
