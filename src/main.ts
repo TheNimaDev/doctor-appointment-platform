@@ -35,7 +35,7 @@ async function bootstrap() {
         scheme: 'bearer',
         bearerFormat: 'JWT',
       },
-      'access-token',
+      'accessToken',
     )
     .addCookieAuth('refreshToken', {
       type: 'apiKey',
