@@ -1,7 +1,8 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
 import { Permission, PERMISSIONS } from '@/common';
-import { ApiOkResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBody, ApiOkResponse } from '@nestjs/swagger';
 import * as UserRes from '../res';
+import * as UserDto from '../dto';
 
 export const GetMeDecorators = () => {
   return applyDecorators(
@@ -16,6 +17,9 @@ export const GetMeDecorators = () => {
 export const UpdateMeDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBody({ type: UserDto.UpdateProfileDto }),
+    ApiOkResponse({ type: UserRes.UpdateMeResponse }),
+    ApiBadRequestResponse({ type: UserRes.UpdateMeBadRequestResponse }),
     Permission({
       permissions: [PERMISSIONS.USER_UPDATE],
     }),
