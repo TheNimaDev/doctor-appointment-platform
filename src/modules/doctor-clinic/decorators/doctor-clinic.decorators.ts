@@ -75,6 +75,9 @@ export const FindDoctorClinicsByClinicDecorators = () => {
 export const FindMyClinicDoctorsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiOkResponse({
+      type: DoctorClinicRes.FindMyClinicDoctorsResponse,
+    }),
     Permission({
       permissions: [PERMISSIONS.DOCTOR_CLINIC_READ],
     }),
