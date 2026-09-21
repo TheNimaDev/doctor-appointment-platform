@@ -78,6 +78,15 @@ export const UpdateSpecialtyDecorators = () => {
 export const DeleteSpecialtyDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiParam({
+      name: 'id',
+      description: 'Specialty ID',
+      type: String,
+      format: 'uuid',
+      example: '7f8c4f2e-9f6c-4f2d-8d13-2a4f8c9b7e61',
+    }),
+    ApiOkResponse({ type: SpecialtyRes.DeleteSpecialtyResponse }),
+    ApiNotFoundResponse({ type: SpecialtyRes.DeleteSpecialtyNotFoundResponse }),
     Permission({
       permissions: [PERMISSIONS.SPECIALTY_DELETE],
     }),
