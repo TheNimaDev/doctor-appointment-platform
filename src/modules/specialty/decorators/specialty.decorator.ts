@@ -1,5 +1,11 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiBadRequestResponse, ApiBody, ApiConflictResponse, ApiCreatedResponse } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiOkResponse,
+} from '@nestjs/swagger';
 import { Permission, PERMISSIONS, Public } from '@/common';
 import * as SpecialtyRes from '../res';
 import * as SpecialtyDto from '../dto';
@@ -21,6 +27,7 @@ export const FindSpecialtiesDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     Public(),
+    ApiOkResponse({ type: SpecialtyRes.FindSpecialtiesResponse }),
     Permission({
       permissions: [PERMISSIONS.SPECIALTY_READ],
     }),
