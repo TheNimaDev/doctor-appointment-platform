@@ -33,6 +33,43 @@ export const FindAvailableTimeSlotsDecorators = () => {
   );
 };
 
+export const FindAvailableDoctorClinicTimeSlotsDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    Public(),
+    ApiParam({
+      name: 'doctorId',
+      description: 'Doctor ID',
+      type: String,
+      format: 'uuid',
+      example: '4c6e8f1a-3d5b-4f7c-9a2e-1b3d5f7c9e0a',
+    }),
+    ApiParam({
+      name: 'clinicId',
+      description: 'Clinic ID',
+      type: String,
+      format: 'uuid',
+      example: '2b4d7e9a-1c3f-4b5d-8e7f-9a1b2c3d4e5f',
+    }),
+    ApiQuery({
+      name: 'date',
+      description: 'Filter time slots by date',
+      required: false,
+      type: String,
+      example: '2026-10-01',
+    }),
+    ApiOkResponse({
+      type: TimeSlotRes.FindAvailableByDoctorAndClinicResponse,
+    }),
+    ApiNotFoundResponse({
+      type: TimeSlotRes.FindAvailableByDoctorAndClinicNotFoundResponse,
+    }),
+    Permission({
+      permissions: [PERMISSIONS.TIME_SLOT_READ],
+    }),
+  );
+};
+
 export const FindAvailableClinicTimeSlotsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
