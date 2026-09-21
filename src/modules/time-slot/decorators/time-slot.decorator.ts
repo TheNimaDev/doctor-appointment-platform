@@ -74,6 +74,26 @@ export const FindAvailableClinicTimeSlotsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     Public(),
+    ApiParam({
+      name: 'clinicId',
+      description: 'Clinic ID',
+      type: String,
+      format: 'uuid',
+      example: '2b4d7e9a-1c3f-4b5d-8e7f-9a1b2c3d4e5f',
+    }),
+    ApiQuery({
+      name: 'date',
+      description: 'Filter time slots by date',
+      required: false,
+      type: String,
+      example: '2026-10-01',
+    }),
+    ApiOkResponse({
+      type: TimeSlotRes.FindAvailableByClinicResponse,
+    }),
+    ApiNotFoundResponse({
+      type: TimeSlotRes.FindAvailableByClinicNotFoundResponse,
+    }),
     Permission({
       permissions: [PERMISSIONS.TIME_SLOT_READ],
     }),
