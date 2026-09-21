@@ -1,5 +1,11 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiBadRequestResponse, ApiBody, ApiConflictResponse, ApiCreatedResponse } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiOkResponse,
+} from '@nestjs/swagger';
 import { Permission, PERMISSIONS } from '@/common';
 import * as PermissionRes from '../res';
 import * as PermissionDto from '../dto';
@@ -20,6 +26,7 @@ export const CreatePermissionDecorators = () => {
 export const FindPermissionsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiOkResponse({ type: PermissionRes.FindPermissionsResponse }),
     Permission({
       permissions: [PERMISSIONS.OWNER_ALL],
     }),
