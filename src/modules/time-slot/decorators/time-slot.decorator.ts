@@ -1,11 +1,32 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
-
+import { ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { Permission, Public, PERMISSIONS } from '@/common';
+import * as TimeSlotRes from '../res';
 
 export const FindAvailableTimeSlotsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     Public(),
+    ApiParam({
+      name: 'doctorId',
+      description: 'Doctor ID',
+      type: String,
+      format: 'uuid',
+      example: '4c6e8f1a-3d5b-4f7c-9a2e-1b3d5f7c9e0a',
+    }),
+    ApiQuery({
+      name: 'date',
+      description: 'Filter time slots by date',
+      required: false,
+      type: String,
+      example: '2026-10-01',
+    }),
+    ApiOkResponse({
+      type: TimeSlotRes.FindAvailableByDoctorResponse,
+    }),
+    ApiNotFoundResponse({
+      type: TimeSlotRes.FindAvailableByDoctorNotFoundResponse,
+    }),
     Permission({
       permissions: [PERMISSIONS.TIME_SLOT_READ],
     }),
