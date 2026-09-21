@@ -103,6 +103,19 @@ export const FindAvailableClinicTimeSlotsDecorators = () => {
 export const FindMyTimeSlotsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiQuery({
+      name: 'date',
+      description: 'Filter time slots by date',
+      required: false,
+      type: String,
+      example: '2026-10-01',
+    }),
+    ApiOkResponse({
+      type: TimeSlotRes.FindMyTimeSlotsResponse,
+    }),
+    ApiNotFoundResponse({
+      type: TimeSlotRes.FindMyTimeSlotsNotFoundResponse,
+    }),
     Permission({
       permissions: [PERMISSIONS.TIME_SLOT_READ],
     }),
