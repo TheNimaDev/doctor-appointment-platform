@@ -4,7 +4,9 @@ import {
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
+  ApiParam,
 } from '@nestjs/swagger';
 import { Permission, PERMISSIONS } from '@/common';
 import * as PermissionRes from '../res';
@@ -36,6 +38,15 @@ export const FindPermissionsDecorators = () => {
 export const FindPermissionDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiParam({
+      name: 'id',
+      description: 'Permission ID',
+      type: String,
+      format: 'uuid',
+      example: '7f8c4f2e-9f6c-4f2d-8d13-2a4f8c9b7e61',
+    }),
+    ApiOkResponse({ type: PermissionRes.FindPermissionResponse }),
+    ApiNotFoundResponse({ type: PermissionRes.FindPermissionNotFoundResponse }),
     Permission({
       permissions: [PERMISSIONS.OWNER_ALL],
     }),
