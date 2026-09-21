@@ -5,6 +5,7 @@ import {
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiNotFoundResponse,
+  ApiOkResponse,
   ApiParam,
 } from '@nestjs/swagger';
 import { Permission, PERMISSIONS } from '@/common';
@@ -35,6 +36,22 @@ export const AddRolePermissionDecorators = () => {
 export const RemoveRolePermissionDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiParam({
+      name: 'roleId',
+      description: 'Role ID',
+      type: String,
+      format: 'uuid',
+      example: '4c6e8f1a-3d5b-4f7c-9a2e-1b3d5f7c9e0a',
+    }),
+    ApiParam({
+      name: 'permissionId',
+      description: 'Permission ID',
+      type: String,
+      format: 'uuid',
+      example: '2b4d7e9a-1c3f-4b5d-8e7f-9a1b2c3d4e5f',
+    }),
+    ApiOkResponse({ type: RolePermissionRes.RemoveRolePermissionResponse }),
+    ApiNotFoundResponse({ type: RolePermissionRes.RemoveRolePermissionNotFoundResponse }),
     Permission({
       permissions: [PERMISSIONS.OWNER_ALL],
     }),
