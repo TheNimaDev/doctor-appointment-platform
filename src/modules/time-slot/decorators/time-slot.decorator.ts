@@ -300,6 +300,19 @@ export const BlockMyTimeSlotDecorators = () => {
 export const UnblockMyTimeSlotDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiParam({
+      name: 'id',
+      description: 'Time slot ID',
+      type: String,
+      format: 'uuid',
+      example: '7f8c4f2e-9f6c-4f2d-8d13-2a4f8c9b7e61',
+    }),
+    ApiOkResponse({
+      type: TimeSlotRes.UnblockMyTimeSlotResponse,
+    }),
+    ApiNotFoundResponse({
+      type: TimeSlotRes.UnblockMyTimeSlotNotFoundResponse,
+    }),
     Permission({
       permissions: [PERMISSIONS.TIME_SLOT_UNBLOCK],
       owner: true,
