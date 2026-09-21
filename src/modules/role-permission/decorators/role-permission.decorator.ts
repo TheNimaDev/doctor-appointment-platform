@@ -61,6 +61,15 @@ export const RemoveRolePermissionDecorators = () => {
 export const FindRolePermissionsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiParam({
+      name: 'roleId',
+      description: 'Role ID',
+      type: String,
+      format: 'uuid',
+      example: '4c6e8f1a-3d5b-4f7c-9a2e-1b3d5f7c9e0a',
+    }),
+    ApiOkResponse({ type: RolePermissionRes.FindRolePermissionsResponse }),
+    ApiNotFoundResponse({ type: RolePermissionRes.FindRolePermissionsNotFoundResponse }),
     Permission({
       permissions: [PERMISSIONS.OWNER_ALL],
     }),
