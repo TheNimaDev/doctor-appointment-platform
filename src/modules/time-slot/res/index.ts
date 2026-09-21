@@ -8,3 +8,4 @@ export * from './find-my-clinic-admin-time-slots.response';
 export * from './find-my-clinic-admin-doctor-time-slots.response';
 export * from './find-available-time-slot.response';
 export * from './find-my-time-slot.response';
+export * from './find-my-clinic-admin-time-slot.response';
