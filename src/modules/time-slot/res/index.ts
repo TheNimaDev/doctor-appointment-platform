@@ -11,3 +11,4 @@ export * from './find-my-time-slot.response';
 export * from './find-my-clinic-admin-time-slot.response';
 export * from './block-my-time-slot.response';
 export * from './unblock-my-time-slot.response';
+export * from './block-my-clinic-time-slot.response';
