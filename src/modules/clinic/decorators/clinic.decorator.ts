@@ -101,6 +101,11 @@ export const FindClinicWithAllStatusDecorators = () => {
 export const UpdateMyClinicDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBody({ type: ClinicDto.UpdateClinicDto }),
+    ApiOkResponse({ type: ClinicRes.UpdateMyClinicResponse }),
+    ApiBadRequestResponse({ type: ClinicRes.UpdateMyClinicBadRequestResponse }),
+    ApiNotFoundResponse({ type: ClinicRes.UpdateMyClinicNotFoundResponse }),
+    ApiConflictResponse({ type: ClinicRes.UpdateMyClinicConflictResponse }),
     Permission({
       permissions: [PERMISSIONS.CLINIC_UPDATE],
     }),
