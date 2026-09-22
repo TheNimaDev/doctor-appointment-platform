@@ -6,10 +6,12 @@ import {
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { Permission, PERMISSIONS, Public } from '@/common';
 import * as DoctorRes from '../res';
 import * as DoctorDto from '../dto';
+import { DoctorStatus } from '../enums';
 
 export const CreateDoctorDecorators = () => {
   return applyDecorators(
@@ -49,7 +51,9 @@ export const FindMyDoctorDecorators = () => {
 export const FindDoctorsWithAllStatusDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiQuery({ name: 'status', required: false, enum: DoctorStatus }),
     ApiOkResponse({ type: DoctorRes.FindDoctorsWithAllStatusResponse }),
+    ApiBadRequestResponse({ type: DoctorRes.FindDoctorsWithAllStatusBadRequestResponse }),
     Permission({
       permissions: [PERMISSIONS.OWNER_ALL],
     }),
