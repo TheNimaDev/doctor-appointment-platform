@@ -8,3 +8,4 @@ export * from './find-all-status-clinic.response';
 export * from './update-my-clinic.response';
 export * from './update-clinic.response';
 export * from './delete-my-clinic.response';
+export * from './delete-clinic.response';
