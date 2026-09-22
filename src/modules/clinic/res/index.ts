@@ -6,3 +6,4 @@ export * from './find-all-status-clinics.response';
 export * from './find-clinic.response';
 export * from './find-all-status-clinic.response';
 export * from './update-my-clinic.response';
+export * from './update-clinic.response';

@@ -115,6 +115,18 @@ export const UpdateMyClinicDecorators = () => {
 export const UpdateClinicDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiParam({
+      name: 'id',
+      description: 'Clinic ID',
+      type: String,
+      format: 'uuid',
+      example: '7f8c4f2e-9f6c-4f2d-8d13-2a4f8c9b7e61',
+    }),
+    ApiBody({ type: ClinicDto.UpdateClinicDto }),
+    ApiOkResponse({ type: ClinicRes.UpdateClinicResponse }),
+    ApiBadRequestResponse({ type: ClinicRes.UpdateClinicBadRequestResponse }),
+    ApiConflictResponse({ type: ClinicRes.UpdateClinicConflictResponse }),
+    ApiNotFoundResponse({ type: ClinicRes.UpdateClinicNotFoundResponse }),
     Permission({
       permissions: [PERMISSIONS.OWNER_ALL],
     }),
