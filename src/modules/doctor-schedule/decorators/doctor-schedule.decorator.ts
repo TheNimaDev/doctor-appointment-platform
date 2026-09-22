@@ -70,11 +70,29 @@ export const FindDoctorSchedulesByDoctorDecorators = () => {
   );
 };
 
-export const FindMyDoctorScheduleDecorators = () => {
+export const FindDoctorSchedulesByDoctorAndClinicDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
-    Permission({
-      permissions: [PERMISSIONS.DOCTOR_SCHEDULE_READ],
+    Public(),
+    ApiParam({
+      name: 'doctorId',
+      description: 'Doctor ID',
+      type: String,
+      format: 'uuid',
+      example: '4c6e8f1a-3d5b-4f7c-9a2e-1b3d5f7c9e0a',
+    }),
+    ApiParam({
+      name: 'clinicId',
+      description: 'Clinic ID',
+      type: String,
+      format: 'uuid',
+      example: '2b4d7e9a-1c3f-4b5d-8e7f-9a1b2c3d4e5f',
+    }),
+    ApiOkResponse({
+      type: ScheduleRes.FindDoctorSchedulesByDoctorAndClinicResponse,
+    }),
+    ApiNotFoundResponse({
+      type: ScheduleRes.FindDoctorSchedulesByDoctorAndClinicNotFoundResponse,
     }),
   );
 };
