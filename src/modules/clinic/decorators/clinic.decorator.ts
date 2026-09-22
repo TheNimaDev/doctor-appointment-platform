@@ -32,6 +32,7 @@ export const FindClinicsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     Public(),
+    ApiOkResponse({ type: ClinicRes.FindClinicsResponse }),
     Permission({
       permissions: [PERMISSIONS.CLINIC_READ],
     }),
