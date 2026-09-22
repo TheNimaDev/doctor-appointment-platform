@@ -1,12 +1,24 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+} from '@nestjs/swagger';
 import { Permission, PERMISSIONS, Public } from '@/common';
+import * as DoctorSpecialtyRes from '../res';
+import * as DoctorSpecialtyDto from '../dto';
 
 export const AddDoctorSpecialtyDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.CREATED),
-    Permission({
-      permissions: [PERMISSIONS.DOCTOR_UPDATE],
-    }),
+    ApiBody({ type: DoctorSpecialtyDto.AddDoctorSpecialtyDto }),
+    ApiCreatedResponse({ type: DoctorSpecialtyRes.AddDoctorSpecialtyResponse }),
+    ApiBadRequestResponse({ type: DoctorSpecialtyRes.AddDoctorSpecialtyBadRequestResponse }),
+    ApiNotFoundResponse({ type: DoctorSpecialtyRes.AddDoctorSpecialtyNotFoundResponse }),
+    ApiConflictResponse({ type: DoctorSpecialtyRes.AddDoctorSpecialtyConflictResponse }),
+    Permission({ permissions: [PERMISSIONS.DOCTOR_UPDATE] }),
   );
 };
 
