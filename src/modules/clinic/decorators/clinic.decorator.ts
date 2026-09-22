@@ -136,6 +136,8 @@ export const UpdateClinicDecorators = () => {
 export const DeleteMyClinicDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiOkResponse({ type: ClinicRes.DeleteMyClinicResponse }),
+    ApiNotFoundResponse({ type: ClinicRes.DeleteMyClinicNotFoundResponse }),
     Permission({
       permissions: [PERMISSIONS.CLINIC_DELETE],
     }),
