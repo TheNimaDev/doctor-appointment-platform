@@ -7,3 +7,4 @@ export * from './find-doctor.response';
 export * from './find-all-status-doctor.response';
 export * from './update-my-doctor.response';
 export * from './update-doctor.response';
+export * from './delete-my-doctor.response';

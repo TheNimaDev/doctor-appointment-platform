@@ -135,6 +135,8 @@ export const UpdateDoctorDecorators = () => {
 export const DeleteMyDoctorDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiOkResponse({ type: DoctorRes.DeleteMyDoctorResponse }),
+    ApiNotFoundResponse({ type: DoctorRes.DeleteMyDoctorNotFoundResponse }),
     Permission({
       permissions: [PERMISSIONS.DOCTOR_DELETE],
     }),
