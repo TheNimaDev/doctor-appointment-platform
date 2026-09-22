@@ -12,3 +12,4 @@ export * from './find-doctor-schedule-by-clinic-owner.response';
 export * from './find-doctor-schedule.response';
 export * from './create-my-doctor-schedule.response';
 export * from './update-my-doctor-schedule.response';
+export * from './update-doctor-schedule.response';
