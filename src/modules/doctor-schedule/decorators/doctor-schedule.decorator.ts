@@ -1,7 +1,17 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiBadRequestResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { Permission, Public, PERMISSIONS } from '@/common';
 import * as ScheduleRes from '../res';
+import * as ScheduleDto from '../dto';
 import { ScheduleStatus } from '../enums';
 
 export const FindAllDoctorSchedulesDecorators = () => {
@@ -226,14 +236,26 @@ export const FindDoctorScheduleDecorators = () => {
   );
 };
 
-export const UpdateDoctorScheduleDecorators = () => {
+export const CreateMyDoctorScheduleDecorators = () => {
   return applyDecorators(
-    HttpCode(HttpStatus.OK),
+    HttpCode(HttpStatus.CREATED),
+    ApiBody({
+      type: ScheduleDto.CreateDoctorScheduleDto,
+    }),
+    ApiCreatedResponse({
+      type: ScheduleRes.CreateMyDoctorScheduleResponse,
+    }),
+    ApiBadRequestResponse({
+      type: ScheduleRes.CreateMyDoctorScheduleBadRequestResponse,
+    }),
+    ApiConflictResponse({
+      type: ScheduleRes.CreateMyDoctorScheduleConflictResponse,
+    }),
+    ApiNotFoundResponse({
+      type: ScheduleRes.CreateMyDoctorScheduleNotFoundResponse,
+    }),
     Permission({
-      permissions: [PERMISSIONS.DOCTOR_SCHEDULE_UPDATE],
-      clinicOwner: true,
-      resource: 'doctor-schedule',
-      resourceIdParam: 'scheduleId',
+      permissions: [PERMISSIONS.DOCTOR_SCHEDULE_CREATE],
     }),
   );
 };
