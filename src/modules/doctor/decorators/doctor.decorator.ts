@@ -1,5 +1,5 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiBadRequestResponse, ApiBody, ApiConflictResponse, ApiCreatedResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBody, ApiConflictResponse, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { Permission, PERMISSIONS, Public } from '@/common';
 import * as DoctorRes from '../res';
 import * as DoctorDto from '../dto';
@@ -21,6 +21,7 @@ export const FindDoctorsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     Public(),
+    ApiOkResponse({ type: DoctorRes.FindDoctorsResponse }),
     Permission({
       permissions: [PERMISSIONS.DOCTOR_READ],
     }),
