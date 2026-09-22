@@ -147,14 +147,14 @@ export const FindMyDoctorScheduleDecorators = () => {
   );
 };
 
-export const FindDoctorScheduleByClinicOwnerDecorators = () => {
+export const FindMyClinicSchedulesDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiOkResponse({
+      type: ScheduleRes.FindMyClinicSchedulesResponse,
+    }),
     Permission({
       permissions: [PERMISSIONS.DOCTOR_SCHEDULE_READ],
-      clinicOwner: true,
-      resource: 'doctor-schedule',
-      resourceIdParam: 'scheduleId',
     }),
   );
 };
