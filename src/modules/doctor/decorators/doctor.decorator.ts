@@ -6,6 +6,7 @@ import {
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
 import { Permission, PERMISSIONS, Public } from '@/common';
@@ -64,6 +65,15 @@ export const FindDoctorDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     Public(),
+    ApiParam({
+      name: 'id',
+      description: 'Doctor ID',
+      type: String,
+      format: 'uuid',
+      example: '7f8c4f2e-9f6c-4f2d-8d13-2a4f8c9b7e61',
+    }),
+    ApiOkResponse({ type: DoctorRes.FindDoctorResponse }),
+    ApiNotFoundResponse({ type: DoctorRes.FindDoctorNotFoundResponse }),
     Permission({
       permissions: [PERMISSIONS.DOCTOR_READ],
     }),
