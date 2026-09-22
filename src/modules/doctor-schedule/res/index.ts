@@ -14,3 +14,4 @@ export * from './create-my-doctor-schedule.response';
 export * from './update-my-doctor-schedule.response';
 export * from './update-doctor-schedule.response';
 export * from './update-my-doctor-schedule-status.response';
+export * from './update-doctor-schedule-status.response';
