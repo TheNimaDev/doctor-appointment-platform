@@ -1,5 +1,11 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiBadRequestResponse, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { Permission, Public, PERMISSIONS } from '@/common';
 import * as ScheduleRes from '../res';
 import { ScheduleStatus } from '../enums';
@@ -24,12 +30,22 @@ export const FindAllDoctorSchedulesDecorators = () => {
   );
 };
 
-export const FindDoctorSchedulesDecorators = () => {
+export const FindDoctorSchedulesByClinicDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     Public(),
-    Permission({
-      permissions: [PERMISSIONS.DOCTOR_SCHEDULE_READ],
+    ApiParam({
+      name: 'clinicId',
+      description: 'Clinic ID',
+      type: String,
+      format: 'uuid',
+      example: '2b4d7e9a-1c3f-4b5d-8e7f-9a1b2c3d4e5f',
+    }),
+    ApiOkResponse({
+      type: ScheduleRes.FindDoctorSchedulesByClinicResponse,
+    }),
+    ApiNotFoundResponse({
+      type: ScheduleRes.FindDoctorSchedulesByClinicNotFoundResponse,
     }),
   );
 };
