@@ -1,9 +1,16 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiBadRequestResponse, ApiBody, ApiConflictResponse, ApiCreatedResponse } from '@nestjs/swagger';
 import { Permission, PERMISSIONS, Public } from '@/common';
+import * as ClinicRes from '../res';
+import * as ClinicDto from '../dto';
 
 export const CreateClinicDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.CREATED),
+    ApiBody({ type: ClinicDto.CreateClinicDto }),
+    ApiCreatedResponse({ type: ClinicRes.CreateClinicResponse }),
+    ApiBadRequestResponse({ type: ClinicRes.CreateClinicBadRequestResponse }),
+    ApiConflictResponse({ type: ClinicRes.CreateClinicConflictResponse }),
     Permission({
       permissions: [PERMISSIONS.CLINIC_CREATE],
     }),
