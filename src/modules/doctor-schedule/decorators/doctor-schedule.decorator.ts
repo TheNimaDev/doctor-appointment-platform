@@ -1,10 +1,23 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
-
+import { ApiBadRequestResponse, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { Permission, Public, PERMISSIONS } from '@/common';
+import * as ScheduleRes from '../res';
+import { ScheduleStatus } from '../enums';
 
 export const FindAllDoctorSchedulesDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiQuery({
+      name: 'status',
+      required: false,
+      enum: ScheduleStatus,
+    }),
+    ApiOkResponse({
+      type: ScheduleRes.FindAllDoctorSchedulesResponse,
+    }),
+    ApiBadRequestResponse({
+      type: ScheduleRes.FindAllDoctorSchedulesBadRequestResponse,
+    }),
     Permission({
       permissions: [PERMISSIONS.OWNER_ALL],
     }),
