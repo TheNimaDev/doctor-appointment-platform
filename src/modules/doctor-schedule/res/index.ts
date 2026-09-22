@@ -9,3 +9,4 @@ export * from './find-my-doctor-schedule.response';
 export * from './find-my-clinic-schedules.response';
 export * from './find-doctor-schedules-for-clinic.response';
 export * from './find-doctor-schedule-by-clinic-owner.response';
+export * from './find-doctor-schedule.response';

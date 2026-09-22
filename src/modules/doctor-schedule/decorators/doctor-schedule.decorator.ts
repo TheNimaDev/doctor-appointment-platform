@@ -206,11 +206,22 @@ export const FindDoctorScheduleByClinicOwnerDecorators = () => {
   );
 };
 
-export const UpdateMyDoctorScheduleDecorators = () => {
+export const FindDoctorScheduleDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
-    Permission({
-      permissions: [PERMISSIONS.DOCTOR_SCHEDULE_UPDATE],
+    Public(),
+    ApiParam({
+      name: 'scheduleId',
+      description: 'Doctor schedule ID',
+      type: String,
+      format: 'uuid',
+      example: '7f8c4f2e-9f6c-4f2d-8d13-2a4f8c9b7e61',
+    }),
+    ApiOkResponse({
+      type: ScheduleRes.FindDoctorScheduleResponse,
+    }),
+    ApiNotFoundResponse({
+      type: ScheduleRes.FindDoctorScheduleNotFoundResponse,
     }),
   );
 };
