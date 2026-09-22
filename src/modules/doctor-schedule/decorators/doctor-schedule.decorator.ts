@@ -319,11 +319,30 @@ export const UpdateDoctorScheduleDecorators = () => {
   );
 };
 
-export const DeleteMyDoctorScheduleDecorators = () => {
+export const UpdateMyDoctorScheduleStatusDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiParam({
+      name: 'scheduleId',
+      description: 'Doctor schedule ID',
+      type: String,
+      format: 'uuid',
+      example: '7f8c4f2e-9f6c-4f2d-8d13-2a4f8c9b7e61',
+    }),
+    ApiBody({
+      type: ScheduleDto.UpdateDoctorScheduleStatusDto,
+    }),
+    ApiOkResponse({
+      type: ScheduleRes.UpdateMyDoctorScheduleStatusResponse,
+    }),
+    ApiBadRequestResponse({
+      type: ScheduleRes.UpdateMyDoctorScheduleStatusBadRequestResponse,
+    }),
+    ApiNotFoundResponse({
+      type: ScheduleRes.UpdateMyDoctorScheduleStatusNotFoundResponse,
+    }),
     Permission({
-      permissions: [PERMISSIONS.DOCTOR_SCHEDULE_DELETE],
+      permissions: [PERMISSIONS.DOCTOR_SCHEDULE_UPDATE_STATUS],
     }),
   );
 };
