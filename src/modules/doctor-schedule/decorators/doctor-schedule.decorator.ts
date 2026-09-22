@@ -50,12 +50,22 @@ export const FindDoctorSchedulesByClinicDecorators = () => {
   );
 };
 
-export const FindDoctorScheduleDecorators = () => {
+export const FindDoctorSchedulesByDoctorDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     Public(),
-    Permission({
-      permissions: [PERMISSIONS.DOCTOR_SCHEDULE_READ],
+    ApiParam({
+      name: 'doctorId',
+      description: 'Doctor ID',
+      type: String,
+      format: 'uuid',
+      example: '4c6e8f1a-3d5b-4f7c-9a2e-1b3d5f7c9e0a',
+    }),
+    ApiOkResponse({
+      type: ScheduleRes.FindDoctorSchedulesByDoctorResponse,
+    }),
+    ApiNotFoundResponse({
+      type: ScheduleRes.FindDoctorSchedulesByDoctorNotFoundResponse,
     }),
   );
 };
