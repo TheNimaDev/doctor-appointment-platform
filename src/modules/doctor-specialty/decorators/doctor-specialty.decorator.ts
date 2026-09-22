@@ -53,9 +53,16 @@ export const FindDoctorSpecialtiesDecorators = () => {
 export const SetDoctorSpecialtyPrimaryDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
-    Permission({
-      permissions: [PERMISSIONS.DOCTOR_UPDATE],
+    ApiParam({
+      name: 'specialtyId',
+      description: 'Specialty ID',
+      type: String,
+      format: 'uuid',
+      example: '2b4d7e9a-1c3f-4b5d-8e7f-9a1b2c3d4e5f',
     }),
+    ApiOkResponse({ type: DoctorSpecialtyRes.SetDoctorSpecialtyPrimaryResponse }),
+    ApiNotFoundResponse({ type: DoctorSpecialtyRes.SetDoctorSpecialtyPrimaryNotFoundResponse }),
+    Permission({ permissions: [PERMISSIONS.DOCTOR_UPDATE] }),
   );
 };
 
