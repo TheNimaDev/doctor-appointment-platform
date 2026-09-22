@@ -1,8 +1,17 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiBadRequestResponse, ApiBody, ApiConflictResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { Permission, PERMISSIONS, Public } from '@/common';
 import * as ClinicRes from '../res';
 import * as ClinicDto from '../dto';
+import { ClinicStatus } from '../enums';
 
 export const CreateClinicDecorators = () => {
   return applyDecorators(
@@ -42,6 +51,9 @@ export const FindClinicsDecorators = () => {
 export const FindClinicsWithAllStatusDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiQuery({ name: 'status', required: false, enum: ClinicStatus }),
+    ApiOkResponse({ type: ClinicRes.FindClinicsWithAllStatusResponse }),
+    ApiBadRequestResponse({ type: ClinicRes.FindClinicsWithAllStatusBadRequestResponse }),
     Permission({
       permissions: [PERMISSIONS.OWNER_ALL],
     }),
