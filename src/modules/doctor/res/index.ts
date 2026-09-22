@@ -8,3 +8,4 @@ export * from './find-all-status-doctor.response';
 export * from './update-my-doctor.response';
 export * from './update-doctor.response';
 export * from './delete-my-doctor.response';
+export * from './delete-doctor.response';
