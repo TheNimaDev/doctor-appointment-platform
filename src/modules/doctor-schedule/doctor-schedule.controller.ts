@@ -29,7 +29,7 @@ export class DoctorScheduleController {
    * Public endpoint.
    */
   @Get('clinic/:clinicId')
-  @DoctorScheduleDecorator.FindDoctorSchedulesDecorators()
+  @DoctorScheduleDecorator.FindDoctorSchedulesByClinicDecorators()
   async findActiveByClinic(@Param('clinicId') clinicId: string): Promise<ApiResponse<DoctorSchedulesResponse>> {
     const data = await this.doctorScheduleService.findActiveByClinic({
       clinicId,
@@ -47,7 +47,7 @@ export class DoctorScheduleController {
    * Public endpoint.
    */
   @Get('doctor/:doctorId')
-  @DoctorScheduleDecorator.FindDoctorSchedulesDecorators()
+  @DoctorScheduleDecorator.FindDoctorSchedulesByDoctorDecorators()
   async findActiveByDoctor(@Param('doctorId') doctorId: string): Promise<ApiResponse<DoctorSchedulesResponse>> {
     const data = await this.doctorScheduleService.findActiveByDoctor({
       doctorId,
@@ -65,7 +65,7 @@ export class DoctorScheduleController {
    * Public endpoint.
    */
   @Get('doctor/:doctorId/clinic/:clinicId')
-  @DoctorScheduleDecorator.FindDoctorSchedulesDecorators()
+  @DoctorScheduleDecorator.FindDoctorSchedulesByDoctorAndClinicDecorators()
   async findActiveByDoctorAndClinic(
     @Param('clinicId') clinicId: string,
     @Param('doctorId') doctorId: string,
@@ -161,7 +161,7 @@ export class DoctorScheduleController {
    * Clinic admin endpoint.
    */
   @Get('my-clinic/doctor/:doctorId')
-  @DoctorScheduleDecorator.FindDoctorClinicSchedulesForClinicDecorators()
+  @DoctorScheduleDecorator.FindDoctorSchedulesForClinicDecorators()
   async findDoctorSchedulesForClinic(
     @Req() req: AccessRequest,
     @Param('doctorId') doctorId: string,
