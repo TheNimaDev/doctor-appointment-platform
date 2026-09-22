@@ -101,6 +101,10 @@ export const FindDoctorWithAllStatusDecorators = () => {
 export const UpdateMyDoctorDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBody({ type: DoctorDto.UpdateDoctorDto }),
+    ApiOkResponse({ type: DoctorRes.UpdateMyDoctorResponse }),
+    ApiBadRequestResponse({ type: DoctorRes.UpdateMyDoctorBadRequestResponse }),
+    ApiNotFoundResponse({ type: DoctorRes.UpdateMyDoctorNotFoundResponse }),
     Permission({
       permissions: [PERMISSIONS.DOCTOR_UPDATE],
     }),
