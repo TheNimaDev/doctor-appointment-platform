@@ -4,6 +4,7 @@ import {
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
 } from '@nestjs/swagger';
 import { Permission, PERMISSIONS, Public } from '@/common';
@@ -37,6 +38,8 @@ export const FindDoctorsDecorators = () => {
 export const FindMyDoctorDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiOkResponse({ type: DoctorRes.FindMyDoctorResponse }),
+    ApiNotFoundResponse({ type: DoctorRes.FindMyDoctorNotFoundResponse }),
     Permission({
       permissions: [PERMISSIONS.DOCTOR_READ],
     }),
