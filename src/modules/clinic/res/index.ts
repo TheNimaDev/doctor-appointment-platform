@@ -4,3 +4,4 @@ export * from './find-my-clinic.response';
 export * from './find-clinics.response';
 export * from './find-all-status-clinics.response';
 export * from './find-clinic.response';
+export * from './find-all-status-clinic.response';
