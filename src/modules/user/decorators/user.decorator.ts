@@ -1,12 +1,13 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
 import { Permission, PERMISSIONS } from '@/common';
-import { ApiBadRequestResponse, ApiBody, ApiOkResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiBody, ApiOkResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import * as UserRes from '../res';
 import * as UserDto from '../dto';
 
 export const GetMeDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiOkResponse({ type: UserRes.GetMeResponse }),
     Permission({
       permissions: [PERMISSIONS.USER_READ],
@@ -17,6 +18,7 @@ export const GetMeDecorators = () => {
 export const UpdateMeDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiBody({ type: UserDto.UpdateProfileDto }),
     ApiOkResponse({ type: UserRes.UpdateMeResponse }),
     ApiBadRequestResponse({ type: UserRes.UpdateMeBadRequestResponse }),
@@ -29,6 +31,7 @@ export const UpdateMeDecorators = () => {
 export const DeleteMeDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiBody({ type: UserDto.DeleteMeDto }),
     ApiOkResponse({ type: UserRes.DeleteMeResponse }),
     ApiBadRequestResponse({ type: UserRes.DeleteMeBadRequestResponse }),
