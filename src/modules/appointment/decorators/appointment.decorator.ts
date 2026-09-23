@@ -1,6 +1,7 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
@@ -15,6 +16,7 @@ import * as AppointmentDto from '../dto';
 export const FindAppointmentsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiOkResponse({
       type: AppointmentRes.FindAppointmentsResponse,
     }),
@@ -27,6 +29,7 @@ export const FindAppointmentsDecorators = () => {
 export const FindAppointmentDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Appointment ID',
@@ -49,6 +52,7 @@ export const FindAppointmentDecorators = () => {
 export const ReserveAppointmentDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.CREATED),
+    ApiBearerAuth('accessToken'),
     ApiBody({
       type: AppointmentDto.ReserveAppointmentDto,
     }),
@@ -70,6 +74,7 @@ export const ReserveAppointmentDecorators = () => {
 export const FindPatientAppointmentsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiOkResponse({
       type: AppointmentRes.FindPatientAppointmentsResponse,
     }),
@@ -82,6 +87,7 @@ export const FindPatientAppointmentsDecorators = () => {
 export const FindPatientAppointmentDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Appointment ID',
@@ -106,6 +112,7 @@ export const FindPatientAppointmentDecorators = () => {
 export const FindDoctorAppointmentsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiOkResponse({
       type: AppointmentRes.FindDoctorAppointmentsResponse,
     }),
@@ -118,6 +125,7 @@ export const FindDoctorAppointmentsDecorators = () => {
 export const FindDoctorAppointmentDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Appointment ID',
@@ -142,6 +150,7 @@ export const FindDoctorAppointmentDecorators = () => {
 export const FindMyClinicAppointmentsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiOkResponse({
       type: AppointmentRes.FindMyClinicAppointmentsResponse,
     }),
@@ -154,6 +163,7 @@ export const FindMyClinicAppointmentsDecorators = () => {
 export const FindMyClinicAppointmentDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Appointment ID',
@@ -178,6 +188,7 @@ export const FindMyClinicAppointmentDecorators = () => {
 export const CancelAppointmentDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Appointment ID',
@@ -208,6 +219,7 @@ export const CancelAppointmentDecorators = () => {
 export const ConfirmAppointmentDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Appointment ID',
@@ -232,6 +244,7 @@ export const ConfirmAppointmentDecorators = () => {
 export const RejectAppointmentDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Appointment ID',
@@ -256,6 +269,7 @@ export const RejectAppointmentDecorators = () => {
 export const CompleteAppointmentDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Appointment ID',
@@ -280,6 +294,7 @@ export const CompleteAppointmentDecorators = () => {
 export const NoShowAppointmentDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Appointment ID',
