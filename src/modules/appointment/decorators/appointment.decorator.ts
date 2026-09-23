@@ -1,7 +1,16 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiNotFoundResponse, ApiOkResponse, ApiParam } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiParam,
+} from '@nestjs/swagger';
 import { Permission, PERMISSIONS } from '@/common';
 import * as AppointmentRes from '../res';
+import * as AppointmentDto from '../dto';
 
 export const FindAppointmentsDecorators = () => {
   return applyDecorators(
@@ -40,6 +49,18 @@ export const FindAppointmentDecorators = () => {
 export const ReserveAppointmentDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.CREATED),
+    ApiBody({
+      type: AppointmentDto.ReserveAppointmentDto,
+    }),
+    ApiCreatedResponse({
+      type: AppointmentRes.ReserveAppointmentResponse,
+    }),
+    ApiBadRequestResponse({
+      type: AppointmentRes.ReserveAppointmentBadRequestResponse,
+    }),
+    ApiConflictResponse({
+      type: AppointmentRes.ReserveAppointmentConflictResponse,
+    }),
     Permission({
       permissions: [PERMISSIONS.APPOINTMENT_RESERVE],
     }),
