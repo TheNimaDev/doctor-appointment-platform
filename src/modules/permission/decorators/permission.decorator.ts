@@ -1,6 +1,7 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
@@ -15,6 +16,7 @@ import * as PermissionDto from '../dto';
 export const CreatePermissionDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.CREATED),
+    ApiBearerAuth('accessToken'),
     ApiBody({ type: PermissionDto.CreatePermissionDto }),
     ApiCreatedResponse({ type: PermissionRes.CreatePermissionResponse }),
     ApiBadRequestResponse({ type: PermissionRes.CreatePermissionBadRequestResponse }),
@@ -28,6 +30,7 @@ export const CreatePermissionDecorators = () => {
 export const FindPermissionsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiOkResponse({ type: PermissionRes.FindPermissionsResponse }),
     Permission({
       permissions: [PERMISSIONS.OWNER_ALL],
@@ -38,6 +41,7 @@ export const FindPermissionsDecorators = () => {
 export const FindPermissionDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Permission ID',
@@ -56,6 +60,7 @@ export const FindPermissionDecorators = () => {
 export const UpdatePermissionDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Permission ID',
@@ -77,6 +82,7 @@ export const UpdatePermissionDecorators = () => {
 export const DeletePermissionDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Permission ID',
