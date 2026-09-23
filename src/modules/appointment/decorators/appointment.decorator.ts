@@ -1,9 +1,14 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiOkResponse } from '@nestjs/swagger';
 import { Permission, PERMISSIONS } from '@/common';
+import * as AppointmentRes from '../res';
 
 export const FindAppointmentsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiOkResponse({
+      type: AppointmentRes.FindAppointmentsResponse,
+    }),
     Permission({
       permissions: [PERMISSIONS.OWNER_ALL],
     }),
