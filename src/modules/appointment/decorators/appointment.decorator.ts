@@ -178,6 +178,25 @@ export const FindMyClinicAppointmentDecorators = () => {
 export const CancelAppointmentDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiParam({
+      name: 'id',
+      description: 'Appointment ID',
+      type: String,
+      format: 'uuid',
+      example: '7f8c4f2e-9f6c-4f2d-8d13-2a4f8c9b7e61',
+    }),
+    ApiBody({
+      type: AppointmentDto.CancelAppointmentDto,
+    }),
+    ApiOkResponse({
+      type: AppointmentRes.CancelAppointmentResponse,
+    }),
+    ApiBadRequestResponse({
+      type: AppointmentRes.CancelAppointmentBadRequestResponse,
+    }),
+    ApiNotFoundResponse({
+      type: AppointmentRes.CancelAppointmentNotFoundResponse,
+    }),
     Permission({
       permissions: [PERMISSIONS.APPOINTMENT_CANCEL],
       owner: true,
