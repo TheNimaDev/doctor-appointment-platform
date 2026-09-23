@@ -142,6 +142,9 @@ export const FindDoctorAppointmentDecorators = () => {
 export const FindMyClinicAppointmentsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiOkResponse({
+      type: AppointmentRes.FindMyClinicAppointmentsResponse,
+    }),
     Permission({
       permissions: [PERMISSIONS.APPOINTMENT_READ_DOCTOR],
     }),
