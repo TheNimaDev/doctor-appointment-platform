@@ -1,6 +1,7 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
@@ -15,6 +16,7 @@ import * as UserRoleDto from '../dto';
 export const FindUserRolesDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'userId',
       description: 'User ID',
@@ -33,6 +35,7 @@ export const FindUserRolesDecorators = () => {
 export const AddUserRoleDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.CREATED),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'userId',
       description: 'User ID',
@@ -54,6 +57,7 @@ export const AddUserRoleDecorators = () => {
 export const RemoveUserRoleDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'userId',
       description: 'User ID',
