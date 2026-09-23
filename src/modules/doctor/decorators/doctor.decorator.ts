@@ -1,6 +1,7 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
@@ -17,6 +18,7 @@ import { DoctorStatus } from '../enums';
 export const CreateDoctorDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.CREATED),
+    ApiBearerAuth('accessToken'),
     ApiBody({ type: DoctorDto.CreateDoctorDto }),
     ApiCreatedResponse({ type: DoctorRes.CreateDoctorResponse }),
     ApiBadRequestResponse({ type: DoctorRes.CreateDoctorBadRequestResponse }),
@@ -41,6 +43,7 @@ export const FindDoctorsDecorators = () => {
 export const FindMyDoctorDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiOkResponse({ type: DoctorRes.FindMyDoctorResponse }),
     ApiNotFoundResponse({ type: DoctorRes.FindMyDoctorNotFoundResponse }),
     Permission({
@@ -52,6 +55,7 @@ export const FindMyDoctorDecorators = () => {
 export const FindDoctorsWithAllStatusDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiQuery({ name: 'status', required: false, enum: DoctorStatus }),
     ApiOkResponse({ type: DoctorRes.FindDoctorsWithAllStatusResponse }),
     ApiBadRequestResponse({ type: DoctorRes.FindDoctorsWithAllStatusBadRequestResponse }),
@@ -83,6 +87,7 @@ export const FindDoctorDecorators = () => {
 export const FindDoctorWithAllStatusDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Doctor ID',
@@ -101,6 +106,7 @@ export const FindDoctorWithAllStatusDecorators = () => {
 export const UpdateMyDoctorDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiBody({ type: DoctorDto.UpdateDoctorDto }),
     ApiOkResponse({ type: DoctorRes.UpdateMyDoctorResponse }),
     ApiBadRequestResponse({ type: DoctorRes.UpdateMyDoctorBadRequestResponse }),
@@ -114,6 +120,7 @@ export const UpdateMyDoctorDecorators = () => {
 export const UpdateDoctorDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Doctor ID',
@@ -135,6 +142,7 @@ export const UpdateDoctorDecorators = () => {
 export const DeleteMyDoctorDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiOkResponse({ type: DoctorRes.DeleteMyDoctorResponse }),
     ApiNotFoundResponse({ type: DoctorRes.DeleteMyDoctorNotFoundResponse }),
     Permission({
@@ -146,6 +154,7 @@ export const DeleteMyDoctorDecorators = () => {
 export const DeleteDoctorDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Doctor ID',
