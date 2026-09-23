@@ -1,8 +1,10 @@
 import { applyDecorators, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
+  ApiCookieAuth,
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -49,6 +51,7 @@ export const LoginDecorators = () => {
 export const LogoutDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiCookieAuth('refreshToken'),
     ApiOkResponse({ type: AuthRes.LogoutResponse }),
     ApiUnauthorizedResponse({ type: AuthRes.LogoutUnauthorizedResponse }),
     ApiNotFoundResponse({ type: AuthRes.LogoutNotFoundResponse }),
@@ -63,6 +66,7 @@ export const LogoutDecorators = () => {
 export const LogoutAllDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiCookieAuth('refreshToken'),
     ApiOkResponse({ type: AuthRes.LogoutAllResponse }),
     ApiUnauthorizedResponse({ type: AuthRes.LogoutAllUnauthorizedResponse }),
     ApiNotFoundResponse({ type: AuthRes.LogoutAllNotFoundResponse }),
@@ -88,6 +92,7 @@ export const VerifyEmailResendDecorators = () => {
 export const RefreshDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiCookieAuth('refreshToken'),
     ApiOkResponse({ type: AuthRes.RefreshResponse }),
     ApiUnauthorizedResponse({ type: AuthRes.RefreshUnauthorizedResponse }),
     Public({
@@ -101,6 +106,7 @@ export const RefreshDecorators = () => {
 export const ChangePasswordDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiBody({ type: AuthDto.ChangePasswordDto }),
     ApiOkResponse({ type: AuthRes.ChangePasswordResponse }),
     ApiUnauthorizedResponse({ type: AuthRes.ChangePasswordUnauthorizedResponse }),
@@ -131,6 +137,7 @@ export const ResetPasswordDecorators = () => {
 export const ChangeEmailDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiBody({ type: AuthDto.ChangeEmailDto }),
     ApiOkResponse({ type: AuthRes.ChangeEmailResponse }),
     ApiUnauthorizedResponse({ type: AuthRes.ChangeEmailUnauthorizedResponse }),
