@@ -1,6 +1,7 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
@@ -15,6 +16,7 @@ import * as DoctorSpecialtyDto from '../dto';
 export const AddDoctorSpecialtyDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.CREATED),
+    ApiBearerAuth('accessToken'),
     ApiBody({ type: DoctorSpecialtyDto.AddDoctorSpecialtyDto }),
     ApiCreatedResponse({ type: DoctorSpecialtyRes.AddDoctorSpecialtyResponse }),
     ApiBadRequestResponse({ type: DoctorSpecialtyRes.AddDoctorSpecialtyBadRequestResponse }),
@@ -27,6 +29,7 @@ export const AddDoctorSpecialtyDecorators = () => {
 export const FindMyDoctorSpecialtiesDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiOkResponse({ type: DoctorSpecialtyRes.FindMyDoctorSpecialtiesResponse }),
     ApiNotFoundResponse({ type: DoctorSpecialtyRes.FindMyDoctorSpecialtiesNotFoundResponse }),
     Permission({ permissions: [PERMISSIONS.DOCTOR_READ] }),
@@ -36,6 +39,7 @@ export const FindMyDoctorSpecialtiesDecorators = () => {
 export const FindDoctorSpecialtiesDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     Public(),
     ApiParam({
       name: 'doctorId',
@@ -53,6 +57,7 @@ export const FindDoctorSpecialtiesDecorators = () => {
 export const SetDoctorSpecialtyPrimaryDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'specialtyId',
       description: 'Specialty ID',
@@ -69,6 +74,7 @@ export const SetDoctorSpecialtyPrimaryDecorators = () => {
 export const RemoveDoctorSpecialtyDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'specialtyId',
       description: 'Specialty ID',
