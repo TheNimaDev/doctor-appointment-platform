@@ -10,3 +10,4 @@ export * from './find-my-clinic-appointments.response';
 export * from './find-my-clinic-appointment.response';
 export * from './cancel-appointment.response';
 export * from './confirm-appointment.response';
+export * from './reject-appointment.response';
