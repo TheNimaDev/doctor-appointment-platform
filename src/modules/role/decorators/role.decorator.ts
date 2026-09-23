@@ -1,6 +1,7 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
@@ -15,6 +16,7 @@ import * as RoleDto from '../dto';
 export const CreateRoleDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.CREATED),
+    ApiBearerAuth('accessToken'),
     ApiBody({ type: RoleDto.CreateRoleDto }),
     ApiCreatedResponse({ type: RoleRes.CreateRoleResponse }),
     ApiBadRequestResponse({ type: RoleRes.CreateRoleBadRequestResponse }),
@@ -28,6 +30,7 @@ export const CreateRoleDecorators = () => {
 export const FindRolesDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiOkResponse({ type: RoleRes.FindRolesResponse }),
     Permission({
       permissions: [PERMISSIONS.OWNER_ALL],
@@ -38,6 +41,7 @@ export const FindRolesDecorators = () => {
 export const FindRoleDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Role ID',
@@ -56,6 +60,7 @@ export const FindRoleDecorators = () => {
 export const UpdateRoleDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Role ID',
@@ -77,6 +82,7 @@ export const UpdateRoleDecorators = () => {
 export const DeleteRoleDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Role ID',
