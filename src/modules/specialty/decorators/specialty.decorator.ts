@@ -1,6 +1,7 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
@@ -15,6 +16,7 @@ import * as SpecialtyDto from '../dto';
 export const CreateSpecialtyDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.CREATED),
+    ApiBearerAuth('accessToken'),
     ApiBody({ type: SpecialtyDto.CreateSpecialtyDto }),
     ApiCreatedResponse({ type: SpecialtyRes.CreateSpecialtyResponse }),
     ApiBadRequestResponse({ type: SpecialtyRes.CreateSpecialtyBadRequestResponse }),
@@ -57,6 +59,7 @@ export const FindSpecialtyDecorators = () => {
 export const UpdateSpecialtyDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Specialty ID',
@@ -78,6 +81,7 @@ export const UpdateSpecialtyDecorators = () => {
 export const DeleteSpecialtyDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Specialty ID',
