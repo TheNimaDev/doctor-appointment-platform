@@ -1,6 +1,7 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
@@ -17,6 +18,7 @@ import { ScheduleStatus } from '../enums';
 export const FindAllDoctorSchedulesDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiQuery({
       name: 'status',
       required: false,
@@ -104,6 +106,7 @@ export const FindDoctorSchedulesByDoctorAndClinicDecorators = () => {
 export const FindMyDoctorSchedulesDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiOkResponse({
       type: ScheduleRes.FindMyDoctorSchedulesResponse,
     }),
@@ -116,6 +119,7 @@ export const FindMyDoctorSchedulesDecorators = () => {
 export const FindMyDoctorClinicSchedulesDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'clinicId',
       description: 'Clinic ID',
@@ -138,6 +142,7 @@ export const FindMyDoctorClinicSchedulesDecorators = () => {
 export const FindMyDoctorScheduleDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'scheduleId',
       description: 'Doctor schedule ID',
@@ -160,6 +165,7 @@ export const FindMyDoctorScheduleDecorators = () => {
 export const FindMyClinicSchedulesDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiOkResponse({
       type: ScheduleRes.FindMyClinicSchedulesResponse,
     }),
@@ -172,6 +178,7 @@ export const FindMyClinicSchedulesDecorators = () => {
 export const FindDoctorSchedulesForClinicDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'doctorId',
       description: 'Doctor ID',
@@ -194,6 +201,7 @@ export const FindDoctorSchedulesForClinicDecorators = () => {
 export const FindDoctorScheduleByClinicOwnerDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'scheduleId',
       description: 'Doctor schedule ID',
@@ -239,6 +247,7 @@ export const FindDoctorScheduleDecorators = () => {
 export const CreateMyDoctorScheduleDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.CREATED),
+    ApiBearerAuth('accessToken'),
     ApiBody({
       type: ScheduleDto.CreateDoctorScheduleDto,
     }),
@@ -263,6 +272,7 @@ export const CreateMyDoctorScheduleDecorators = () => {
 export const UpdateMyDoctorScheduleDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'scheduleId',
       description: 'Doctor schedule ID',
@@ -291,6 +301,7 @@ export const UpdateMyDoctorScheduleDecorators = () => {
 export const UpdateDoctorScheduleDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'scheduleId',
       description: 'Doctor schedule ID',
@@ -322,6 +333,7 @@ export const UpdateDoctorScheduleDecorators = () => {
 export const UpdateMyDoctorScheduleStatusDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'scheduleId',
       description: 'Doctor schedule ID',
@@ -350,6 +362,7 @@ export const UpdateMyDoctorScheduleStatusDecorators = () => {
 export const UpdateDoctorScheduleStatusDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'scheduleId',
       description: 'Doctor schedule ID',
@@ -381,6 +394,7 @@ export const UpdateDoctorScheduleStatusDecorators = () => {
 export const DeleteMyDoctorScheduleDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'scheduleId',
       description: 'Doctor schedule ID',
@@ -403,6 +417,7 @@ export const DeleteMyDoctorScheduleDecorators = () => {
 export const DeleteDoctorScheduleDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'scheduleId',
       description: 'Doctor schedule ID',
