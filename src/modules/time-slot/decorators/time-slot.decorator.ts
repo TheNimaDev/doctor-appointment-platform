@@ -1,5 +1,5 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { Permission, Public, PERMISSIONS } from '@/common';
 import * as TimeSlotRes from '../res';
 
@@ -103,6 +103,7 @@ export const FindAvailableClinicTimeSlotsDecorators = () => {
 export const FindMyTimeSlotsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiQuery({
       name: 'date',
       description: 'Filter time slots by date',
@@ -125,6 +126,7 @@ export const FindMyTimeSlotsDecorators = () => {
 export const FindMyClinicTimeSlotsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'clinicId',
       description: 'Clinic ID',
@@ -154,6 +156,7 @@ export const FindMyClinicTimeSlotsDecorators = () => {
 export const FindMyTimeSlotDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Time slot ID',
@@ -201,6 +204,7 @@ export const FindAvailableTimeSlotDecorators = () => {
 export const FindMyClinicAdminTimeSlotsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiQuery({
       name: 'date',
       description: 'Filter time slots by date',
@@ -223,6 +227,7 @@ export const FindMyClinicAdminTimeSlotsDecorators = () => {
 export const FindMyClinicAdminDoctorTimeSlotsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'doctorId',
       description: 'Doctor ID',
@@ -252,6 +257,7 @@ export const FindMyClinicAdminDoctorTimeSlotsDecorators = () => {
 export const FindMyClinicAdminTimeSlotDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Time slot ID',
@@ -276,6 +282,7 @@ export const FindMyClinicAdminTimeSlotDecorators = () => {
 export const BlockMyTimeSlotDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Time slot ID',
@@ -300,6 +307,7 @@ export const BlockMyTimeSlotDecorators = () => {
 export const UnblockMyTimeSlotDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Time slot ID',
@@ -324,6 +332,7 @@ export const UnblockMyTimeSlotDecorators = () => {
 export const BlockMyClinicTimeSlotDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Time slot ID',
@@ -348,6 +357,7 @@ export const BlockMyClinicTimeSlotDecorators = () => {
 export const UnblockMyClinicTimeSlotDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Time slot ID',
