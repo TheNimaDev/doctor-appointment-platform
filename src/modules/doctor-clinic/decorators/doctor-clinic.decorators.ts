@@ -1,11 +1,19 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
 import { Permission, PERMISSIONS } from '@/common';
-import { ApiConflictResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiParam,
+} from '@nestjs/swagger';
 import * as DoctorClinicRes from '../res';
 
 export const CreateDoctorClinicDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.CREATED),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'doctorId',
       description: 'Doctor ID',
@@ -31,6 +39,7 @@ export const CreateDoctorClinicDecorators = () => {
 export const FindDoctorClinicsByDoctorDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'doctorId',
       description: 'Doctor ID',
@@ -53,6 +62,7 @@ export const FindDoctorClinicsByDoctorDecorators = () => {
 export const FindDoctorClinicsByClinicDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'clinicId',
       description: 'Clinic ID',
@@ -75,6 +85,7 @@ export const FindDoctorClinicsByClinicDecorators = () => {
 export const FindMyClinicDoctorsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiOkResponse({
       type: DoctorClinicRes.FindMyClinicDoctorsResponse,
     }),
@@ -87,6 +98,7 @@ export const FindMyClinicDoctorsDecorators = () => {
 export const FindMyDoctorClinicsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiOkResponse({
       type: DoctorClinicRes.FindMyDoctorClinicsResponse,
     }),
@@ -99,6 +111,7 @@ export const FindMyDoctorClinicsDecorators = () => {
 export const DeleteDoctorClinicDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'doctorId',
       description: 'Doctor ID',
