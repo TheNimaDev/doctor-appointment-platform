@@ -7,3 +7,4 @@ export * from './find-patient-appointment.response';
 export * from './find-doctor-appointments.response';
 export * from './find-doctor-appointment.response';
 export * from './find-my-clinic-appointments.response';
+export * from './find-my-clinic-appointment.response';
