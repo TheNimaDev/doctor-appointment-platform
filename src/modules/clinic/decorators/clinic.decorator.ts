@@ -1,6 +1,7 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
@@ -17,6 +18,7 @@ import { ClinicStatus } from '../enums';
 export const CreateClinicDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.CREATED),
+    ApiBearerAuth('accessToken'),
     ApiBody({ type: ClinicDto.CreateClinicDto }),
     ApiCreatedResponse({ type: ClinicRes.CreateClinicResponse }),
     ApiBadRequestResponse({ type: ClinicRes.CreateClinicBadRequestResponse }),
@@ -30,6 +32,7 @@ export const CreateClinicDecorators = () => {
 export const FindMyClinicDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiOkResponse({ type: ClinicRes.FindMyClinicResponse }),
     ApiNotFoundResponse({ type: ClinicRes.FindMyClinicNotFoundResponse }),
     Permission({
@@ -52,6 +55,7 @@ export const FindClinicsDecorators = () => {
 export const FindClinicsWithAllStatusDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiQuery({ name: 'status', required: false, enum: ClinicStatus }),
     ApiOkResponse({ type: ClinicRes.FindClinicsWithAllStatusResponse }),
     ApiBadRequestResponse({ type: ClinicRes.FindClinicsWithAllStatusBadRequestResponse }),
@@ -83,6 +87,7 @@ export const FindClinicDecorators = () => {
 export const FindClinicWithAllStatusDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Clinic ID',
@@ -101,6 +106,7 @@ export const FindClinicWithAllStatusDecorators = () => {
 export const UpdateMyClinicDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiBody({ type: ClinicDto.UpdateClinicDto }),
     ApiOkResponse({ type: ClinicRes.UpdateMyClinicResponse }),
     ApiBadRequestResponse({ type: ClinicRes.UpdateMyClinicBadRequestResponse }),
@@ -115,6 +121,7 @@ export const UpdateMyClinicDecorators = () => {
 export const UpdateClinicDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Clinic ID',
@@ -136,6 +143,7 @@ export const UpdateClinicDecorators = () => {
 export const DeleteMyClinicDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiOkResponse({ type: ClinicRes.DeleteMyClinicResponse }),
     ApiNotFoundResponse({ type: ClinicRes.DeleteMyClinicNotFoundResponse }),
     Permission({
@@ -147,6 +155,7 @@ export const DeleteMyClinicDecorators = () => {
 export const DeleteClinicDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'id',
       description: 'Clinic ID',
