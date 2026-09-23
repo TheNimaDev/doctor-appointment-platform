@@ -1,6 +1,7 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
@@ -15,6 +16,7 @@ import * as RolePermissionDto from '../dto';
 export const AddRolePermissionDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.CREATED),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'roleId',
       description: 'Role ID',
@@ -36,6 +38,7 @@ export const AddRolePermissionDecorators = () => {
 export const RemoveRolePermissionDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'roleId',
       description: 'Role ID',
@@ -61,6 +64,7 @@ export const RemoveRolePermissionDecorators = () => {
 export const FindRolePermissionsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
     ApiParam({
       name: 'roleId',
       description: 'Role ID',
