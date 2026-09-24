@@ -6,9 +6,10 @@ import { TimeSlotService } from './time-slot.service';
 import { DoctorModule } from '@/modules/doctor';
 import { DoctorClinicModule } from '@/modules/doctor-clinic';
 import { ClinicModule } from '@/modules/clinic';
+import { DoctorScheduleModule } from '@/modules/doctor-schedule';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([TimeSlot]), DoctorModule, DoctorClinicModule, ClinicModule],
+  imports: [TypeOrmModule.forFeature([TimeSlot]), DoctorModule, DoctorClinicModule, ClinicModule, DoctorScheduleModule],
   controllers: [TimeSlotController],
   providers: [TimeSlotService],
   exports: [TimeSlotService],
