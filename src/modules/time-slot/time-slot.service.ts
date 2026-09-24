@@ -25,9 +25,10 @@ import {
   UpdateTimeSlotStatusHandlerPayload,
   UpdateTimeSlotStatusPayload,
 } from '@/types';
-import { checkDatabaseError, isDateTimeExpired } from '@/lib';
-import { DoctorClinicService } from '../doctor-clinic/doctor-clinic.service';
-import { ClinicService } from '../clinic/clinic.service';
+import { checkDatabaseError, isDateTimeExpired, minutesToTime, timeToMinutes } from '@/lib';
+import { DoctorClinicService } from '@/modules/doctor-clinic/doctor-clinic.service';
+import { ClinicService } from '@/modules/clinic/clinic.service';
+import { DoctorScheduleService } from '@/modules/doctor-schedule/doctor-schedule.service';
 
 @Injectable()
 export class TimeSlotService {
@@ -49,6 +50,39 @@ export class TimeSlotService {
    */
   private getRepository(manager?: EntityManager): Repository<TimeSlot> {
     return manager?.getRepository(TimeSlot) ?? this.timeSlotRepository;
+  }
+
+  /**
+   * Generate time slots for a specific date.
+   */
+  private generateSlots(payload: { date: string } & { DoctorScheduleResponse }) {
+    const { date, DoctorScheduleResponse: schedule } = payload;
+
+    const slots: Array<{
+      date: string;
+      startTime: string;
+      endTime: string;
+    }> = [];
+
+    let currentMinutes = timeToMinutes(schedule.startTime);
+
+    const endMinutes = timeToMinutes(schedule.endTime);
+
+    while (currentMinutes + schedule.slotDuration <= endMinutes) {
+      const slotStart = minutesToTime(currentMinutes);
+
+      const slotEnd = minutesToTime(currentMinutes + schedule.slotDuration);
+
+      slots.push({
+        date,
+        startTime: slotStart,
+        endTime: slotEnd,
+      });
+
+      currentMinutes += schedule.slotDuration;
+    }
+
+    return slots;
   }
 
   /**
