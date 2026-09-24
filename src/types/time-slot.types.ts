@@ -1,6 +1,7 @@
 import { EntityManager } from 'typeorm';
 import { TimeSlot } from '@/modules/time-slot/entities';
 import { TimeSlotStatus } from '@/modules/time-slot/enums';
+import { DoctorScheduleResponse } from './doctor-schedule.types';
 
 /** TimeSlot without relation data. */
 export type SafeTimeSlot = Omit<TimeSlot, 'schedule' | 'appointments'>;
@@ -23,6 +24,11 @@ export interface CreateTimeSlotPayload {
   endTime: string;
   status?: TimeSlotStatus;
   manager?: EntityManager;
+}
+
+/** Parameters for generating time slots. */
+export interface GenerateSlotsPayload extends DoctorScheduleResponse {
+  date: string;
 }
 
 /** Parameters for finding a time slot in the authenticated doctor. */

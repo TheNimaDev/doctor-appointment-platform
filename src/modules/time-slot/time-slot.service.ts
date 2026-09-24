@@ -18,6 +18,7 @@ import {
   FindMyClinicTimeSlotsPayload,
   FindMyTimeSlotsPayload,
   FindTimeSlotByIdPayload,
+  GenerateSlotsPayload,
   GetMyClinicTimeSlotPayload,
   GetMyTimeSlotPayload,
   TimeSlotResponse,
@@ -25,10 +26,14 @@ import {
   UpdateTimeSlotStatusHandlerPayload,
   UpdateTimeSlotStatusPayload,
 } from '@/types';
-import { checkDatabaseError, isDateTimeExpired, minutesToTime, timeToMinutes } from '@/lib';
+import {
+  checkDatabaseError,
+  isDateTimeExpired,
+  minutesToTime,
+  timeToMinutes,
+} from '@/lib';
 import { DoctorClinicService } from '@/modules/doctor-clinic/doctor-clinic.service';
 import { ClinicService } from '@/modules/clinic/clinic.service';
-import { DoctorScheduleService } from '@/modules/doctor-schedule/doctor-schedule.service';
 
 @Injectable()
 export class TimeSlotService {
@@ -55,8 +60,8 @@ export class TimeSlotService {
   /**
    * Generate time slots for a specific date.
    */
-  private generateSlots(payload: { date: string } & { DoctorScheduleResponse }) {
-    const { date, DoctorScheduleResponse: schedule } = payload;
+  private generateSlots(payload: GenerateSlotsPayload) {
+    const { date, doctorSchedule: schedule } = payload;
 
     const slots: Array<{
       date: string;
