@@ -11,5 +11,6 @@ import { ClinicModule } from '@/modules/clinic';
   imports: [TypeOrmModule.forFeature([DoctorSchedule]), DoctorClinicModule, DoctorModule, ClinicModule],
   controllers: [DoctorScheduleController],
   providers: [DoctorScheduleService],
+  exports: [DoctorScheduleService],
 })
 export class DoctorScheduleModule {}
