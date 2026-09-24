@@ -10,6 +10,7 @@ import {
   BaseException,
   CreateTimeSlotPayload,
   DeleteTimeSlotPayload,
+  EnsureTimeSlotsPayload,
   FindAvailableByClinicPayload,
   FindAvailableByDoctorAndClinicPayload,
   FindAvailableByDoctorPayload,
@@ -27,13 +28,17 @@ import {
   UpdateTimeSlotStatusPayload,
 } from '@/types';
 import {
+  addDays,
   checkDatabaseError,
+  combineDateAndTime,
+  getDayOfWeek,
   isDateTimeExpired,
   minutesToTime,
   timeToMinutes,
 } from '@/lib';
 import { DoctorClinicService } from '@/modules/doctor-clinic/doctor-clinic.service';
 import { ClinicService } from '@/modules/clinic/clinic.service';
+import { DoctorScheduleService } from '@/modules/doctor-schedule/doctor-schedule.service';
 
 @Injectable()
 export class TimeSlotService {
@@ -45,6 +50,7 @@ export class TimeSlotService {
     private readonly doctorService: DoctorService,
     private readonly doctorClinicService: DoctorClinicService,
     private readonly clinicService: ClinicService,
+    private readonly doctorScheduleService: DoctorScheduleService,
   ) {}
 
   /**
@@ -112,6 +118,60 @@ export class TimeSlotService {
         e: error as Error,
         mainResource: 'TimeSlot',
       });
+    }
+  }
+
+  /**
+   * Ensure time slots exist for the doctor.
+   */
+  async ensureSlots(payload: EnsureTimeSlotsPayload): Promise<void> {
+    const repository = this.getRepository(payload.manager);
+
+    const { doctorSchedules } = await this.doctorScheduleService.findActiveByDoctor({
+      doctorId: payload.doctorId,
+    });
+
+    let currentDate = payload.startDate;
+
+    while (currentDate <= payload.endDate) {
+      const currentDateTime = combineDateAndTime(currentDate, '00:00:00');
+
+      const dayOfWeek = getDayOfWeek(currentDateTime);
+
+      const matchingSchedules = doctorSchedules.filter((schedule) => schedule.dayOfWeek === dayOfWeek);
+
+      for (const schedule of matchingSchedules) {
+        const existingSlots = await repository.find({
+          where: {
+            scheduleId: schedule.id,
+            date: currentDate,
+          },
+        });
+
+        const existingStartTimes = new Set(existingSlots.map((slot) => slot.startTime));
+
+        const slots = this.generateSlots({
+          date: currentDate,
+          doctorSchedule: schedule,
+        });
+
+        for (const slot of slots) {
+          if (existingStartTimes.has(slot.startTime)) {
+            continue;
+          }
+
+          await this.createTimeSlot({
+            scheduleId: schedule.id,
+            date: slot.date,
+            startTime: slot.startTime,
+            endTime: slot.endTime,
+            status: TimeSlotStatus.AVAILABLE,
+            manager: payload.manager,
+          });
+        }
+      }
+
+      currentDate = addDays(currentDate, 1);
     }
   }
 
