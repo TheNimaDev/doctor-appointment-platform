@@ -31,6 +31,14 @@ export interface GenerateSlotsPayload extends DoctorScheduleResponse {
   date: string;
 }
 
+/** Parameters for ensuring time slots. */
+export interface EnsureTimeSlotsPayload {
+  doctorId: string;
+  startDate: string;
+  endDate: string;
+  manager?: EntityManager;
+}
+
 /** Parameters for finding a time slot in the authenticated doctor. */
 export interface GetMyTimeSlotPayload {
   id: string;
