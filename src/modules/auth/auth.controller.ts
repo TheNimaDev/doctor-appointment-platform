@@ -12,10 +12,11 @@ import {
   VerifyEmailDto,
 } from './dto';
 import type { AccessRequest, ApiResponse, LoginResponse, NormalizedClientInfo, RefreshRequest } from '@/types';
-import type { CookieOptions, Response } from 'express';
+import type { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { NormalizeClientInfo } from '@/common';
 import * as AuthDecorator from './decorators';
+import { getCookieOptions } from '@/lib';
 
 @Controller('auth')
 export class AuthController {
@@ -23,22 +24,6 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
   ) {}
-
-  /**
-   * Build secure cookie options for the refresh token.
-   * - Enables strict security settings in production.
-   */
-  getCookieOptions(maxAge?: number): CookieOptions {
-    const isProduction: boolean = this.configService.get<string>('NODE_ENV') === 'production';
-
-    return {
-      sameSite: isProduction ? 'strict' : 'lax',
-      httpOnly: true,
-      secure: isProduction,
-      path: '/',
-      maxAge,
-    };
-  }
 
   /**
    * Register a new user account.
@@ -80,7 +65,11 @@ export class AuthController {
   ): Promise<ApiResponse<LoginResponse>> {
     const { refreshToken, ...data } = await this.authService.login({ ...loginDto, clientInfo });
 
-    res.cookie('refreshToken', refreshToken.token, this.getCookieOptions(refreshToken.maxAge));
+    res.cookie(
+      'refreshToken',
+      refreshToken.token,
+      getCookieOptions(this.configService.get<string>('NODE_ENV') === 'production', refreshToken.maxAge),
+    );
 
     return {
       message: 'Login successful.',
@@ -94,7 +83,7 @@ export class AuthController {
   @Post('logout')
   @AuthDecorator.LogoutDecorators()
   async logout(@Req() req: RefreshRequest, @Res({ passthrough: true }) res: Response): Promise<ApiResponse> {
-    res.clearCookie('refreshToken', this.getCookieOptions());
+    res.clearCookie('refreshToken', getCookieOptions(this.configService.get<string>('NODE_ENV') === 'production'));
     await this.authService.logout(req.refreshPayload);
 
     return {
@@ -108,7 +97,7 @@ export class AuthController {
   @Post('logout/all')
   @AuthDecorator.LogoutAllDecorators()
   async logoutAll(@Req() req: RefreshRequest, @Res({ passthrough: true }) res: Response): Promise<ApiResponse> {
-    res.clearCookie('refreshToken', this.getCookieOptions());
+    res.clearCookie('refreshToken', getCookieOptions(this.configService.get<string>('NODE_ENV') === 'production'));
     await this.authService.logoutAll(req.refreshPayload);
 
     return {
@@ -143,7 +132,11 @@ export class AuthController {
   ): Promise<ApiResponse<LoginResponse>> {
     const { refreshToken, ...data } = await this.authService.refresh(req.refreshPayload);
 
-    res.cookie('refreshToken', refreshToken.token, this.getCookieOptions(refreshToken.maxAge));
+    res.cookie(
+      'refreshToken',
+      refreshToken.token,
+      getCookieOptions(this.configService.get<string>('NODE_ENV') === 'production', refreshToken.maxAge),
+    );
 
     return {
       message: 'Token refreshed successfully.',
