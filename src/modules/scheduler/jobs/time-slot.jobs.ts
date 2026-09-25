@@ -26,4 +26,11 @@ export class TimeSlotJob {
       });
     }
   }
+
+  /**
+   * Expire past time slots.
+   */
+  async expireTimeSlots() {
+    await this.timeSlotService.expireTimeSlots();
+  }
 }
