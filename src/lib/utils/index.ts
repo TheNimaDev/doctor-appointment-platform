@@ -4,3 +4,4 @@ export * from './database-error.util';
 export * from './user.utils';
 export * from './crypto';
 export * from './normalize-client-info';
+export * from './cookies.utils';
