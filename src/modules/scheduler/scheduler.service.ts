@@ -34,4 +34,12 @@ export class SchedulerService {
       endDate,
     });
   }
+
+  /**
+   * Expire past time slots.
+   */
+  @Cron(CronExpression.EVERY_MINUTE)
+  async expireTimeSlots() {
+    await this.timeSlotJob.expireTimeSlots();
+  }
 }
