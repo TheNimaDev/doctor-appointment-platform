@@ -1,16 +1,20 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
-import type { BaseException, UserAccess } from '@/types';
+import type { AccessRequest, BaseException, UserAccess } from '@/types';
 import { IS_PUBLIC_KEY } from '@/common';
+import { SessionService } from '@/modules/session/session.service';
 
 @Injectable()
 export class AccessTokenGuard extends AuthGuard('jwt') implements CanActivate {
-  constructor(private readonly reflector: Reflector) {
+  constructor(
+    private readonly reflector: Reflector,
+    private readonly sessionService: SessionService,
+  ) {
     super();
   }
 
-  canActivate(context: ExecutionContext) {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride(IS_PUBLIC_KEY, [context.getHandler(), context.getClass()]) ?? {
       isPublicAccess: false,
       isPublicPermission: false,
@@ -20,7 +24,18 @@ export class AccessTokenGuard extends AuthGuard('jwt') implements CanActivate {
       return true;
     }
 
-    return super.canActivate(context);
+    const authenticated = await super.canActivate(context);
+
+    if (!authenticated) {
+      return false;
+    }
+
+    const request = context.switchToHttp().getRequest<AccessRequest>();
+    const { sessionId } = request.user;
+
+    await this.sessionService.getById({ id: sessionId });
+
+    return true;
   }
 
   handleRequest<T = UserAccess>(
