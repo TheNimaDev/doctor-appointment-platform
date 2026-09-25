@@ -11,6 +11,7 @@ export interface RolesAndPermissions {
 /** JWT access token payload. */
 export interface AccessTokenPayload extends RolesAndPermissions {
   sub: string;
+  sessionId: string;
   iat?: number;
   exp?: number;
   display_name?: string;
