@@ -136,7 +136,7 @@ export class AuthService {
 
     const userData = userResponse.user;
 
-    const refreshTokenData = await this.databaseService.dataSource.transaction(async (manager) => {
+    return await this.databaseService.dataSource.transaction(async (manager) => {
       let userSession;
       const remember = params.remember ?? false;
 
@@ -165,25 +165,29 @@ export class AuthService {
         userSession = newSession.session;
       }
 
-      return this.refreshTokenService.createRefreshToken({
+      const refreshToken = await this.refreshTokenService.createRefreshToken({
         sessionId: userSession.id,
         clientInfo: params.clientInfo,
         remember,
         manager,
       });
+
+      const accessTokenPayload: AccessTokenPayload = {
+        sub: user.id,
+        sessionId: userSession.id,
+        display_name: `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim(),
+        roles: userData.roles,
+        permissions: userData.permissions,
+      };
+
+      const accessToken: string = this.generateAccessToken(accessTokenPayload);
+
+      return {
+        user: userData,
+        accessToken,
+        refreshToken,
+      };
     });
-    const accessTokenPayload: AccessTokenPayload = {
-      sub: user.id,
-      display_name: `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim(),
-      roles: userData.roles,
-      permissions: userData.permissions,
-    };
-    const accessToken: string = this.generateAccessToken(accessTokenPayload);
-    return {
-      user: userData,
-      accessToken,
-      refreshToken: refreshTokenData,
-    };
   }
 
   /**
@@ -295,7 +299,7 @@ export class AuthService {
    * Rotate the current refresh token and issue a new access token.
    */
   async refresh(params: RefreshTokenPayload): Promise<LoginServiceOutput> {
-    const refreshTokenData = await this.databaseService.dataSource.transaction(async (manager) => {
+    return await this.databaseService.dataSource.transaction(async (manager) => {
       await this.refreshTokenService.revokeRefreshTokenByHash({
         tokenHash: params.refreshRecord.tokenHash,
         manager,
@@ -306,7 +310,7 @@ export class AuthService {
         manager,
       });
 
-      return this.refreshTokenService.createRefreshToken({
+      const refreshToken = await this.refreshTokenService.createRefreshToken({
         sessionId: params.session.id,
         clientInfo: {
           ipAddress: params.session.ipAddress,
@@ -320,22 +324,23 @@ export class AuthService {
         remember: params.session.remember,
         manager,
       });
+
+      const accessTokenPayload: AccessTokenPayload = {
+        sub: params.user.id,
+        sessionId: params.session.id,
+        display_name: `${params.user.firstName ?? ''} ${params.user.lastName ?? ''}`.trim(),
+        roles: params.user.roles,
+        permissions: params.user.permissions,
+      };
+
+      const accessToken = this.generateAccessToken(accessTokenPayload);
+
+      return {
+        user: params.user,
+        accessToken,
+        refreshToken,
+      };
     });
-
-    const accessTokenPayload: AccessTokenPayload = {
-      sub: params.user.id,
-      display_name: `${params.user.firstName ?? ''} ${params.user.lastName ?? ''}`.trim(),
-      roles: params.user.roles,
-      permissions: params.user.permissions,
-    };
-
-    const accessToken = this.generateAccessToken(accessTokenPayload);
-
-    return {
-      user: params.user,
-      accessToken,
-      refreshToken: refreshTokenData,
-    };
   }
 
   /**
