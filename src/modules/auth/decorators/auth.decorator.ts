@@ -95,10 +95,7 @@ export const RefreshDecorators = () => {
     ApiCookieAuth('refreshToken'),
     ApiOkResponse({ type: AuthRes.RefreshResponse }),
     ApiUnauthorizedResponse({ type: AuthRes.RefreshUnauthorizedResponse }),
-    Public({
-      isPublicAccess: false,
-      isPublicPermission: true,
-    }),
+    Public(),
     UseGuards(RefreshTokenGuard),
   );
 };
