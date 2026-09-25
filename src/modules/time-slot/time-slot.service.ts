@@ -32,6 +32,8 @@ import {
   checkDatabaseError,
   combineDateAndTime,
   getDayOfWeek,
+  getServerDate,
+  getServerTime,
   isDateTimeExpired,
   minutesToTime,
   timeToMinutes,
@@ -627,5 +629,30 @@ export class TimeSlotService {
         error: 'Time Slot Not Found',
       } as BaseException);
     }
+  }
+
+  /**
+   * Expire past time slots.
+   */
+  async expireTimeSlots(): Promise<void> {
+    const repository = this.getRepository();
+
+    const currentDate = getServerDate();
+    const currentTime = getServerTime();
+
+    await repository
+      .createQueryBuilder()
+      .update(TimeSlot)
+      .set({
+        status: TimeSlotStatus.EXPIRED,
+      })
+      .where('status = :status', {
+        status: TimeSlotStatus.AVAILABLE,
+      })
+      .andWhere('(date < :currentDate OR (date = :currentDate AND startTime <= :currentTime))', {
+        currentDate,
+        currentTime,
+      })
+      .execute();
   }
 }
