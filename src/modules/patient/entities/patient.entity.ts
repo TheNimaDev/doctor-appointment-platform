@@ -5,12 +5,14 @@ import {
   Entity,
   Index,
   JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from '@/modules/user/entities';
+import { Appointment } from '@/modules/appointment/entities';
 import { BloodType, Gender } from '../enums';
 
 @Entity('patients')
@@ -29,6 +31,9 @@ export class Patient {
   })
   @JoinColumn({ name: 'userId' })
   user: User;
+
+  @OneToMany(() => Appointment, (appointment) => appointment.patient)
+  appointments: Appointment[];
 
   @Column({ type: 'varchar', length: 10 })
   nationalCode: string;

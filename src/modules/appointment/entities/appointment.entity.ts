@@ -12,6 +12,7 @@ import {
 
 import { AppointmentStatus } from '../enums';
 import { TimeSlot } from '@/modules/time-slot/entities';
+import { Patient } from '@/modules/patient/entities';
 
 @Index(['patientId'])
 @Index(['timeSlotId'])
@@ -23,6 +24,10 @@ export class Appointment {
 
   @Column({ type: 'uuid' })
   patientId: string;
+
+  @ManyToOne(() => Patient, (patient) => patient.appointments)
+  @JoinColumn({ name: 'patientId' })
+  patient: Patient;
 
   @Column({ type: 'uuid' })
   timeSlotId: string;
