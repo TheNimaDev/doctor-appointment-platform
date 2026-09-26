@@ -646,8 +646,8 @@ export class TimeSlotService {
       .set({
         status: TimeSlotStatus.EXPIRED,
       })
-      .where('status = :status', {
-        status: TimeSlotStatus.AVAILABLE,
+      .where('status != :expiredStatus', {
+        expiredStatus: TimeSlotStatus.EXPIRED,
       })
       .andWhere('(date < :currentDate OR (date = :currentDate AND startTime <= :currentTime))', {
         currentDate,
