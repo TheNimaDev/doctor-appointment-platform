@@ -4,10 +4,13 @@ import {
   DeleteDateColumn,
   Entity,
   Index,
+  JoinColumn,
+  OneToOne,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
+import { User } from '@/modules/user/entities';
 import { BloodType, Gender } from '../enums';
 
 @Entity('patients')
@@ -20,6 +23,12 @@ export class Patient {
 
   @Column({ type: 'uuid' })
   userId: string;
+
+  @OneToOne(() => User, (user) => user.patient, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'userId' })
+  user: User;
 
   @Column({ type: 'varchar', length: 10 })
   nationalCode: string;

@@ -14,6 +14,7 @@ import { Session } from '@/modules/session/entities';
 import { UserRole } from '@/modules/user-role/entities';
 import { Doctor } from '@/modules/doctor/entities';
 import { Clinic } from '@/modules/clinic/entities';
+import { Patient } from '@/modules/patient/entities';
 
 @Entity('users')
 export class User {
@@ -47,6 +48,9 @@ export class User {
 
   @OneToOne(() => Doctor, (doctor) => doctor.user)
   doctor?: Doctor;
+
+  @OneToOne(() => Patient, (patient) => patient.user)
+  patient?: Patient;
 
   @OneToOne(() => Clinic, (clinic) => clinic.owner)
   clinic?: Clinic;
