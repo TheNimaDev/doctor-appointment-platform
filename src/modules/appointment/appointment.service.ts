@@ -26,6 +26,7 @@ import { DoctorService } from '@/modules/doctor/doctor.service';
 import { AppointmentStatus } from './enums';
 import { APPOINTMENT_ALLOWED_TRANSITIONS } from './constants';
 import { ClinicService } from '@/modules/clinic/clinic.service';
+import { PatientService } from '../patient/patient.service';
 
 @Injectable()
 export class AppointmentService {
@@ -37,6 +38,7 @@ export class AppointmentService {
     private readonly timeSlotService: TimeSlotService,
     private readonly doctorService: DoctorService,
     private readonly clinicService: ClinicService,
+    private readonly patientService: PatientService,
   ) {}
 
   /**
@@ -182,14 +184,13 @@ export class AppointmentService {
           manager,
         });
 
-        // TODO: Get patient ID from user ID after implementing Patient module.
-        // const { patient } = await this.patientService.findByUserId({
-        //   userId: payload.userId,
-        //   manager: payload.manager,
-        // });
+        const { patient } = await this.patientService.findById({
+          id: payload.patientId,
+          manager,
+        });
 
         const appointment = repository.create({
-          patientId: payload.patientId, // TODO: Replace with patient.id
+          patientId: patient.id,
           timeSlotId: timeSlot.id,
           notes: payload.notes,
         });
@@ -219,15 +220,14 @@ export class AppointmentService {
   async findPatientAppointments(payload: FindPatientAppointmentsPayload): Promise<AppointmentsResponse> {
     const repository = this.getRepository(payload.manager);
 
-    // TODO: Get patient ID from user ID after implementing Patient module.
-    // const { patient } = await this.patientService.findByUserId({
-    //   userId: payload.userId,
-    //   manager: payload.manager,
-    // });
+    const { patient } = await this.patientService.findByUserId({
+      userId: payload.userId,
+      manager: payload.manager,
+    });
 
     const appointments = await repository.find({
       where: {
-        patientId: payload.userId, // TODO: Replace with patient.id
+        patientId: patient.id,
       },
       order: {
         createdAt: 'DESC',
@@ -245,16 +245,15 @@ export class AppointmentService {
   async getPatientAppointmentById(payload: FindPatientAppointmentByIdPayload): Promise<AppointmentResponse> {
     const repository = this.getRepository(payload.manager);
 
-    // TODO: Get patient ID from user ID after implementing Patient module.
-    // const { patient } = await this.patientService.findByUserId({
-    //   userId: payload.userId,
-    //   manager: payload.manager,
-    // });
+    const { patient } = await this.patientService.findByUserId({
+      userId: payload.userId,
+      manager: payload.manager,
+    });
 
     const appointment = await repository.findOne({
       where: {
         id: payload.id,
-        patientId: payload.userId, // TODO: Replace with patient.id
+        patientId: patient.id,
       },
     });
 
