@@ -21,3 +21,4 @@ export * from './time-slot.types';
 export * from './appointment.types';
 export * from './doctor-clinic.types';
 export * from './scheduler.types';
+export * from './patient.types';
