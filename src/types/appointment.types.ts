@@ -3,7 +3,7 @@ import { Appointment } from '@/modules/appointment/entities';
 import { AppointmentStatus } from '@/modules/appointment/enums';
 
 /** Appointment without relation data. */
-export type SafeAppointment = Omit<Appointment, 'timeSlot'>;
+export type SafeAppointment = Omit<Appointment, 'timeSlot' | 'patient'>;
 
 /** Appointment API response. */
 export interface AppointmentResponse {
