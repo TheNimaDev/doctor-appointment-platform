@@ -12,13 +12,9 @@ Patient نماینده یک User است که برای دریافت خدمات پ
 
 ```
 User
-
-1
-
-↓
-
-1
-
+  1
+  ↓
+  1
 Patient
 ```
 
@@ -169,7 +165,6 @@ UNIQUE(nationalCode)
 
 INDEX(city)
 
-INDEX(gender)
 ```
 
 ---
@@ -184,13 +179,9 @@ INDEX(gender)
 
 ```
 Patient
-
-1
-
-↓
-
-1
-
+  1
+  ↓
+  1
 User
 ```
 
@@ -208,13 +199,9 @@ Description:
 
 ```
 Patient
-
-1
-
-↓
-
-N
-
+  1
+  ↓
+  N
 Appointment
 ```
 
@@ -229,7 +216,6 @@ Patient:
 
 Ali
 
-
 Appointments:
 
 Cardiology - 2026/08/01
@@ -243,13 +229,9 @@ Dentistry - 2026/09/10
 
 ```
 Patient
-
-1
-
-↓
-
-N
-
+  1
+  ↓
+  N
 MedicalRecord
 ```
 
@@ -263,13 +245,9 @@ Description:
 
 ```
 Patient
-
-1
-
-↓
-
-N
-
+  1
+  ↓
+  N
 Prescription
 ```
 
@@ -283,13 +261,9 @@ Description:
 
 ```
 Patient
-
-1
-
-↓
-
-N
-
+  1
+  ↓
+  N
 Review
 ```
 
@@ -303,13 +277,9 @@ Description:
 
 ```
 Patient
-
-1
-
-↓
-
-N
-
+  1
+  ↓
+  N
 Payment
 ```
 
@@ -361,9 +331,7 @@ Correct:
 
 ```
 User
-
-↓
-
+  ↓
 Patient
 ```
 
@@ -385,23 +353,17 @@ Wrong:
 
 ```
 User
-
-bloodType
-
-medicalHistory
+├── bloodType
+└── medicalHistory
 ```
 
 Correct:
 
 ```
 User
-
-↓
-
+  ↓
 Patient
-
-↓
-
+  ↓
 MedicalRecord
 ```
 
