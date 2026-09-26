@@ -73,6 +73,7 @@ function flattenValidationErrors(errors: ValidationError[], parentPath = ''): Va
     Modules.AppointmentModule,
     Modules.SchedulerModule,
     Modules.DoctorClinicModule,
+    Modules.PatientModule,
   ],
   providers: [
     {
