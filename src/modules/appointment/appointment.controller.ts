@@ -168,7 +168,7 @@ export class AppointmentController {
   }
 
   /**
-   * Cancel an appointment.
+   * Cancel an appointment belonging to the current patient.
    */
   @Patch(':id/cancel')
   @AppointmentDecorator.CancelAppointmentDecorators()
@@ -189,11 +189,11 @@ export class AppointmentController {
   }
 
   /**
-   * Confirm an appointment.
+   * Confirm an appointment belonging to the current admin's clinic.
    */
-  @Patch(':id/confirm')
-  @AppointmentDecorator.ConfirmAppointmentDecorators()
-  async confirmAppointment(@Param('id') id: string): Promise<ApiResponse<AppointmentResponse>> {
+  @Patch('my-clinic/:id/confirm')
+  @AppointmentDecorator.ConfirmMyClinicAppointmentDecorators()
+  async confirmMyClinicAppointment(@Param('id') id: string): Promise<ApiResponse<AppointmentResponse>> {
     const data = await this.appointmentService.handleAppointmentStatus({
       id,
       status: AppointmentStatus.CONFIRMED,
@@ -206,11 +206,28 @@ export class AppointmentController {
   }
 
   /**
-   * Reject an appointment.
+   * Confirm an appointment belonging to the current doctor.
    */
-  @Patch(':id/reject')
-  @AppointmentDecorator.RejectAppointmentDecorators()
-  async rejectAppointment(@Param('id') id: string): Promise<ApiResponse<AppointmentResponse>> {
+  @Patch('my/:id/confirm')
+  @AppointmentDecorator.ConfirmMyAppointmentDecorators()
+  async confirmMyAppointment(@Param('id') id: string): Promise<ApiResponse<AppointmentResponse>> {
+    const data = await this.appointmentService.handleAppointmentStatus({
+      id,
+      status: AppointmentStatus.CONFIRMED,
+    });
+
+    return {
+      message: 'Appointment confirmed successfully.',
+      data,
+    };
+  }
+
+  /**
+   * Reject an appointment belonging to the current admin's clinic.
+   */
+  @Patch('my-clinic/:id/reject')
+  @AppointmentDecorator.RejectMyClinicAppointmentDecorators()
+  async rejectMyClinicAppointment(@Param('id') id: string): Promise<ApiResponse<AppointmentResponse>> {
     const data = await this.appointmentService.handleAppointmentStatus({
       id,
       status: AppointmentStatus.REJECTED,
@@ -223,11 +240,28 @@ export class AppointmentController {
   }
 
   /**
-   * Complete an appointment.
+   * Reject an appointment belonging to the current doctor.
    */
-  @Patch(':id/complete')
-  @AppointmentDecorator.CompleteAppointmentDecorators()
-  async completeAppointment(@Param('id') id: string): Promise<ApiResponse<AppointmentResponse>> {
+  @Patch('my/:id/reject')
+  @AppointmentDecorator.RejectMyAppointmentDecorators()
+  async rejectMyAppointment(@Param('id') id: string): Promise<ApiResponse<AppointmentResponse>> {
+    const data = await this.appointmentService.handleAppointmentStatus({
+      id,
+      status: AppointmentStatus.REJECTED,
+    });
+
+    return {
+      message: 'Appointment rejected successfully.',
+      data,
+    };
+  }
+
+  /**
+   * Complete an appointment belonging to the current admin's clinic.
+   */
+  @Patch('my-clinic/:id/complete')
+  @AppointmentDecorator.CompleteMyClinicAppointmentDecorators()
+  async completeMyClinicAppointment(@Param('id') id: string): Promise<ApiResponse<AppointmentResponse>> {
     const data = await this.appointmentService.handleAppointmentStatus({
       id,
       status: AppointmentStatus.COMPLETED,
@@ -240,11 +274,45 @@ export class AppointmentController {
   }
 
   /**
-   * Mark an appointment as no-show.
+   * Complete an appointment belonging to the current doctor.
    */
-  @Patch(':id/no-show')
-  @AppointmentDecorator.NoShowAppointmentDecorators()
+  @Patch('my/:id/complete')
+  @AppointmentDecorator.CompleteMyAppointmentDecorators()
+  async completeMyAppointment(@Param('id') id: string): Promise<ApiResponse<AppointmentResponse>> {
+    const data = await this.appointmentService.handleAppointmentStatus({
+      id,
+      status: AppointmentStatus.COMPLETED,
+    });
+
+    return {
+      message: 'Appointment completed successfully.',
+      data,
+    };
+  }
+
+  /**
+   * Mark an appointment as no-show belonging to the current admin's clinic.
+   */
+  @Patch('my-clinic/:id/no-show')
+  @AppointmentDecorator.NoShowMyClinicAppointmentDecorators()
   async markAppointmentAsNoShow(@Param('id') id: string): Promise<ApiResponse<AppointmentResponse>> {
+    const data = await this.appointmentService.handleAppointmentStatus({
+      id,
+      status: AppointmentStatus.NO_SHOW,
+    });
+
+    return {
+      message: 'Appointment marked as no-show successfully.',
+      data,
+    };
+  }
+
+  /**
+   * Mark an appointment as no-show belonging to the current doctor.
+   */
+  @Patch('my/:id/no-show')
+  @AppointmentDecorator.NoShowMyAppointmentDecorators()
+  async markMyAppointmentAsNoShow(@Param('id') id: string): Promise<ApiResponse<AppointmentResponse>> {
     const data = await this.appointmentService.handleAppointmentStatus({
       id,
       status: AppointmentStatus.NO_SHOW,
