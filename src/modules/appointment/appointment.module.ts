@@ -6,9 +6,10 @@ import { AppointmentService } from './appointment.service';
 import { TimeSlotModule } from '@/modules/time-slot';
 import { DoctorModule } from '@/modules/doctor';
 import { ClinicModule } from '@/modules/clinic';
+import { PatientModule } from '@/modules/patient';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Appointment]), TimeSlotModule, DoctorModule, ClinicModule],
+  imports: [TypeOrmModule.forFeature([Appointment]), TimeSlotModule, DoctorModule, ClinicModule, PatientModule],
   controllers: [AppointmentController],
   providers: [AppointmentService],
 })
