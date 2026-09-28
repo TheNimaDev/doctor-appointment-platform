@@ -216,7 +216,32 @@ export const CancelAppointmentDecorators = () => {
   );
 };
 
-export const ConfirmAppointmentDecorators = () => {
+export const ConfirmMyClinicAppointmentDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
+    ApiParam({
+      name: 'id',
+      description: 'Appointment ID',
+      type: String,
+      format: 'uuid',
+      example: '7f8c4f2e-9f6c-4f2d-8d13-2a4f8c9b7e61',
+    }),
+    ApiOkResponse({
+      type: AppointmentRes.ConfirmAppointmentResponse,
+    }),
+    ApiNotFoundResponse({
+      type: AppointmentRes.ConfirmAppointmentNotFoundResponse,
+    }),
+    Permission({
+      permissions: [PERMISSIONS.APPOINTMENT_CONFIRM],
+      clinicOwner: true,
+      resource: 'appointment-doctor',
+    }),
+  );
+};
+
+export const ConfirmMyAppointmentDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
@@ -241,7 +266,32 @@ export const ConfirmAppointmentDecorators = () => {
   );
 };
 
-export const RejectAppointmentDecorators = () => {
+export const RejectMyClinicAppointmentDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
+    ApiParam({
+      name: 'id',
+      description: 'Appointment ID',
+      type: String,
+      format: 'uuid',
+      example: '7f8c4f2e-9f6c-4f2d-8d13-2a4f8c9b7e61',
+    }),
+    ApiOkResponse({
+      type: AppointmentRes.RejectAppointmentResponse,
+    }),
+    ApiNotFoundResponse({
+      type: AppointmentRes.RejectAppointmentNotFoundResponse,
+    }),
+    Permission({
+      permissions: [PERMISSIONS.APPOINTMENT_REJECT],
+      clinicOwner: true,
+      resource: 'appointment-doctor',
+    }),
+  );
+};
+
+export const RejectMyAppointmentDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
@@ -266,7 +316,32 @@ export const RejectAppointmentDecorators = () => {
   );
 };
 
-export const CompleteAppointmentDecorators = () => {
+export const CompleteMyClinicAppointmentDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
+    ApiParam({
+      name: 'id',
+      description: 'Appointment ID',
+      type: String,
+      format: 'uuid',
+      example: '7f8c4f2e-9f6c-4f2d-8d13-2a4f8c9b7e61',
+    }),
+    ApiOkResponse({
+      type: AppointmentRes.CompleteAppointmentResponse,
+    }),
+    ApiNotFoundResponse({
+      type: AppointmentRes.CompleteAppointmentNotFoundResponse,
+    }),
+    Permission({
+      permissions: [PERMISSIONS.APPOINTMENT_COMPLETE],
+      clinicOwner: true,
+      resource: 'appointment-doctor',
+    }),
+  );
+};
+
+export const CompleteMyAppointmentDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
@@ -291,7 +366,32 @@ export const CompleteAppointmentDecorators = () => {
   );
 };
 
-export const NoShowAppointmentDecorators = () => {
+export const NoShowMyClinicAppointmentDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
+    ApiParam({
+      name: 'id',
+      description: 'Appointment ID',
+      type: String,
+      format: 'uuid',
+      example: '7f8c4f2e-9f6c-4f2d-8d13-2a4f8c9b7e61',
+    }),
+    ApiOkResponse({
+      type: AppointmentRes.NoShowAppointmentResponse,
+    }),
+    ApiNotFoundResponse({
+      type: AppointmentRes.NoShowAppointmentNotFoundResponse,
+    }),
+    Permission({
+      permissions: [PERMISSIONS.APPOINTMENT_NO_SHOW],
+      clinicOwner: true,
+      resource: 'appointment-doctor',
+    }),
+  );
+};
+
+export const NoShowMyAppointmentDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
