@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { Appointment } from './entities';
-import { checkDatabaseError } from '@/lib';
+import { checkDatabaseError, getServerDateTime } from '@/lib';
 import {
   BaseException,
   FindAppointmentByIdPayload,
@@ -387,6 +387,7 @@ export class AppointmentService {
 
       if (payload.status === AppointmentStatus.CANCELLED) {
         appointment.cancellationReason = payload.reason;
+        appointment.cancelledAt = getServerDateTime();
       }
 
       const updatedAppointment = await repository.save(appointment);
