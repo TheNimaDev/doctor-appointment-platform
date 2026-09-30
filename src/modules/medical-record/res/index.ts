@@ -7,3 +7,4 @@ export * from './find-patient-medical-records.response';
 export * from './find-patient-medical-record.response';
 export * from './find-patient-medical-record-by-appointment.response';
 export * from './find-doctor-medical-records.response';
+export * from './find-doctor-medical-record.response';
