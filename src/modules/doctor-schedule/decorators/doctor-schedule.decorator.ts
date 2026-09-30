@@ -158,6 +158,9 @@ export const FindMyDoctorScheduleDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.DOCTOR_SCHEDULE_READ],
+      owner: true,
+      resource: 'doctor-schedule',
+      resourceIdParam: 'scheduleId',
     }),
   );
 };
@@ -294,6 +297,9 @@ export const UpdateMyDoctorScheduleDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.DOCTOR_SCHEDULE_UPDATE],
+      owner: true,
+      resource: 'doctor-schedule',
+      resourceIdParam: 'scheduleId',
     }),
   );
 };
@@ -355,6 +361,9 @@ export const UpdateMyDoctorScheduleStatusDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.DOCTOR_SCHEDULE_UPDATE_STATUS],
+      owner: true,
+      resource: 'doctor-schedule',
+      resourceIdParam: 'scheduleId',
     }),
   );
 };
@@ -410,6 +419,9 @@ export const DeleteMyDoctorScheduleDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.DOCTOR_SCHEDULE_DELETE],
+      owner: true,
+      resource: 'doctor-schedule',
+      resourceIdParam: 'scheduleId',
     }),
   );
 };
