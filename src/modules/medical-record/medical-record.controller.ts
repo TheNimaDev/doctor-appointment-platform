@@ -11,7 +11,7 @@ export class MedicalRecordController {
   /**
    * Create a medical record for a completed appointment.
    */
-  @Post('/appointment/:appointmentId')
+  @Post('appointment/:appointmentId')
   @MedicalRecordDecorator.CreateMedicalRecordDecorators()
   async create(
     @Req() req: AccessRequest,
