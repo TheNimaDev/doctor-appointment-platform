@@ -12,5 +12,6 @@ import { PatientModule } from '@/modules/patient';
   imports: [TypeOrmModule.forFeature([Appointment]), TimeSlotModule, DoctorModule, ClinicModule, PatientModule],
   controllers: [AppointmentController],
   providers: [AppointmentService],
+  exports:[AppointmentService]
 })
 export class AppointmentModule {}
