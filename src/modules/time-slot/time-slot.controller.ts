@@ -32,7 +32,7 @@ export class TimeSlotController {
    * Get available time slots for a doctor in a specific clinic.
    */
   @Get('doctors/:doctorId/clinics/:clinicId')
-  @TimeSlotDecorator.FindAvailableTimeSlotsDecorators()
+  @TimeSlotDecorator.FindAvailableDoctorClinicTimeSlotsDecorators()
   async findAvailableByDoctorAndClinic(
     @Param('doctorId') doctorId: string,
     @Param('clinicId') clinicId: string,
