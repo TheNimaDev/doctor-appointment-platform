@@ -2,7 +2,7 @@ import { getBaseOkResponseSchema, getNormalErrorResponse } from '@/common/swagge
 import type { MedicalRecordResponse } from '@/types';
 import { medicalRecordResponseSchema } from './medical-record.response';
 
-const path = 'medical-records';
+const path = 'medical-records/all/appointment/:appointmentId';
 
 export class FindMedicalRecordByAppointmentResponse extends getBaseOkResponseSchema<MedicalRecordResponse>({
   path,

@@ -2,7 +2,7 @@ import { getBaseOkResponseSchema, getNormalErrorResponse, getValidationErrorResp
 import type { MedicalRecordResponse } from '@/types';
 import { medicalRecordResponseSchema } from './medical-record.response';
 
-const path = 'medical-records';
+const path = 'medical-records/appointment/:appointmentId';
 
 export class CreateMedicalRecordResponse extends getBaseOkResponseSchema<MedicalRecordResponse>({
   path,

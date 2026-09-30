@@ -2,7 +2,7 @@ import { getBaseOkResponseSchema } from '@/common/swagger';
 import type { MedicalRecordsResponse } from '@/types';
 import { medicalRecordsResponseSchema } from './medical-record.response';
 
-const path = 'medical-records';
+const path = 'medical-records/all';
 
 export class FindMedicalRecordsResponse extends getBaseOkResponseSchema<MedicalRecordsResponse>({
   path,
