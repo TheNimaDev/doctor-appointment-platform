@@ -11,3 +11,4 @@ export * from './find-doctor-medical-record.response';
 export * from './find-doctor-medical-record-by-appointment.response';
 export * from './find-my-clinic-medical-records.response';
 export * from './find-my-clinic-medical-record.response';
+export * from './find-my-clinic-medical-record-by-appointment.response';
