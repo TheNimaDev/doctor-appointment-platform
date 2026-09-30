@@ -9,6 +9,7 @@ import { TimeSlot } from '@/modules/time-slot/entities';
 import { Session } from '@/modules/session/entities';
 import { RefreshToken } from '@/modules/refresh-token/entities';
 import { DoctorSpecialty } from '@/modules/doctor-specialty/entities';
+import { MedicalRecord } from '@/modules/medical-record/entities';
 
 interface OwnershipConfig {
   entity: EntityTarget<ObjectLiteral>;
@@ -116,5 +117,47 @@ export const OWNERSHIP_CONFIG: Record<string, OwnershipConfig> = {
       doctor: true,
     },
     getUserId: (resource) => resource.doctor?.userId,
+  },
+
+  'medical-record-doctor': {
+    entity: MedicalRecord,
+    relations: {
+      appointment: {
+        timeSlot: {
+          schedule: {
+            doctorClinic: {
+              doctor: true,
+            },
+          },
+        },
+      },
+    },
+    getUserId: (resource) => resource.appointment?.timeSlot?.schedule?.doctorClinic?.doctor?.userId,
+  },
+
+  'medical-record-clinic': {
+    entity: MedicalRecord,
+    relations: {
+      appointment: {
+        timeSlot: {
+          schedule: {
+            doctorClinic: {
+              clinic: true,
+            },
+          },
+        },
+      },
+    },
+    getClinicOwnerId: (resource) => resource.appointment?.timeSlot?.schedule?.doctorClinic?.clinic?.ownerId,
+  },
+
+  'medical-record-patient': {
+    entity: MedicalRecord,
+    relations: {
+      appointment: {
+        patient: true,
+      },
+    },
+    getUserId: (resource) => resource.appointment?.patient?.userId,
   },
 };
