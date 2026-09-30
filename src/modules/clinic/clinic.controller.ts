@@ -75,12 +75,12 @@ export class ClinicController {
   }
 
   /**
-   * Get an active clinic by ID.
+   * Get a clinic by ID any status.
    */
-  @Get(':id')
-  @ClinicDecorator.FindClinicDecorators()
-  async findActiveById(@Param('id') id: string): Promise<ApiResponse<ClinicResponse>> {
-    const data = await this.clinicService.findActiveById({
+  @Get('all/:id')
+  @ClinicDecorator.FindClinicWithAllStatusDecorators()
+  async findById(@Param('id') id: string): Promise<ApiResponse<ClinicResponse>> {
+    const data = await this.clinicService.findById({
       id,
     });
 
@@ -91,12 +91,12 @@ export class ClinicController {
   }
 
   /**
-   * Get a clinic by ID any status.
+   * Get an active clinic by ID.
    */
-  @Get('all/:id')
-  @ClinicDecorator.FindClinicWithAllStatusDecorators()
-  async findById(@Param('id') id: string): Promise<ApiResponse<ClinicResponse>> {
-    const data = await this.clinicService.findById({
+  @Get(':id')
+  @ClinicDecorator.FindClinicDecorators()
+  async findActiveById(@Param('id') id: string): Promise<ApiResponse<ClinicResponse>> {
+    const data = await this.clinicService.findActiveById({
       id,
     });
 
