@@ -13,3 +13,4 @@ export * from './find-my-clinic-medical-records.response';
 export * from './find-my-clinic-medical-record.response';
 export * from './find-my-clinic-medical-record-by-appointment.response';
 export * from './update-medical-record.response';
+export * from './delete-medical-record.response';
