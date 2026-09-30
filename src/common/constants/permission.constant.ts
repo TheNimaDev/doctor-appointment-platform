@@ -182,13 +182,13 @@ export const APPOINTMENT_PERMISSIONS = {
   APPOINTMENT_READ_PATIENT: {
     name: 'appointment:read-patient',
     module: 'appointment',
-    action: 'read',
+    action: 'read-patient',
   },
 
   APPOINTMENT_READ_DOCTOR: {
     name: 'appointment:read-doctor',
     module: 'appointment',
-    action: 'read',
+    action: 'read-doctor',
   },
 
   APPOINTMENT_RESERVE: {
@@ -264,6 +264,39 @@ export const PATIENT_PERMISSIONS = {
   },
 } as const satisfies PermissionStructure;
 
+export const MEDICAL_RECORD_PERMISSIONS = {
+  MEDICAL_RECORD_CREATE: {
+    name: 'medical-record:create',
+    module: 'medical-record',
+    action: 'create',
+  },
+  MEDICAL_RECORD_READ_PATIENT: {
+    name: 'medical-record:read-patient',
+    module: 'medical-record',
+    action: 'read-patient',
+  },
+  MEDICAL_RECORD_READ_DOCTOR: {
+    name: 'medical-record:read-doctor',
+    module: 'medical-record',
+    action: 'read-doctor',
+  },
+  MEDICAL_RECORD_READ_CLINIC: {
+    name: 'medical-record:read-clinic',
+    module: 'medical-record',
+    action: 'read-clinic',
+  },
+  MEDICAL_RECORD_UPDATE: {
+    name: 'medical-record:update',
+    module: 'medical-record',
+    action: 'update',
+  },
+  MEDICAL_RECORD_DELETE: {
+    name: 'medical-record:delete',
+    module: 'medical-record',
+    action: 'delete',
+  },
+} as const satisfies PermissionStructure;
+
 export const RAW_PERMISSIONS_OBJECT = {
   ...BASE_PERMISSIONS,
   ...USER_PERMISSIONS,
@@ -276,6 +309,7 @@ export const RAW_PERMISSIONS_OBJECT = {
   ...APPOINTMENT_PERMISSIONS,
   ...DOCTOR_CLINIC_PERMISSIONS,
   ...PATIENT_PERMISSIONS,
+  ...MEDICAL_RECORD_PERMISSIONS,
 } as const satisfies PermissionStructure;
 
 type ReturnPermissionObject = Readonly<{
