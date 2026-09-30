@@ -12,30 +12,14 @@ Structure:
 
 ```
 Patient
-
-1
-
-↓
-
-N
-
-MedicalRecord
-
-N
-
-↓
-
-1
-
-Doctor
-
-N
-
-↓
-
-1
-
+   1
+   ↓
+   N
 Appointment
+   1
+   ↓
+   0..1
+MedicalRecord
 ```
 
 ---
@@ -45,8 +29,6 @@ Appointment
 | Field         | Type     | Nullable | Description      |
 | ------------- | -------- | -------- | ---------------- |
 | id            | UUID     | ❌       | Primary Key      |
-| patientId     | UUID     | ❌       | FK → Patient     |
-| doctorId      | UUID     | ❌       | FK → Doctor      |
 | appointmentId | UUID     | ❌       | FK → Appointment |
 | diagnosis     | text     | ❌       | تشخیص پزشک       |
 | description   | text     | ✅       | توضیحات پزشکی    |
@@ -59,52 +41,28 @@ Appointment
 
 # Relations
 
-## Many To One
-
-### MedicalRecord → Patient
-
-```
-MedicalRecord
-
-N
-
-↓
-
-1
-
-Patient
-```
-
----
-
-### MedicalRecord → Doctor
-
-```
-MedicalRecord
-
-N
-
-↓
-
-1
-
-Doctor
-```
-
----
+## One To One
 
 ### MedicalRecord → Appointment
 
 ```
 MedicalRecord
-
-N
-
-↓
-
-1
-
+   0..1
+    ↓
 Appointment
+    1
+```
+
+هر Appointment حداکثر یک MedicalRecord دارد.
+
+Patient و Doctor از طریق Appointment قابل دسترسی هستند:
+
+```
+MedicalRecord
+    ↓
+Appointment
+   ↙       ↘
+Patient   Doctor
 ```
 
 ---
@@ -117,9 +75,7 @@ Appointment
 
 ```
 Completed Appointment
-
-↓
-
+        ↓
 MedicalRecord
 ```
 
@@ -132,6 +88,16 @@ MedicalRecord
 ---
 
 ## Rule 3
+
+هر Appointment حداکثر یک MedicalRecord دارد.
+
+```
+Appointment 1 ─── 0..1 MedicalRecord
+```
+
+---
+
+## Rule 4
 
 MedicalRecord حذف فیزیکی نمی‌شود.
 
