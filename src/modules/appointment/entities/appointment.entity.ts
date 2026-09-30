@@ -6,6 +6,7 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -13,6 +14,7 @@ import {
 import { AppointmentStatus } from '../enums';
 import { TimeSlot } from '@/modules/time-slot/entities';
 import { Patient } from '@/modules/patient/entities';
+import { MedicalRecord } from '@/modules/medical-record/entities';
 
 @Index(['patientId'])
 @Index(['timeSlotId'])
@@ -35,6 +37,9 @@ export class Appointment {
   @ManyToOne(() => TimeSlot, (timeSlot) => timeSlot.appointments)
   @JoinColumn({ name: 'timeSlotId' })
   timeSlot: TimeSlot;
+
+  @OneToOne(() => MedicalRecord, (medicalRecord) => medicalRecord.appointment)
+  medicalRecord: MedicalRecord;
 
   @Column({ type: 'enum', enum: AppointmentStatus, default: AppointmentStatus.PENDING })
   status: AppointmentStatus;

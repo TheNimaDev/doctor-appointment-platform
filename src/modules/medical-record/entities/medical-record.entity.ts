@@ -3,10 +3,13 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
+  OneToOne,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
+import { Appointment } from '@/modules/appointment/entities/appointment.entity';
 
 @Unique(['appointmentId'])
 @Entity('medical_records')
@@ -16,6 +19,12 @@ export class MedicalRecord {
 
   @Column({ type: 'uuid' })
   appointmentId: string;
+
+  @OneToOne(() => Appointment, (appointment) => appointment.medicalRecord, {
+    onDelete: 'RESTRICT',
+  })
+  @JoinColumn({ name: 'appointmentId' })
+  appointment: Appointment;
 
   @Column({ type: 'text' })
   diagnosis: string;
