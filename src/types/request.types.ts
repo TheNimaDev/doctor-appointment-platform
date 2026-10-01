@@ -1,5 +1,8 @@
 import { Request } from 'express';
 import { AccessTokenPayload, RefreshTokenPayload } from './token.types';
+import { SafeClinic } from './clinic.types';
+import { SafeDoctor } from './doctor.types';
+import { SafePatient } from './patient.types';
 
 /** Authenticated user data extracted from the access token. */
 export type UserAccess = Omit<AccessTokenPayload, 'sub'> & {
@@ -9,6 +12,10 @@ export type UserAccess = Omit<AccessTokenPayload, 'sub'> & {
 /** HTTP request containing authenticated user information. */
 export interface AccessRequest extends Request {
   user: UserAccess;
+
+  clinic?: SafeClinic;
+  doctor?: SafeDoctor;
+  patient?: SafePatient;
 }
 
 /** HTTP request containing authenticated refresh token information. */
