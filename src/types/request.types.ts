@@ -1,5 +1,6 @@
 import { Request } from 'express';
 import { AccessTokenPayload, RefreshTokenPayload } from './token.types';
+import type { ObjectLiteral } from 'typeorm';
 import { SafeClinic } from './clinic.types';
 import { SafeDoctor } from './doctor.types';
 import { SafePatient } from './patient.types';
@@ -16,6 +17,11 @@ export interface AccessRequest extends Request {
   clinic?: SafeClinic;
   doctor?: SafeDoctor;
   patient?: SafePatient;
+}
+
+/** HTTP request containing the authenticated user and ownership data. */
+export interface OwnershipRequest<T extends ObjectLiteral = ObjectLiteral> extends AccessRequest {
+  ownershipData: T;
 }
 
 /** HTTP request containing authenticated refresh token information. */
