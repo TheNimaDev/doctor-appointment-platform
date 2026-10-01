@@ -9,7 +9,7 @@ export class TimeSlotController {
   constructor(private readonly timeSlotService: TimeSlotService) {}
 
   /**
-   * Get available time slots for a doctor.
+   * Find available time slots for a doctor.
    */
   @Get('doctors/:doctorId')
   @TimeSlotDecorator.FindAvailableTimeSlotsDecorators()
@@ -17,7 +17,7 @@ export class TimeSlotController {
     @Param('doctorId') doctorId: string,
     @Query('date') date?: string,
   ): Promise<ApiResponse<TimeSlotsResponse>> {
-    const data = await this.timeSlotService.findAvailableByDoctor({
+    const data = await this.timeSlotService.findByClinicOrDoctor({
       doctorId,
       date,
     });
@@ -29,7 +29,7 @@ export class TimeSlotController {
   }
 
   /**
-   * Get available time slots for a doctor in a specific clinic.
+   * Find available time slots for a doctor in a specific clinic.
    */
   @Get('doctors/:doctorId/clinics/:clinicId')
   @TimeSlotDecorator.FindAvailableDoctorClinicTimeSlotsDecorators()
@@ -38,7 +38,7 @@ export class TimeSlotController {
     @Param('clinicId') clinicId: string,
     @Query('date') date?: string,
   ): Promise<ApiResponse<TimeSlotsResponse>> {
-    const data = await this.timeSlotService.findAvailableByDoctorAndClinic({
+    const data = await this.timeSlotService.findByClinicAndDoctor({
       doctorId,
       clinicId,
       date,
@@ -51,7 +51,7 @@ export class TimeSlotController {
   }
 
   /**
-   * Get available time slots for a clinic.
+   * Find available time slots for a clinic.
    */
   @Get('clinics/:clinicId')
   @TimeSlotDecorator.FindAvailableClinicTimeSlotsDecorators()
@@ -59,7 +59,7 @@ export class TimeSlotController {
     @Param('clinicId') clinicId: string,
     @Query('date') date?: string,
   ): Promise<ApiResponse<TimeSlotsResponse>> {
-    const data = await this.timeSlotService.findAvailableByClinic({
+    const data = await this.timeSlotService.findByClinicOrDoctor({
       clinicId,
       date,
     });
@@ -71,13 +71,13 @@ export class TimeSlotController {
   }
 
   /**
-   * Get all time slots belonging to the authenticated doctor.
+   * Find all time slots belonging to the authenticated doctor.
    */
   @Get('my')
   @TimeSlotDecorator.FindMyTimeSlotsDecorators()
   async findMy(@Req() req: AccessRequest, @Query('date') date?: string): Promise<ApiResponse<TimeSlotsResponse>> {
-    const data = await this.timeSlotService.findMy({
-      userId: req.user.userId,
+    const data = await this.timeSlotService.findByClinicOrDoctor({
+      doctorId: req.doctor!.id,
       date,
     });
 
@@ -88,7 +88,7 @@ export class TimeSlotController {
   }
 
   /**
-   * Get time slots of the authenticated doctor in a specific clinic.
+   * Find time slots of the authenticated doctor in a specific clinic.
    */
   @Get('my/clinics/:clinicId')
   @TimeSlotDecorator.FindMyClinicTimeSlotsDecorators()
@@ -97,8 +97,8 @@ export class TimeSlotController {
     @Param('clinicId') clinicId: string,
     @Query('date') date?: string,
   ): Promise<ApiResponse<TimeSlotsResponse>> {
-    const data = await this.timeSlotService.findMyByClinic({
-      userId: req.user.userId,
+    const data = await this.timeSlotService.findByClinicAndDoctor({
+      doctorId: req.doctor!.id,
       clinicId,
       date,
     });
@@ -110,15 +110,13 @@ export class TimeSlotController {
   }
 
   /**
-   * Get all time slots of all doctors in the authenticated admin's clinic.
-   *
-   * Includes all statuses.
+   * Find all time slots of all doctors in the authenticated admin's clinic.
    */
   @Get('my-clinic')
   @TimeSlotDecorator.FindMyClinicAdminTimeSlotsDecorators()
   async findMyClinic(@Req() req: AccessRequest, @Query('date') date?: string): Promise<ApiResponse<TimeSlotsResponse>> {
-    const data = await this.timeSlotService.findMyClinic({
-      userId: req.user.userId,
+    const data = await this.timeSlotService.findByClinicOrDoctor({
+      clinicId: req.clinic!.id,
       date,
     });
 
@@ -129,18 +127,18 @@ export class TimeSlotController {
   }
 
   /**
-   * Get time slots of a specific doctor in the authenticated admin's clinic.
+   * Find time slots of a specific doctor in the authenticated admin's clinic.
    */
   @Get('my-clinic/doctors/:doctorId')
   @TimeSlotDecorator.FindMyClinicAdminDoctorTimeSlotsDecorators()
-  async findMyClinicDoctor(
+  async findMyClinicByDoctor(
     @Req() req: AccessRequest,
     @Param('doctorId') doctorId: string,
     @Query('date') date?: string,
   ): Promise<ApiResponse<TimeSlotsResponse>> {
-    const data = await this.timeSlotService.findMyClinicDoctor({
+    const data = await this.timeSlotService.findByClinicAndDoctor({
       doctorId,
-      userId: req.user.userId,
+      clinicId: req.clinic!.id,
       date,
     });
 
@@ -155,10 +153,9 @@ export class TimeSlotController {
    */
   @Get('my-clinic/:id')
   @TimeSlotDecorator.FindMyClinicAdminTimeSlotDecorators()
-  async findMyClinicById(@Req() req: AccessRequest, @Param('id') id: string): Promise<ApiResponse<TimeSlotResponse>> {
-    const data = await this.timeSlotService.getMyClinicTimeSlot({
+  async getMyClinicById(@Param('id') id: string): Promise<ApiResponse<TimeSlotResponse>> {
+    const data = await this.timeSlotService.getById({
       id,
-      userId: req.user.userId,
     });
 
     return {
@@ -172,10 +169,9 @@ export class TimeSlotController {
    */
   @Get('my/:id')
   @TimeSlotDecorator.FindMyTimeSlotDecorators()
-  async findMyById(@Req() req: AccessRequest, @Param('id') id: string): Promise<ApiResponse<TimeSlotResponse>> {
-    const data = await this.timeSlotService.getMyTimeSlot({
+  async getMyById(@Param('id') id: string): Promise<ApiResponse<TimeSlotResponse>> {
+    const data = await this.timeSlotService.getById({
       id,
-      userId: req.user.userId,
     });
 
     return {
@@ -189,9 +185,10 @@ export class TimeSlotController {
    */
   @Get(':id')
   @TimeSlotDecorator.FindAvailableTimeSlotDecorators()
-  async findById(@Param('id') id: string): Promise<ApiResponse<TimeSlotResponse>> {
-    const data = await this.timeSlotService.getAvailableById({
+  async getById(@Param('id') id: string): Promise<ApiResponse<TimeSlotResponse>> {
+    const data = await this.timeSlotService.getById({
       id,
+      status: TimeSlotStatus.AVAILABLE,
     });
 
     return {
