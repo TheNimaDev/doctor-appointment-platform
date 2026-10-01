@@ -7,7 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { BaseException, AccessRequest } from '@/types';
+import { BaseException, OwnershipRequest } from '@/types';
 import { PERMISSION_METADATA, PermissionDecoratorParams, PERMISSIONS } from '@/common';
 import { OWNERSHIP_CONFIG } from '@/common/configs';
 import { DatabaseService } from '@/modules/database/database.service';
@@ -16,7 +16,6 @@ import { DatabaseService } from '@/modules/database/database.service';
 export class OwnershipGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
-
     private readonly databaseService: DatabaseService,
   ) {}
 
@@ -51,14 +50,9 @@ export class OwnershipGuard implements CanActivate {
       } as BaseException);
     }
 
-    const req = context.switchToHttp().getRequest<AccessRequest>();
+    const request = context.switchToHttp().getRequest<OwnershipRequest>();
 
-    if (req.user.permissions.includes(PERMISSIONS.OWNER_ALL)) {
-      return true;
-    }
-
-    const userId = req.user.userId;
-    const rawResourceId = req.params[metadata.resourceIdParam];
+    const rawResourceId = request.params[metadata.resourceIdParam];
     const resourceId = Array.isArray(rawResourceId) ? rawResourceId[0] : rawResourceId;
 
     if (!resourceId) {
@@ -92,6 +86,14 @@ export class OwnershipGuard implements CanActivate {
         error: `${resourceNameFormatted} Not Found`,
       } as BaseException);
     }
+
+    request.ownershipData = resource;
+
+    if (request.user.permissions.includes(PERMISSIONS.OWNER_ALL)) {
+      return true;
+    }
+
+    const userId = request.user.userId;
 
     if (metadata.owner) {
       const ownerUserId = config.getUserId?.(resource);
