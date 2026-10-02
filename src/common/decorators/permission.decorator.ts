@@ -7,8 +7,7 @@ export interface PermissionDecoratorParams {
   permissions: PermissionsKeyType[];
   requiredAll?: boolean;
 
-  owner?: boolean;
-  clinicOwner?: boolean;
+  ownership?: 'owner' | 'clinic' | 'doctor' | 'patient';
 
   resource?: string;
   resourceIdParam?: string;
@@ -17,16 +16,14 @@ export interface PermissionDecoratorParams {
 export function Permission({
   permissions,
   requiredAll = false,
-  owner = false,
-  clinicOwner = false,
+  ownership,
   resource,
   resourceIdParam = 'id',
 }: PermissionDecoratorParams) {
   return SetMetadata(PERMISSION_METADATA, {
     permissions,
     requiredAll,
-    owner,
-    clinicOwner,
+    ownership,
     resource,
     resourceIdParam,
   });
