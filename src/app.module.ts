@@ -5,6 +5,7 @@ import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import {
   AccessTokenGuard,
   ClientInfoMiddleware,
+  ContextGuard,
   OwnershipGuard,
   PermissionsGuard,
   ResponseInterceptor,
@@ -112,6 +113,10 @@ function flattenValidationErrors(errors: ValidationError[], parentPath = ''): Va
     {
       provide: APP_GUARD,
       useClass: OwnershipGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ContextGuard,
     },
   ],
 })
