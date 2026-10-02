@@ -50,13 +50,11 @@ export class PatientController {
   @Get('my')
   @PatientDecorator.FindMyPatientDecorators()
   async findMy(@Req() req: AccessRequest): Promise<ApiResponse<PatientResponse>> {
-    const data = await this.patientService.findByUserId({
-      userId: req.user.userId,
-    });
-
     return {
       message: 'Patient retrieved successfully.',
-      data,
+      data: {
+        patient: req.patient!,
+      },
     };
   }
 
@@ -86,7 +84,7 @@ export class PatientController {
     @Body() updatePatientDto: UpdatePatientDto,
   ): Promise<ApiResponse<PatientResponse>> {
     const data = await this.patientService.update({
-      userId: req.user.userId,
+      patientId: req.patient!.id,
       ...updatePatientDto,
     });
 
