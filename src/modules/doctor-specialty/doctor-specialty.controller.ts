@@ -18,7 +18,7 @@ export class DoctorSpecialtyController {
     @Body() addDoctorSpecialtyDto: AddDoctorSpecialtyDto,
   ): Promise<ApiResponse<DoctorSpecialtyResponse>> {
     const data = await this.doctorSpecialtyService.add({
-      userId: req.user.userId,
+      doctorId: req.doctor!.id,
       ...addDoctorSpecialtyDto,
     });
 
@@ -35,7 +35,7 @@ export class DoctorSpecialtyController {
   @DoctorSpecialtyDecorator.FindMyDoctorSpecialtiesDecorators()
   async findMySpecialties(@Req() req: AccessRequest): Promise<ApiResponse<DoctorSpecialtiesResponse>> {
     const data = await this.doctorSpecialtyService.findAllByUserId({
-      userId: req.user.userId,
+      doctorId: req.doctor!.id,
     });
 
     return {
@@ -63,15 +63,12 @@ export class DoctorSpecialtyController {
   /**
    * Set a doctor's specialty as primary.
    */
-  @Patch('my/:specialtyId/primary')
+  @Patch('my/:id/primary')
   @DoctorSpecialtyDecorator.SetDoctorSpecialtyPrimaryDecorators()
-  async setPrimary(
-    @Req() req: AccessRequest,
-    @Param('specialtyId') specialtyId: string,
-  ): Promise<ApiResponse<DoctorSpecialtyResponse>> {
+  async setPrimary(@Req() req: AccessRequest, @Param('id') id: string): Promise<ApiResponse<DoctorSpecialtyResponse>> {
     const data = await this.doctorSpecialtyService.setPrimary({
-      userId: req.user.userId,
-      specialtyId,
+      id,
+      doctorId: req.doctor!.id,
     });
 
     return {
@@ -83,12 +80,11 @@ export class DoctorSpecialtyController {
   /**
    * Soft-delete a specialty from a doctor.
    */
-  @Delete('my/:specialtyId')
+  @Delete('my/:id')
   @DoctorSpecialtyDecorator.RemoveDoctorSpecialtyDecorators()
-  async remove(@Req() req: AccessRequest, @Param('specialtyId') specialtyId: string): Promise<ApiResponse> {
+  async remove(@Param('id') id: string): Promise<ApiResponse> {
     await this.doctorSpecialtyService.remove({
-      userId: req.user.userId,
-      specialtyId,
+      id,
     });
 
     return {
