@@ -37,7 +37,7 @@ export async function seedDoctors(doctorService: DoctorService, manager: EntityM
     });
 
     await doctorService.updateStatus({
-      doctorId: doctor.id,
+      id: doctor.id,
       status: DoctorStatus.ACTIVE,  
       manager,
     });
