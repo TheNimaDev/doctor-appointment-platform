@@ -36,7 +36,7 @@ export async function seedClinics(clinicService: ClinicService, manager: EntityM
     });
 
     await clinicService.updateStatus({
-      clinicId: clinic.id,
+      id: clinic.id,
       status: ClinicStatus.ACTIVE,
       manager,
     });
