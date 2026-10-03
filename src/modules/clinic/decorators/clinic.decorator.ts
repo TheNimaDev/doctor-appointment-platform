@@ -10,7 +10,7 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { Permission, PERMISSIONS, Public } from '@/common';
+import { Context, Permission, PERMISSIONS, Public } from '@/common';
 import * as ClinicRes from '../res';
 import * as ClinicDto from '../dto';
 import { ClinicStatus } from '../enums';
@@ -107,6 +107,7 @@ export const UpdateMyClinicDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('clinic'),
     ApiBody({ type: ClinicDto.UpdateClinicDto }),
     ApiOkResponse({ type: ClinicRes.UpdateMyClinicResponse }),
     ApiBadRequestResponse({ type: ClinicRes.UpdateMyClinicBadRequestResponse }),
@@ -144,6 +145,7 @@ export const DeleteMyClinicDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('clinic'),
     ApiOkResponse({ type: ClinicRes.DeleteMyClinicResponse }),
     ApiNotFoundResponse({ type: ClinicRes.DeleteMyClinicNotFoundResponse }),
     Permission({
