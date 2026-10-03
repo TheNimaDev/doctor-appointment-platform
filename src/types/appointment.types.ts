@@ -30,18 +30,11 @@ export interface FindAppointmentByIdPayload {
 
 /** Parameters required to find a admin clinic's appointments. */
 export interface FindMyClinicAppointmentsPayload {
-  ownerId: string;
+  clinicId: string;
   status?: AppointmentStatus;
   manager?: EntityManager;
 }
 
-/** Parameters required to find a admin clinic's appointment by ID. */
-export interface FindMyClinicAppointmentPayload {
-  id: string;
-  ownerId: string;
-  status?: AppointmentStatus;
-  manager?: EntityManager;
-}
 
 /** Parameters required to find all appointments. */
 export interface FindAppointmentsPayload {
@@ -51,27 +44,13 @@ export interface FindAppointmentsPayload {
 
 /** Parameters required to find a patient's appointments. */
 export interface FindPatientAppointmentsPayload {
-  userId: string;
+  patientId: string;
   manager?: EntityManager;
 }
 
 /** Parameters required to find a doctor's appointments. */
 export interface FindDoctorAppointmentsPayload {
-  userId: string;
-  manager?: EntityManager;
-}
-
-/** Parameters required to find a doctor's appointment by ID. */
-export interface FindDoctorAppointmentByIdPayload {
-  id: string;
-  userId: string;
-  manager?: EntityManager;
-}
-
-/** Parameters required to find a patient's appointment by ID. */
-export interface FindPatientAppointmentByIdPayload {
-  id: string;
-  userId: string;
+  doctorId: string;
   manager?: EntityManager;
 }
 
