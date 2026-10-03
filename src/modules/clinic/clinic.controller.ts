@@ -1,7 +1,14 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req } from '@nestjs/common';
 import { ClinicService } from './clinic.service';
 import { CreateClinicDto, FindClinicDto, UpdateClinicDto } from './dto';
-import type { AccessRequest, ApiResponse, ClinicResponse, ClinicsResponse } from '@/types';
+import type {
+  AccessRequest,
+  ApiResponse,
+  ClinicResponse,
+  ClinicsResponse,
+  OwnershipRequest,
+  SafeClinic,
+} from '@/types';
 import * as ClinicDecorator from './decorators';
 
 @Controller('clinics')
@@ -33,14 +40,12 @@ export class ClinicController {
    */
   @Get('my')
   @ClinicDecorator.FindMyClinicDecorators()
-  async findMy(@Req() req: AccessRequest): Promise<ApiResponse<ClinicResponse>> {
-    const data = await this.clinicService.findByOwnerId({
-      ownerId: req.user.userId,
-    });
-
+  async findMy(@Req() req: OwnershipRequest<SafeClinic>): Promise<ApiResponse<ClinicResponse>> {
     return {
       message: 'Clinic retrieved successfully.',
-      data,
+      data: {
+        clinic: req.ownershipData,
+      },
     };
   }
 
@@ -116,7 +121,7 @@ export class ClinicController {
     @Body() updateClinicDto: UpdateClinicDto,
   ): Promise<ApiResponse<ClinicResponse>> {
     const data = await this.clinicService.update({
-      ownerId: req.user.userId,
+      id: req.clinic!.id,
       ...updateClinicDto,
     });
 
@@ -136,7 +141,7 @@ export class ClinicController {
     @Body() updateClinicDto: UpdateClinicDto,
   ): Promise<ApiResponse<ClinicResponse>> {
     const data = await this.clinicService.update({
-      clinicId: id,
+      id,
       ...updateClinicDto,
     });
 
@@ -153,7 +158,7 @@ export class ClinicController {
   @ClinicDecorator.DeleteMyClinicDecorators()
   async deleteMy(@Req() req: AccessRequest): Promise<ApiResponse> {
     await this.clinicService.delete({
-      ownerId: req.user.userId,
+      id: req.clinic!.id,
     });
 
     return {
@@ -168,7 +173,7 @@ export class ClinicController {
   @ClinicDecorator.DeleteClinicDecorators()
   async delete(@Param('id') id: string): Promise<ApiResponse> {
     await this.clinicService.delete({
-      clinicId: id,
+      id,
     });
 
     return {
