@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { DoctorSpecialty } from './entities';
@@ -43,54 +43,35 @@ export class DoctorSpecialtyService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const { doctor } = await this.doctorService.findByUserId({
-        userId: payload.userId,
-        manager: payload.manager,
-      });
-
       const { specialty } = await this.specialtyService.getById({
         id: payload.specialtyId,
         manager: payload.manager,
       });
 
-      const existing = await repository.findOne({
-        where: {
-          doctorId: doctor.id,
-          specialtyId: specialty.id,
-        },
+      const doctorSpecialty = repository.create({
+        doctorId: payload.doctorId,
+        specialtyId: specialty.id,
       });
-
-      if (existing) {
-        throw new ConflictException({
-          message: 'This specialty is already assigned to the doctor.',
-          error: 'Doctor Specialty Already Exists',
-        } as BaseException);
-      }
 
       const hasSpecialty = await repository.exists({
         where: {
-          doctorId: doctor.id,
+          doctorId: payload.doctorId,
         },
       });
 
       const isPrimary = !hasSpecialty || (payload.isPrimary ?? false);
-
       if (isPrimary) {
         await repository.update(
           {
-            doctorId: doctor.id,
+            doctorId: payload.doctorId,
           },
           {
             isPrimary: false,
           },
         );
-      }
 
-      const doctorSpecialty = repository.create({
-        doctorId: doctor.id,
-        specialtyId: specialty.id,
-        isPrimary,
-      });
+        doctorSpecialty.isPrimary = true;
+      }
 
       const savedDoctorSpecialty = await repository.save(doctorSpecialty);
 
@@ -98,10 +79,6 @@ export class DoctorSpecialtyService {
         doctorSpecialty: savedDoctorSpecialty,
       };
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof ConflictException) {
-        throw error;
-      }
-
       checkDatabaseError({
         e: error as Error,
         mainResource: 'Doctor Specialty',
@@ -134,23 +111,12 @@ export class DoctorSpecialtyService {
   /**
    * Find a specific doctor-specialty relation.
    */
-  async findOne(payload: FindDoctorSpecialtyPayload): Promise<DoctorSpecialtyResponse> {
+  async getById(payload: FindDoctorSpecialtyPayload): Promise<DoctorSpecialtyResponse> {
     const repository = this.getRepository(payload.manager);
-
-    const { doctor } = await this.doctorService.findById({
-      id: payload.doctorId,
-      manager: payload.manager,
-    });
-
-    const { specialty } = await this.specialtyService.getById({
-      id: payload.specialtyId,
-      manager: payload.manager,
-    });
 
     const doctorSpecialty = await repository.findOne({
       where: {
-        doctorId: doctor.id,
-        specialtyId: specialty.id,
+        id: payload.id,
       },
     });
 
@@ -173,20 +139,9 @@ export class DoctorSpecialtyService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const { doctor } = await this.doctorService.findByUserId({
-        userId: payload.userId,
-        manager: payload.manager,
-      });
-
-      const { doctorSpecialty } = await this.findOne({
-        doctorId: doctor.id,
-        specialtyId: payload.specialtyId,
-        manager: payload.manager,
-      });
-
       await repository.update(
         {
-          doctorId: doctor.id,
+          doctorId: payload.doctorId,
         },
         {
           isPrimary: false,
@@ -195,16 +150,15 @@ export class DoctorSpecialtyService {
 
       await repository.update(
         {
-          id: doctorSpecialty.id,
+          id: payload.id,
         },
         {
           isPrimary: true,
         },
       );
 
-      return this.findOne({
-        doctorId: doctor.id,
-        specialtyId: payload.specialtyId,
+      return this.getById({
+        id: payload.id,
         manager: payload.manager,
       });
     } catch (error) {
@@ -225,14 +179,9 @@ export class DoctorSpecialtyService {
   async findAllByUserId(payload: FindDoctorSpecialtiesByUserIdPayload): Promise<DoctorSpecialtiesResponse> {
     const repository = this.getRepository(payload.manager);
 
-    const { doctor } = await this.doctorService.findByUserId({
-      userId: payload.userId,
-      manager: payload.manager,
-    });
-
     const doctorSpecialties = await repository.find({
       where: {
-        doctorId: doctor.id,
+        doctorId: payload.doctorId,
       },
     });
 
@@ -248,19 +197,8 @@ export class DoctorSpecialtyService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const { doctor } = await this.doctorService.findByUserId({
-        userId: payload.userId,
-        manager: payload.manager,
-      });
-
-      const { specialty } = await this.specialtyService.getById({
-        id: payload.specialtyId,
-        manager: payload.manager,
-      });
-
       const result = await repository.softDelete({
-        doctorId: doctor.id,
-        specialtyId: specialty.id,
+        id: payload.id,
       });
 
       if (result.affected === 0) {
