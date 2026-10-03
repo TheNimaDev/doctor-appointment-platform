@@ -18,7 +18,7 @@ export class DoctorClinicController {
   ): Promise<ApiResponse<DoctorClinicResponse>> {
     const data = await this.doctorClinicService.create({
       doctorId,
-      clinicOwnerId: req.user.userId,
+      clinicId: req.clinic!.id,
     });
 
     return {
@@ -66,7 +66,7 @@ export class DoctorClinicController {
   @DoctorClinicDecorator.FindMyClinicDoctorsDecorators()
   async findByClinic(@Req() req: AccessRequest): Promise<ApiResponse<DoctorClinicsResponse>> {
     const data = await this.doctorClinicService.findClinicDoctors({
-      clinicOwnerId: req.user.userId,
+      clinicId: req.clinic!.id,
     });
 
     return {
@@ -82,7 +82,7 @@ export class DoctorClinicController {
   @DoctorClinicDecorator.FindMyDoctorClinicsDecorators()
   async findByDoctor(@Req() req: AccessRequest): Promise<ApiResponse<DoctorClinicsResponse>> {
     const data = await this.doctorClinicService.findDoctorClinics({
-      userId: req.user.userId,
+      doctorId: req.doctor!.id,
     });
 
     return {
@@ -94,12 +94,11 @@ export class DoctorClinicController {
   /**
    * Delete a doctor-clinic relation.
    */
-  @Delete(':doctorId')
+  @Delete(':id')
   @DoctorClinicDecorator.DeleteDoctorClinicDecorators()
-  async delete(@Req() req: AccessRequest, @Param('doctorId') doctorId: string): Promise<ApiResponse> {
+  async delete(@Param('id') id: string): Promise<ApiResponse> {
     await this.doctorClinicService.delete({
-      doctorId,
-      clinicOwnerId: req.user.userId,
+      id,
     });
 
     return {
