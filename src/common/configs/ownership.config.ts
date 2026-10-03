@@ -11,6 +11,7 @@ import { RefreshToken } from '@/modules/refresh-token/entities';
 import { DoctorSpecialty } from '@/modules/doctor-specialty/entities';
 import { MedicalRecord } from '@/modules/medical-record/entities';
 import { Patient } from '@/modules/patient/entities';
+import { DoctorClinic } from '@/modules/doctor-clinic/entities';
 
 interface OwnershipConfig {
   entity: EntityTarget<ObjectLiteral>;
@@ -75,6 +76,16 @@ export const OWNERSHIP_CONFIG: Record<string, OwnershipConfig> = {
     },
     getDoctorUserId: (resource) => resource.doctorClinic?.doctor?.userId,
     getClinicUserId: (resource) => resource.doctorClinic?.clinic?.ownerId,
+  },
+
+  'doctor-clinic': {
+    entity: DoctorClinic,
+    relations: {
+      doctor: true,
+      clinic: true,
+    },
+    getDoctorUserId: (resource) => resource.doctor?.userId,
+    getClinicUserId: (resource) => resource.clinic?.ownerId,
   },
 
   'time-slot': {
