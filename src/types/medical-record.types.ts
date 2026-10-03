@@ -16,7 +16,6 @@ export interface MedicalRecordsResponse {
 
 /** Parameters for creating a medical record. */
 export interface CreateMedicalRecordPayload {
-  userId: string;
   appointmentId: string;
   diagnosis: string;
   description?: string | null;
@@ -43,96 +42,33 @@ export interface FindMedicalRecordByAppointmentIdPayload {
 
 /** Parameters required to find a patient's medical records. */
 export interface FindPatientMedicalRecordsPayload {
-  userId: string;
-  manager?: EntityManager;
-}
-
-/** Parameters required to find a patient's medical record by ID. */
-export interface FindPatientMedicalRecordByIdPayload {
-  id: string;
-  userId: string;
-  manager?: EntityManager;
-}
-
-/** Parameters required to find a patient's medical record by appointment ID. */
-export interface FindPatientMedicalRecordByAppointmentIdPayload {
-  appointmentId: string;
-  userId: string;
+  patientId: string;
   manager?: EntityManager;
 }
 
 /** Parameters required to find a doctor's medical records. */
 export interface FindDoctorMedicalRecordsPayload {
-  userId: string;
-  manager?: EntityManager;
-}
-
-/** Parameters required to find a doctor's medical record by ID. */
-export interface FindDoctorMedicalRecordByIdPayload {
-  id: string;
-  userId: string;
-  manager?: EntityManager;
-}
-
-/** Parameters required to find a doctor's medical record by appointment ID. */
-export interface FindDoctorMedicalRecordByAppointmentIdPayload {
-  appointmentId: string;
-  userId: string;
+  doctorId: string;
   manager?: EntityManager;
 }
 
 /** Parameters required to find a clinic admin's medical records. */
 export interface FindClinicAdminMedicalRecordsPayload {
-  userId: string;
-  manager?: EntityManager;
-}
-
-/** Parameters required to find a clinic admin's medical record by ID. */
-export interface FindClinicAdminMedicalRecordByIdPayload {
-  id: string;
-  userId: string;
-  manager?: EntityManager;
-}
-
-/** Parameters required to find a clinic admin's medical record by appointment ID. */
-export interface FindClinicAdminMedicalRecordByAppointmentIdPayload {
-  appointmentId: string;
-  userId: string;
+  clinicId: string;
   manager?: EntityManager;
 }
 
 /** Parameters for updating a medical record. */
-export type UpdateMedicalRecordPayload = MedicalRecordIdentifier & {
-  userId: string;
+export interface UpdateMedicalRecordPayload {
+  id: string;
   diagnosis?: string;
   description?: string | null;
   notes?: string | null;
   manager?: EntityManager;
-};
+}
 
 /** Parameters for deleting a medical record. */
-export type DeleteMedicalRecordPayload = MedicalRecordIdentifier & {
-  userId: string;
+export interface DeleteMedicalRecordPayload {
+  id: string;
   manager?: EntityManager;
-};
-
-/**
- * Identifies a medical record by either medical record ID or appointment ID.
- */
-export type MedicalRecordIdentifier =
-  | {
-      medicalRecordId: string;
-      appointmentId?: never;
-    }
-  | {
-      appointmentId: string;
-      medicalRecordId?: never;
-    };
-
-/**
- * Parameters for resolving a medical record by medical record ID or appointment ID.
- */
-export type ResolveMedicalRecordPayload = MedicalRecordIdentifier & {
-  userId: string;
-  manager?: EntityManager;
-};
+}
