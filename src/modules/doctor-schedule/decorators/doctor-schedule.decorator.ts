@@ -10,7 +10,7 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { Permission, Public, PERMISSIONS } from '@/common';
+import { Permission, Public, PERMISSIONS, Context } from '@/common';
 import * as ScheduleRes from '../res';
 import * as ScheduleDto from '../dto';
 import { ScheduleStatus } from '../enums';
@@ -107,6 +107,7 @@ export const FindMyDoctorSchedulesDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('doctor'),
     ApiOkResponse({
       type: ScheduleRes.FindMyDoctorSchedulesResponse,
     }),
@@ -120,6 +121,7 @@ export const FindMyDoctorClinicSchedulesDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('doctor'),
     ApiParam({
       name: 'clinicId',
       description: 'Clinic ID',
@@ -143,6 +145,7 @@ export const FindMyDoctorScheduleDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('doctor'),
     ApiParam({
       name: 'scheduleId',
       description: 'Doctor schedule ID',
@@ -158,9 +161,8 @@ export const FindMyDoctorScheduleDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.DOCTOR_SCHEDULE_READ],
-      owner: true,
+      ownership: 'doctor',
       resource: 'doctor-schedule',
-      resourceIdParam: 'scheduleId',
     }),
   );
 };
@@ -169,6 +171,7 @@ export const FindMyClinicSchedulesDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('clinic'),
     ApiOkResponse({
       type: ScheduleRes.FindMyClinicSchedulesResponse,
     }),
@@ -182,6 +185,7 @@ export const FindDoctorSchedulesForClinicDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('clinic'),
     ApiParam({
       name: 'doctorId',
       description: 'Doctor ID',
@@ -205,6 +209,7 @@ export const FindDoctorScheduleByClinicOwnerDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('clinic'),
     ApiParam({
       name: 'scheduleId',
       description: 'Doctor schedule ID',
@@ -220,9 +225,8 @@ export const FindDoctorScheduleByClinicOwnerDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.DOCTOR_SCHEDULE_READ],
-      clinicOwner: true,
+      ownership: 'clinic',
       resource: 'doctor-schedule',
-      resourceIdParam: 'scheduleId',
     }),
   );
 };
@@ -251,6 +255,7 @@ export const CreateMyDoctorScheduleDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.CREATED),
     ApiBearerAuth('accessToken'),
+    Context('doctor'),
     ApiBody({
       type: ScheduleDto.CreateDoctorScheduleDto,
     }),
@@ -276,6 +281,7 @@ export const UpdateMyDoctorScheduleDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('doctor'),
     ApiParam({
       name: 'scheduleId',
       description: 'Doctor schedule ID',
@@ -297,9 +303,8 @@ export const UpdateMyDoctorScheduleDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.DOCTOR_SCHEDULE_UPDATE],
-      owner: true,
+      ownership: 'doctor',
       resource: 'doctor-schedule',
-      resourceIdParam: 'scheduleId',
     }),
   );
 };
@@ -308,6 +313,7 @@ export const UpdateDoctorScheduleDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('clinic'),
     ApiParam({
       name: 'scheduleId',
       description: 'Doctor schedule ID',
@@ -329,9 +335,8 @@ export const UpdateDoctorScheduleDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.DOCTOR_SCHEDULE_UPDATE],
-      clinicOwner: true,
+      ownership: 'clinic',
       resource: 'doctor-schedule',
-      resourceIdParam: 'scheduleId',
     }),
   );
 };
@@ -340,6 +345,7 @@ export const UpdateMyDoctorScheduleStatusDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('doctor'),
     ApiParam({
       name: 'scheduleId',
       description: 'Doctor schedule ID',
@@ -361,9 +367,8 @@ export const UpdateMyDoctorScheduleStatusDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.DOCTOR_SCHEDULE_UPDATE_STATUS],
-      owner: true,
+      ownership: 'doctor',
       resource: 'doctor-schedule',
-      resourceIdParam: 'scheduleId',
     }),
   );
 };
@@ -372,6 +377,7 @@ export const UpdateDoctorScheduleStatusDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('clinic'),
     ApiParam({
       name: 'scheduleId',
       description: 'Doctor schedule ID',
@@ -393,9 +399,8 @@ export const UpdateDoctorScheduleStatusDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.DOCTOR_SCHEDULE_UPDATE_STATUS],
-      clinicOwner: true,
+      ownership: 'clinic',
       resource: 'doctor-schedule',
-      resourceIdParam: 'scheduleId',
     }),
   );
 };
@@ -404,6 +409,7 @@ export const DeleteMyDoctorScheduleDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('doctor'),
     ApiParam({
       name: 'scheduleId',
       description: 'Doctor schedule ID',
@@ -419,9 +425,8 @@ export const DeleteMyDoctorScheduleDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.DOCTOR_SCHEDULE_DELETE],
-      owner: true,
+      ownership: 'doctor',
       resource: 'doctor-schedule',
-      resourceIdParam: 'scheduleId',
     }),
   );
 };
@@ -430,6 +435,7 @@ export const DeleteDoctorScheduleDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('clinic'),
     ApiParam({
       name: 'scheduleId',
       description: 'Doctor schedule ID',
@@ -445,9 +451,8 @@ export const DeleteDoctorScheduleDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.DOCTOR_SCHEDULE_DELETE],
-      clinicOwner: true,
+      ownership: 'clinic',
       resource: 'doctor-schedule',
-      resourceIdParam: 'scheduleId',
     }),
   );
 };
