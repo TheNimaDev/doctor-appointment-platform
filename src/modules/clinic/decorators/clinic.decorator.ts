@@ -33,6 +33,7 @@ export const FindMyClinicDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('clinic'),
     ApiOkResponse({ type: ClinicRes.FindMyClinicResponse }),
     ApiNotFoundResponse({ type: ClinicRes.FindMyClinicNotFoundResponse }),
     Permission({
