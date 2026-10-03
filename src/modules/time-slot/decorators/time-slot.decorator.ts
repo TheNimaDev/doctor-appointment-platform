@@ -174,7 +174,7 @@ export const FindMyTimeSlotDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.TIME_SLOT_READ],
-      owner: true,
+      ownership: 'doctor',
       resource: 'time-slot',
     }),
   );
@@ -277,7 +277,7 @@ export const FindMyClinicAdminTimeSlotDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.TIME_SLOT_READ],
-      clinicOwner: true,
+      ownership: 'clinic',
       resource: 'time-slot',
     }),
   );
@@ -302,7 +302,7 @@ export const BlockMyTimeSlotDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.TIME_SLOT_BLOCK],
-      owner: true,
+      ownership: 'doctor',
       resource: 'time-slot',
     }),
   );
@@ -327,7 +327,7 @@ export const UnblockMyTimeSlotDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.TIME_SLOT_UNBLOCK],
-      owner: true,
+      ownership: 'doctor',
       resource: 'time-slot',
     }),
   );
@@ -352,7 +352,7 @@ export const BlockMyClinicTimeSlotDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.TIME_SLOT_BLOCK],
-      clinicOwner: true,
+      ownership: 'clinic',
       resource: 'time-slot',
     }),
   );
@@ -377,7 +377,7 @@ export const UnblockMyClinicTimeSlotDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.TIME_SLOT_UNBLOCK],
-      clinicOwner: true,
+      ownership: 'clinic',
       resource: 'time-slot',
     }),
   );
