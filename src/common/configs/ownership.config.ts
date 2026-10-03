@@ -110,7 +110,7 @@ export const OWNERSHIP_CONFIG: Record<string, OwnershipConfig> = {
     relations: {
       doctor: true,
     },
-    getDoctorUserId: (resource) => resource.doctor?.userId,
+    getOwnerUserId: (resource) => resource.doctor?.userId,
   },
 
   'medical-record': {
