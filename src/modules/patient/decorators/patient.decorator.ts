@@ -10,7 +10,7 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { Permission, PERMISSIONS } from '@/common';
+import { Context, Permission, PERMISSIONS } from '@/common';
 import * as PatientRes from '../res';
 import * as PatientDto from '../dto';
 import { Gender } from '../enums';
@@ -43,6 +43,7 @@ export const FindMyPatientDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('patient'),
     ApiOkResponse({
       type: PatientRes.FindMyPatientResponse,
     }),
@@ -112,6 +113,7 @@ export const UpdateMyPatientDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('patient'),
     ApiBody({
       type: PatientDto.UpdatePatientDto,
     }),

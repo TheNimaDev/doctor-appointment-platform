@@ -10,7 +10,7 @@ import {
   ApiOkResponse,
   ApiParam,
 } from '@nestjs/swagger';
-import { Permission, PERMISSIONS } from '@/common';
+import { Context, Permission, PERMISSIONS } from '@/common';
 import * as MedicalRecordRes from '../res';
 import * as MedicalRecordDto from '../dto';
 
@@ -21,6 +21,7 @@ export const CreateMedicalRecordDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.CREATED),
     ApiBearerAuth('accessToken'),
+    Context('doctor'),
     ApiParam({
       name: 'appointmentId',
       description: 'Appointment ID',
@@ -45,6 +46,9 @@ export const CreateMedicalRecordDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.MEDICAL_RECORD_CREATE],
+      ownership: 'doctor',
+      resource: 'appointment',
+      resourceIdParam: 'appointmentId',
     }),
   );
 };
@@ -124,6 +128,7 @@ export const FindPatientMedicalRecordsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('patient'),
     ApiOkResponse({
       type: MedicalRecordRes.FindPatientMedicalRecordsResponse,
     }),
@@ -140,6 +145,7 @@ export const FindPatientMedicalRecordDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('patient'),
     ApiParam({
       name: 'id',
       description: 'Medical Record ID',
@@ -155,8 +161,8 @@ export const FindPatientMedicalRecordDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.MEDICAL_RECORD_READ_PATIENT],
-      owner: true,
-      resource: 'medical-record-patient',
+      ownership: 'patient',
+      resource: 'medical-record',
     }),
   );
 };
@@ -168,6 +174,7 @@ export const FindPatientMedicalRecordByAppointmentDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('patient'),
     ApiParam({
       name: 'appointmentId',
       description: 'Appointment ID',
@@ -183,8 +190,9 @@ export const FindPatientMedicalRecordByAppointmentDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.MEDICAL_RECORD_READ_PATIENT],
-      owner: true,
-      resource: 'medical-record-patient',
+      ownership: 'patient',
+      resource: 'appointment',
+      resourceIdParam: 'appointmentId',
     }),
   );
 };
@@ -196,6 +204,7 @@ export const FindDoctorMedicalRecordsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('doctor'),
     ApiOkResponse({
       type: MedicalRecordRes.FindDoctorMedicalRecordsResponse,
     }),
@@ -212,6 +221,7 @@ export const FindDoctorMedicalRecordDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('doctor'),
     ApiParam({
       name: 'id',
       description: 'Medical Record ID',
@@ -227,8 +237,8 @@ export const FindDoctorMedicalRecordDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.MEDICAL_RECORD_READ_DOCTOR],
-      owner: true,
-      resource: 'medical-record-doctor',
+      ownership: 'doctor',
+      resource: 'medical-record',
     }),
   );
 };
@@ -240,6 +250,7 @@ export const FindDoctorMedicalRecordByAppointmentDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('doctor'),
     ApiParam({
       name: 'appointmentId',
       description: 'Appointment ID',
@@ -255,8 +266,9 @@ export const FindDoctorMedicalRecordByAppointmentDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.MEDICAL_RECORD_READ_DOCTOR],
-      owner: true,
-      resource: 'medical-record-doctor',
+      ownership: 'doctor',
+      resource: 'appointment',
+      resourceIdParam: 'appointmentId',
     }),
   );
 };
@@ -268,6 +280,7 @@ export const FindMyClinicMedicalRecordsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('clinic'),
     ApiOkResponse({
       type: MedicalRecordRes.FindMyClinicMedicalRecordsResponse,
     }),
@@ -284,6 +297,7 @@ export const FindMyClinicMedicalRecordDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('clinic'),
     ApiParam({
       name: 'id',
       description: 'Medical Record ID',
@@ -299,8 +313,8 @@ export const FindMyClinicMedicalRecordDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.MEDICAL_RECORD_READ_CLINIC],
-      clinicOwner: true,
-      resource: 'medical-record-clinic',
+      ownership: 'clinic',
+      resource: 'medical-record',
     }),
   );
 };
@@ -312,6 +326,7 @@ export const FindMyClinicMedicalRecordByAppointmentDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('clinic'),
     ApiParam({
       name: 'appointmentId',
       description: 'Appointment ID',
@@ -327,8 +342,9 @@ export const FindMyClinicMedicalRecordByAppointmentDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.MEDICAL_RECORD_READ_CLINIC],
-      clinicOwner: true,
-      resource: 'medical-record-clinic',
+      ownership: 'clinic',
+      resource: 'appointment',
+      resourceIdParam: 'appointmentId',
     }),
   );
 };
@@ -340,6 +356,7 @@ export const UpdateMedicalRecordDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('doctor'),
     ApiParam({
       name: 'id',
       description: 'Medical Record ID',
@@ -358,8 +375,8 @@ export const UpdateMedicalRecordDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.MEDICAL_RECORD_UPDATE],
-      owner: true,
-      resource: 'medical-record-doctor',
+      ownership: 'doctor',
+      resource: 'medical-record',
     }),
   );
 };
@@ -371,6 +388,7 @@ export const DeleteMedicalRecordDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.NO_CONTENT),
     ApiBearerAuth('accessToken'),
+    Context('doctor'),
     ApiParam({
       name: 'id',
       description: 'Medical Record ID',
@@ -384,8 +402,8 @@ export const DeleteMedicalRecordDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.MEDICAL_RECORD_DELETE],
-      owner: true,
-      resource: 'medical-record-doctor',
+      ownership: 'doctor',
+      resource: 'medical-record',
     }),
   );
 };

@@ -26,7 +26,8 @@ export interface CreateDoctorPayload {
 }
 
 /** Parameters for updating a doctor. */
-export type UpdateDoctorPayload = DoctorIdentifier & {
+export type UpdateDoctorPayload = {
+  id: string;
   medicalCode?: string;
   bio?: string | null;
   experienceYears?: number;
@@ -35,7 +36,8 @@ export type UpdateDoctorPayload = DoctorIdentifier & {
 };
 
 /** Parameters for updating a doctor status. */
-export type UpdateDoctorStatusPayload = DoctorIdentifier & {
+export type UpdateDoctorStatusPayload = {
+  id: string;
   status: DoctorStatus;
   manager?: EntityManager;
 };
@@ -43,6 +45,7 @@ export type UpdateDoctorStatusPayload = DoctorIdentifier & {
 /** Parameters for finding a doctor by ID. */
 export interface FindDoctorByIdPayload {
   id: string;
+  status?: DoctorStatus;
   manager?: EntityManager;
 }
 
@@ -61,7 +64,8 @@ export interface FindDoctorByMedicalCodePayload {
 }
 
 /** Parameters for deleting a doctor. */
-export type DeleteDoctorPayload = DoctorIdentifier & {
+export type DeleteDoctorPayload = {
+  id: string;
   manager?: EntityManager;
 };
 
@@ -70,36 +74,3 @@ export interface FindDoctorsPayload {
   status?: DoctorStatus;
   manager?: EntityManager;
 }
-
-/**
- * Identifies a doctor by either doctor ID or user ID.
- */
-export type DoctorIdentifier =
-  | {
-      doctorId: string;
-      userId?: never;
-    }
-  | {
-      userId: string;
-      doctorId?: never;
-    };
-
-/**
- * Identifies a resource by either user ID or clinic owner ID.
- */
-export type DoctorOrClinicOwnerIdentifier =
-  | {
-      userId: string;
-      clinicOwnerId?: never;
-    }
-  | {
-      clinicOwnerId: string;
-      userId?: never;
-    };
-
-/**
- * Parameters for resolving a doctor by user ID or doctor ID.
- */
-export type ResolveDoctorPayload = DoctorIdentifier & {
-  manager?: EntityManager;
-};

@@ -29,7 +29,8 @@ export interface CreateClinicPayload {
 }
 
 /** Parameters for updating a clinic. */
-export type UpdateClinicPayload = ClinicIdentifier & {
+export interface UpdateClinicPayload {
+  id: string;
   name?: string;
   address?: string;
   city?: string;
@@ -38,13 +39,14 @@ export type UpdateClinicPayload = ClinicIdentifier & {
   longitude?: number | null;
   description?: string | null;
   manager?: EntityManager;
-};
+}
 
 /** Parameters for updating a clinic status. */
-export type UpdateClinicStatusPayload = ClinicIdentifier & {
+export interface UpdateClinicStatusPayload {
+  id: string;
   status: ClinicStatus;
   manager?: EntityManager;
-};
+}
 
 /** Parameters for finding a clinic by ID. */
 export interface FindClinicByIdPayload {
@@ -65,26 +67,7 @@ export interface FindClinicsPayload {
 }
 
 /** Parameters for deleting a clinic. */
-export type DeleteClinicPayload = ClinicIdentifier & {
+export interface DeleteClinicPayload {
+  id: string;
   manager?: EntityManager;
-};
-
-/**
- * Identifies a clinic by either clinic owner ID or clinic ID.
- */
-export type ClinicIdentifier =
-  | {
-      clinicId: string;
-      ownerId?: never;
-    }
-  | {
-      ownerId: string;
-      clinicId?: never;
-    };
-
-/**
- * Parameters for resolving a clinic by owner ID or clinic ID.
- */
-export type ResolveClinicPayload = ClinicIdentifier & {
-  manager?: EntityManager;
-};
+}

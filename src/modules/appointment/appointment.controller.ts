@@ -1,7 +1,14 @@
 import { Body, Controller, Get, Param, Patch, Post, Req } from '@nestjs/common';
 import { AppointmentService } from './appointment.service';
 import * as AppointmentDecorator from './decorators';
-import type { ApiResponse, AppointmentResponse, AppointmentsResponse, AccessRequest } from '@/types';
+import type {
+  ApiResponse,
+  AppointmentResponse,
+  AppointmentsResponse,
+  AccessRequest,
+  OwnershipRequest,
+  SafeAppointment,
+} from '@/types';
 import { CancelAppointmentDto, ReserveAppointmentDto } from './dto';
 import { AppointmentStatus } from './enums';
 
@@ -19,7 +26,7 @@ export class AppointmentController {
     @Body() reserveAppointmentDto: ReserveAppointmentDto,
   ): Promise<ApiResponse<AppointmentResponse>> {
     const data = await this.appointmentService.reserveAppointment({
-      patientId: req.user.userId,
+      patientId: req.patient!.id,
       ...reserveAppointmentDto,
     });
 
@@ -66,7 +73,7 @@ export class AppointmentController {
   @AppointmentDecorator.FindPatientAppointmentsDecorators()
   async findPatientAppointments(@Req() req: AccessRequest): Promise<ApiResponse<AppointmentsResponse>> {
     const data = await this.appointmentService.findPatientAppointments({
-      userId: req.user.userId,
+      patientId: req.patient!.id,
     });
 
     return {
@@ -82,7 +89,7 @@ export class AppointmentController {
   @AppointmentDecorator.FindDoctorAppointmentsDecorators()
   async findDoctorAppointments(@Req() req: AccessRequest): Promise<ApiResponse<AppointmentsResponse>> {
     const data = await this.appointmentService.findDoctorAppointments({
-      userId: req.user.userId,
+      doctorId: req.doctor!.id,
     });
 
     return {
@@ -97,17 +104,13 @@ export class AppointmentController {
   @Get('doctor/:id')
   @AppointmentDecorator.FindDoctorAppointmentDecorators()
   async getDoctorAppointmentById(
-    @Req() req: AccessRequest,
-    @Param('id') id: string,
+    @Req() req: OwnershipRequest<SafeAppointment>,
   ): Promise<ApiResponse<AppointmentResponse>> {
-    const data = await this.appointmentService.getDoctorAppointmentById({
-      userId: req.user.userId,
-      id,
-    });
-
     return {
       message: 'Doctor appointment retrieved successfully.',
-      data,
+      data: {
+        appointment: req.ownershipData,
+      },
     };
   }
 
@@ -118,7 +121,7 @@ export class AppointmentController {
   @AppointmentDecorator.FindMyClinicAppointmentsDecorators()
   async getMyClinicAppointments(@Req() req: AccessRequest): Promise<ApiResponse<AppointmentsResponse>> {
     const data = await this.appointmentService.findMyClinicAppointments({
-      ownerId: req.user.userId,
+      clinicId: req.clinic!.id,
     });
 
     return {
@@ -133,17 +136,13 @@ export class AppointmentController {
   @Get('my-clinic/:id')
   @AppointmentDecorator.FindMyClinicAppointmentDecorators()
   async getMyClinicAppointmentById(
-    @Req() req: AccessRequest,
-    @Param('id') id: string,
+    @Req() req: OwnershipRequest<SafeAppointment>,
   ): Promise<ApiResponse<AppointmentResponse>> {
-    const data = await this.appointmentService.getMyClinicAppointmentsById({
-      ownerId: req.user.userId,
-      id,
-    });
-
     return {
       message: 'Clinic appointment retrieved successfully.',
-      data,
+      data: {
+        appointment: req.ownershipData,
+      },
     };
   }
 
@@ -153,17 +152,13 @@ export class AppointmentController {
   @Get(':id')
   @AppointmentDecorator.FindPatientAppointmentDecorators()
   async getPatientAppointmentById(
-    @Req() req: AccessRequest,
-    @Param('id') id: string,
+    @Req() req: OwnershipRequest<SafeAppointment>,
   ): Promise<ApiResponse<AppointmentResponse>> {
-    const data = await this.appointmentService.getPatientAppointmentById({
-      id,
-      userId: req.user.userId,
-    });
-
     return {
       message: 'Patient appointment retrieved successfully.',
-      data,
+      data: {
+        appointment: req.ownershipData,
+      },
     };
   }
 

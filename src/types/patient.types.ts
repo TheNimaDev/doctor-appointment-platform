@@ -30,7 +30,8 @@ export interface CreatePatientPayload {
 }
 
 /** Parameters for updating a patient. */
-export type UpdatePatientPayload = PatientIdentifier & {
+export interface UpdatePatientPayload {
+  patientId: string;
   nationalCode?: string;
   birthDate?: string | null;
   gender?: Gender;
@@ -40,7 +41,7 @@ export type UpdatePatientPayload = PatientIdentifier & {
   address?: string | null;
   city?: string | null;
   manager?: EntityManager;
-};
+}
 
 /** Parameters for finding all patients. */
 export interface FindPatientsPayload {
@@ -65,23 +66,3 @@ export interface FindPatientByNationalCodePayload {
   nationalCode: string;
   manager?: EntityManager;
 }
-
-/**
- * Identifies a patient by either patient ID or user ID.
- */
-export type PatientIdentifier =
-  | {
-      patientId: string;
-      userId?: never;
-    }
-  | {
-      userId: string;
-      patientId?: never;
-    };
-
-/**
- * Parameters for resolving a patient by user ID or patient ID.
- */
-export type ResolvePatientPayload = PatientIdentifier & {
-  manager?: EntityManager;
-};

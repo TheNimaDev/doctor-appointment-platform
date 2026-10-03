@@ -1,7 +1,14 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Req } from '@nestjs/common';
 import { MedicalRecordService } from './medical-record.service';
 import * as MedicalRecordDecorator from './decorators';
-import type { AccessRequest, ApiResponse, MedicalRecordResponse, MedicalRecordsResponse } from '@/types';
+import type {
+  AccessRequest,
+  ApiResponse,
+  MedicalRecordResponse,
+  MedicalRecordsResponse,
+  OwnershipRequest,
+  SafeMedicalRecord,
+} from '@/types';
 import { CreateMedicalRecordDto, UpdateMedicalRecordDto } from './dto';
 
 @Controller('medical-records')
@@ -14,12 +21,10 @@ export class MedicalRecordController {
   @Post('appointment/:appointmentId')
   @MedicalRecordDecorator.CreateMedicalRecordDecorators()
   async create(
-    @Req() req: AccessRequest,
     @Param('appointmentId') appointmentId: string,
     @Body() createMedicalRecordDto: CreateMedicalRecordDto,
   ): Promise<ApiResponse<MedicalRecordResponse>> {
     const data = await this.medicalRecordService.create({
-      userId: req.user.userId,
       appointmentId,
       ...createMedicalRecordDto,
     });
@@ -85,7 +90,7 @@ export class MedicalRecordController {
   @MedicalRecordDecorator.FindPatientMedicalRecordsDecorators()
   async findPatientMedicalRecords(@Req() req: AccessRequest): Promise<ApiResponse<MedicalRecordsResponse>> {
     const data = await this.medicalRecordService.findPatientMedicalRecords({
-      userId: req.user.userId,
+      patientId: req.patient!.id,
     });
 
     return {
@@ -100,17 +105,13 @@ export class MedicalRecordController {
   @Get('my/:id')
   @MedicalRecordDecorator.FindPatientMedicalRecordDecorators()
   async findPatientMedicalRecordById(
-    @Req() req: AccessRequest,
-    @Param('id') id: string,
+    @Req() req: OwnershipRequest<SafeMedicalRecord>,
   ): Promise<ApiResponse<MedicalRecordResponse>> {
-    const data = await this.medicalRecordService.findPatientMedicalRecordById({
-      userId: req.user.userId,
-      id,
-    });
-
     return {
       message: 'Patient medical record retrieved successfully.',
-      data,
+      data: {
+        medicalRecord: req.ownershipData,
+      },
     };
   }
 
@@ -120,17 +121,13 @@ export class MedicalRecordController {
   @Get('my/appointment/:appointmentId')
   @MedicalRecordDecorator.FindPatientMedicalRecordByAppointmentDecorators()
   async findPatientMedicalRecordByAppointmentId(
-    @Req() req: AccessRequest,
-    @Param('appointmentId') appointmentId: string,
+    @Req() req: OwnershipRequest<SafeMedicalRecord>,
   ): Promise<ApiResponse<MedicalRecordResponse>> {
-    const data = await this.medicalRecordService.findPatientMedicalRecordByAppointmentId({
-      userId: req.user.userId,
-      appointmentId,
-    });
-
     return {
       message: 'Patient medical record retrieved successfully.',
-      data,
+      data: {
+        medicalRecord: req.ownershipData,
+      },
     };
   }
 
@@ -141,7 +138,7 @@ export class MedicalRecordController {
   @MedicalRecordDecorator.FindDoctorMedicalRecordsDecorators()
   async findDoctorMedicalRecords(@Req() req: AccessRequest): Promise<ApiResponse<MedicalRecordsResponse>> {
     const data = await this.medicalRecordService.findDoctorMedicalRecords({
-      userId: req.user.userId,
+      doctorId: req.doctor!.id,
     });
 
     return {
@@ -156,17 +153,13 @@ export class MedicalRecordController {
   @Get('doctor/:id')
   @MedicalRecordDecorator.FindDoctorMedicalRecordDecorators()
   async findDoctorMedicalRecordById(
-    @Req() req: AccessRequest,
-    @Param('id') id: string,
+    @Req() req: OwnershipRequest<SafeMedicalRecord>,
   ): Promise<ApiResponse<MedicalRecordResponse>> {
-    const data = await this.medicalRecordService.findDoctorMedicalRecordById({
-      userId: req.user.userId,
-      id,
-    });
-
     return {
       message: 'Doctor medical record retrieved successfully.',
-      data,
+      data: {
+        medicalRecord: req.ownershipData,
+      },
     };
   }
 
@@ -176,17 +169,13 @@ export class MedicalRecordController {
   @Get('doctor/appointment/:appointmentId')
   @MedicalRecordDecorator.FindDoctorMedicalRecordByAppointmentDecorators()
   async findDoctorMedicalRecordByAppointmentId(
-    @Req() req: AccessRequest,
-    @Param('appointmentId') appointmentId: string,
+    @Req() req: OwnershipRequest<SafeMedicalRecord>,
   ): Promise<ApiResponse<MedicalRecordResponse>> {
-    const data = await this.medicalRecordService.findDoctorMedicalRecordByAppointmentId({
-      userId: req.user.userId,
-      appointmentId,
-    });
-
     return {
       message: 'Doctor medical record retrieved successfully.',
-      data,
+      data: {
+        medicalRecord: req.ownershipData,
+      },
     };
   }
 
@@ -197,7 +186,7 @@ export class MedicalRecordController {
   @MedicalRecordDecorator.FindMyClinicMedicalRecordsDecorators()
   async findMyClinicMedicalRecords(@Req() req: AccessRequest): Promise<ApiResponse<MedicalRecordsResponse>> {
     const data = await this.medicalRecordService.findClinicAdminMedicalRecords({
-      userId: req.user.userId,
+      clinicId: req.clinic!.id,
     });
 
     return {
@@ -212,17 +201,13 @@ export class MedicalRecordController {
   @Get('my-clinic/:id')
   @MedicalRecordDecorator.FindMyClinicMedicalRecordDecorators()
   async findMyClinicMedicalRecordById(
-    @Req() req: AccessRequest,
-    @Param('id') id: string,
+    @Req() req: OwnershipRequest<SafeMedicalRecord>,
   ): Promise<ApiResponse<MedicalRecordResponse>> {
-    const data = await this.medicalRecordService.findClinicAdminMedicalRecordById({
-      userId: req.user.userId,
-      id,
-    });
-
     return {
       message: 'Clinic medical record retrieved successfully.',
-      data,
+      data: {
+        medicalRecord: req.ownershipData,
+      },
     };
   }
 
@@ -232,17 +217,13 @@ export class MedicalRecordController {
   @Get('my-clinic/appointment/:appointmentId')
   @MedicalRecordDecorator.FindMyClinicMedicalRecordByAppointmentDecorators()
   async findMyClinicMedicalRecordByAppointmentId(
-    @Req() req: AccessRequest,
-    @Param('appointmentId') appointmentId: string,
+    @Req() req: OwnershipRequest<SafeMedicalRecord>,
   ): Promise<ApiResponse<MedicalRecordResponse>> {
-    const data = await this.medicalRecordService.findClinicAdminMedicalRecordByAppointmentId({
-      userId: req.user.userId,
-      appointmentId,
-    });
-
     return {
       message: 'Clinic medical record retrieved successfully.',
-      data,
+      data: {
+        medicalRecord: req.ownershipData,
+      },
     };
   }
 
@@ -252,13 +233,11 @@ export class MedicalRecordController {
   @Patch(':id')
   @MedicalRecordDecorator.UpdateMedicalRecordDecorators()
   async update(
-    @Req() req: AccessRequest,
     @Param('id') id: string,
     @Body() updateMedicalRecordDto: UpdateMedicalRecordDto,
   ): Promise<ApiResponse<MedicalRecordResponse>> {
     const data = await this.medicalRecordService.update({
-      userId: req.user.userId,
-      medicalRecordId: id,
+      id,
       ...updateMedicalRecordDto,
     });
 
@@ -273,10 +252,9 @@ export class MedicalRecordController {
    */
   @Delete(':id')
   @MedicalRecordDecorator.DeleteMedicalRecordDecorators()
-  async delete(@Req() req: AccessRequest, @Param('id') id: string): Promise<ApiResponse> {
+  async delete(@Param('id') id: string): Promise<ApiResponse> {
     await this.medicalRecordService.delete({
-      userId: req.user.userId,
-      medicalRecordId: id,
+      id,
     });
 
     return {

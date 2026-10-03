@@ -1,6 +1,6 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
-import { Permission, Public, PERMISSIONS } from '@/common';
+import { Permission, Public, PERMISSIONS, Context } from '@/common';
 import * as TimeSlotRes from '../res';
 
 export const FindAvailableTimeSlotsDecorators = () => {
@@ -104,6 +104,7 @@ export const FindMyTimeSlotsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('doctor'),
     ApiQuery({
       name: 'date',
       description: 'Filter time slots by date',
@@ -127,6 +128,7 @@ export const FindMyClinicTimeSlotsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('doctor'),
     ApiParam({
       name: 'clinicId',
       description: 'Clinic ID',
@@ -172,7 +174,7 @@ export const FindMyTimeSlotDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.TIME_SLOT_READ],
-      owner: true,
+      ownership: 'doctor',
       resource: 'time-slot',
     }),
   );
@@ -205,6 +207,7 @@ export const FindMyClinicAdminTimeSlotsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('clinic'),
     ApiQuery({
       name: 'date',
       description: 'Filter time slots by date',
@@ -228,6 +231,7 @@ export const FindMyClinicAdminDoctorTimeSlotsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('clinic'),
     ApiParam({
       name: 'doctorId',
       description: 'Doctor ID',
@@ -273,7 +277,7 @@ export const FindMyClinicAdminTimeSlotDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.TIME_SLOT_READ],
-      clinicOwner: true,
+      ownership: 'clinic',
       resource: 'time-slot',
     }),
   );
@@ -298,7 +302,7 @@ export const BlockMyTimeSlotDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.TIME_SLOT_BLOCK],
-      owner: true,
+      ownership: 'doctor',
       resource: 'time-slot',
     }),
   );
@@ -323,7 +327,7 @@ export const UnblockMyTimeSlotDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.TIME_SLOT_UNBLOCK],
-      owner: true,
+      ownership: 'doctor',
       resource: 'time-slot',
     }),
   );
@@ -348,7 +352,7 @@ export const BlockMyClinicTimeSlotDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.TIME_SLOT_BLOCK],
-      clinicOwner: true,
+      ownership: 'clinic',
       resource: 'time-slot',
     }),
   );
@@ -373,7 +377,7 @@ export const UnblockMyClinicTimeSlotDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.TIME_SLOT_UNBLOCK],
-      clinicOwner: true,
+      ownership: 'clinic',
       resource: 'time-slot',
     }),
   );

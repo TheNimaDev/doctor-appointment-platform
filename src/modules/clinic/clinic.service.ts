@@ -10,7 +10,6 @@ import {
   FindClinicByIdPayload,
   FindClinicByOwnerIdPayload,
   FindClinicsPayload,
-  ResolveClinicPayload,
   UpdateClinicPayload,
   UpdateClinicStatusPayload,
 } from '@/types';
@@ -171,10 +170,8 @@ export class ClinicService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const { clinic } = await this.resolveClinic(payload);
-
       const updatedClinic = await repository.preload({
-        id: clinic.id,
+        id: payload.id,
         ...(payload.name !== undefined && {
           name: payload.name,
         }),
@@ -230,7 +227,10 @@ export class ClinicService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const { clinic } = await this.resolveClinic(payload);
+      const { clinic } = await this.findById({
+        id: payload.id,
+        manager: payload.manager,
+      });
 
       clinic.status = payload.status;
 
@@ -240,10 +240,6 @@ export class ClinicService {
         clinic: updatedClinic,
       };
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-
       checkDatabaseError({
         e: error as Error,
         mainResource: 'Clinic',
@@ -258,10 +254,8 @@ export class ClinicService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const { clinic } = await this.resolveClinic(payload);
-
       const result = await repository.softDelete({
-        id: clinic.id,
+        id: payload.id,
       });
 
       if (result.affected === 0) {
@@ -280,22 +274,5 @@ export class ClinicService {
         mainResource: 'Clinic',
       });
     }
-  }
-
-  /**
-   * Resolve a clinic by either owner ID or clinic ID.
-   */
-  async resolveClinic(payload: ResolveClinicPayload): Promise<ClinicResponse> {
-    if ('ownerId' in payload) {
-      return this.findByOwnerId({
-        ownerId: payload.ownerId,
-        manager: payload.manager,
-      });
-    }
-
-    return this.findById({
-      id: payload.clinicId,
-      manager: payload.manager,
-    });
   }
 }

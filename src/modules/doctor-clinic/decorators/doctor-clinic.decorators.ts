@@ -1,5 +1,5 @@
 import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
-import { Permission, PERMISSIONS } from '@/common';
+import { Context, Permission, PERMISSIONS } from '@/common';
 import {
   ApiBearerAuth,
   ApiConflictResponse,
@@ -14,6 +14,7 @@ export const CreateDoctorClinicDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.CREATED),
     ApiBearerAuth('accessToken'),
+    Context('clinic'),
     ApiParam({
       name: 'doctorId',
       description: 'Doctor ID',
@@ -86,6 +87,7 @@ export const FindMyClinicDoctorsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('clinic'),
     ApiOkResponse({
       type: DoctorClinicRes.FindMyClinicDoctorsResponse,
     }),
@@ -99,6 +101,7 @@ export const FindMyDoctorClinicsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('doctor'),
     ApiOkResponse({
       type: DoctorClinicRes.FindMyDoctorClinicsResponse,
     }),
@@ -127,6 +130,8 @@ export const DeleteDoctorClinicDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.DOCTOR_CLINIC_DELETE],
+      ownership: 'clinic',
+      resource: 'doctor-clinic',
     }),
   );
 };

@@ -12,12 +12,9 @@ import {
   ReserveAppointmentPayload,
   FindPatientAppointmentsPayload,
   FindDoctorAppointmentsPayload,
-  FindDoctorAppointmentByIdPayload,
-  FindPatientAppointmentByIdPayload,
   UpdateAppointmentStatusPayload,
   HandleAppointmentStatusPayload,
   FindMyClinicAppointmentsPayload,
-  FindMyClinicAppointmentPayload,
 } from '@/types';
 import { TimeSlotService } from '@/modules/time-slot/time-slot.service';
 import { TimeSlotStatus } from '@/modules/time-slot/enums';
@@ -59,17 +56,12 @@ export class AppointmentService {
 
     const status = payload?.status ? payload.status : AppointmentStatus.PENDING;
 
-    const { clinic } = await this.clinicService.findByOwnerId({
-      ownerId: payload.ownerId,
-      manager: payload.manager,
-    });
-
     const appointments = await repository.find({
       where: {
         timeSlot: {
           schedule: {
             doctorClinic: {
-              clinicId: clinic.id,
+              clinicId: payload.clinicId,
             },
           },
         },
@@ -82,45 +74,6 @@ export class AppointmentService {
 
     return {
       appointments,
-    };
-  }
-
-  /**
-   * Get an appointment from the authenticated admin's clinic.
-   */
-  async getMyClinicAppointmentsById(payload: FindMyClinicAppointmentPayload): Promise<AppointmentResponse> {
-    const repository = this.getRepository(payload.manager);
-
-    const status = payload?.status ? payload.status : AppointmentStatus.PENDING;
-
-    const { clinic } = await this.clinicService.findByOwnerId({
-      ownerId: payload.ownerId,
-      manager: payload.manager,
-    });
-
-    const appointment = await repository.findOne({
-      where: {
-        id: payload.id,
-        timeSlot: {
-          schedule: {
-            doctorClinic: {
-              clinicId: clinic.id,
-            },
-          },
-        },
-        status,
-      },
-    });
-
-    if (!appointment) {
-      throw new NotFoundException({
-        message: 'Appointment not found in your clinic.',
-        error: 'Appointment Not Found',
-      } as BaseException);
-    }
-
-    return {
-      appointment,
     };
   }
 
@@ -220,14 +173,9 @@ export class AppointmentService {
   async findPatientAppointments(payload: FindPatientAppointmentsPayload): Promise<AppointmentsResponse> {
     const repository = this.getRepository(payload.manager);
 
-    const { patient } = await this.patientService.findByUserId({
-      userId: payload.userId,
-      manager: payload.manager,
-    });
-
     const appointments = await repository.find({
       where: {
-        patientId: patient.id,
+        patientId: payload.patientId,
       },
       order: {
         createdAt: 'DESC',
@@ -236,36 +184,6 @@ export class AppointmentService {
 
     return {
       appointments,
-    };
-  }
-
-  /**
-   * Get an appointment by ID belonging to the patient.
-   */
-  async getPatientAppointmentById(payload: FindPatientAppointmentByIdPayload): Promise<AppointmentResponse> {
-    const repository = this.getRepository(payload.manager);
-
-    const { patient } = await this.patientService.findByUserId({
-      userId: payload.userId,
-      manager: payload.manager,
-    });
-
-    const appointment = await repository.findOne({
-      where: {
-        id: payload.id,
-        patientId: patient.id,
-      },
-    });
-
-    if (!appointment) {
-      throw new NotFoundException({
-        message: 'Appointment not found in database.',
-        error: 'Appointment Not Found',
-      } as BaseException);
-    }
-
-    return {
-      appointment,
     };
   }
 
@@ -275,17 +193,12 @@ export class AppointmentService {
   async findDoctorAppointments(payload: FindDoctorAppointmentsPayload): Promise<AppointmentsResponse> {
     const repository = this.getRepository(payload.manager);
 
-    const { doctor } = await this.doctorService.findByUserId({
-      userId: payload.userId,
-      manager: payload.manager,
-    });
-
     const appointments = await repository.find({
       where: {
         timeSlot: {
           schedule: {
             doctorClinic: {
-              doctorId: doctor.id,
+              doctorId: payload.doctorId,
             },
           },
         },
@@ -297,42 +210,6 @@ export class AppointmentService {
 
     return {
       appointments,
-    };
-  }
-
-  /**
-   * Get an appointment by ID belonging to the doctor.
-   */
-  async getDoctorAppointmentById(payload: FindDoctorAppointmentByIdPayload): Promise<AppointmentResponse> {
-    const repository = this.getRepository(payload.manager);
-
-    const { doctor } = await this.doctorService.findByUserId({
-      userId: payload.userId,
-      manager: payload.manager,
-    });
-
-    const appointment = await repository.findOne({
-      where: {
-        id: payload.id,
-        timeSlot: {
-          schedule: {
-            doctorClinic: {
-              doctorId: doctor.id,
-            },
-          },
-        },
-      },
-    });
-
-    if (!appointment) {
-      throw new NotFoundException({
-        message: 'Appointment not found in database.',
-        error: 'Appointment Not Found',
-      } as BaseException);
-    }
-
-    return {
-      appointment,
     };
   }
 

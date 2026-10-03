@@ -9,7 +9,6 @@ import {
   FindPatientByNationalCodePayload,
   FindPatientByUserIdPayload,
   PatientResponse,
-  ResolvePatientPayload,
   UpdatePatientPayload,
 } from '@/types';
 import { Patient } from './entities';
@@ -161,10 +160,8 @@ export class PatientService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const { patient } = await this.resolvePatient(payload);
-
       const updatedPatient = await repository.preload({
-        id: patient.id,
+        id: payload.patientId,
         ...(payload.nationalCode !== undefined && {
           nationalCode: payload.nationalCode,
         }),
@@ -214,22 +211,5 @@ export class PatientService {
         conflictField: 'nationalCode',
       });
     }
-  }
-
-  /**
-   * Resolve a patient by either user ID or patient ID.
-   */
-  async resolvePatient(payload: ResolvePatientPayload): Promise<PatientResponse> {
-    if ('userId' in payload) {
-      return this.findByUserId({
-        userId: payload.userId,
-        manager: payload.manager,
-      });
-    }
-
-    return this.findById({
-      id: payload.patientId,
-      manager: payload.manager,
-    });
   }
 }

@@ -9,7 +9,7 @@ import {
   ApiOkResponse,
   ApiParam,
 } from '@nestjs/swagger';
-import { Permission, PERMISSIONS } from '@/common';
+import { Context, Permission, PERMISSIONS } from '@/common';
 import * as AppointmentRes from '../res';
 import * as AppointmentDto from '../dto';
 
@@ -53,6 +53,7 @@ export const ReserveAppointmentDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.CREATED),
     ApiBearerAuth('accessToken'),
+    Context('patient'),
     ApiBody({
       type: AppointmentDto.ReserveAppointmentDto,
     }),
@@ -75,6 +76,7 @@ export const FindPatientAppointmentsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('patient'),
     ApiOkResponse({
       type: AppointmentRes.FindPatientAppointmentsResponse,
     }),
@@ -103,8 +105,8 @@ export const FindPatientAppointmentDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.APPOINTMENT_READ_PATIENT],
-      owner: true,
-      resource: 'appointment-patient',
+      ownership: 'patient',
+      resource: 'appointment',
     }),
   );
 };
@@ -113,6 +115,7 @@ export const FindDoctorAppointmentsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('doctor'),
     ApiOkResponse({
       type: AppointmentRes.FindDoctorAppointmentsResponse,
     }),
@@ -141,8 +144,8 @@ export const FindDoctorAppointmentDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.APPOINTMENT_READ_DOCTOR],
-      owner: true,
-      resource: 'appointment-doctor',
+      ownership: 'doctor',
+      resource: 'appointment',
     }),
   );
 };
@@ -151,6 +154,7 @@ export const FindMyClinicAppointmentsDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('clinic'),
     ApiOkResponse({
       type: AppointmentRes.FindMyClinicAppointmentsResponse,
     }),
@@ -179,8 +183,8 @@ export const FindMyClinicAppointmentDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.APPOINTMENT_READ_DOCTOR],
-      clinicOwner: true,
-      resource: 'appointment-doctor',
+      ownership: 'clinic',
+      resource: 'appointment',
     }),
   );
 };
@@ -210,8 +214,8 @@ export const CancelAppointmentDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.APPOINTMENT_CANCEL],
-      owner: true,
-      resource: 'appointment-patient',
+      ownership: 'doctor',
+      resource: 'appointment',
     }),
   );
 };
@@ -235,8 +239,8 @@ export const ConfirmMyClinicAppointmentDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.APPOINTMENT_CONFIRM],
-      clinicOwner: true,
-      resource: 'appointment-doctor',
+      ownership: 'clinic',
+      resource: 'appointment',
     }),
   );
 };
@@ -260,8 +264,8 @@ export const ConfirmMyAppointmentDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.APPOINTMENT_CONFIRM],
-      owner: true,
-      resource: 'appointment-doctor',
+      ownership: 'doctor',
+      resource: 'appointment',
     }),
   );
 };
@@ -285,8 +289,8 @@ export const RejectMyClinicAppointmentDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.APPOINTMENT_REJECT],
-      clinicOwner: true,
-      resource: 'appointment-doctor',
+      ownership: 'clinic',
+      resource: 'appointment',
     }),
   );
 };
@@ -310,8 +314,8 @@ export const RejectMyAppointmentDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.APPOINTMENT_REJECT],
-      owner: true,
-      resource: 'appointment-doctor',
+      ownership: 'doctor',
+      resource: 'appointment',
     }),
   );
 };
@@ -335,8 +339,8 @@ export const CompleteMyClinicAppointmentDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.APPOINTMENT_COMPLETE],
-      clinicOwner: true,
-      resource: 'appointment-doctor',
+      ownership: 'clinic',
+      resource: 'appointment',
     }),
   );
 };
@@ -360,8 +364,8 @@ export const CompleteMyAppointmentDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.APPOINTMENT_COMPLETE],
-      owner: true,
-      resource: 'appointment-doctor',
+      ownership: 'doctor',
+      resource: 'appointment',
     }),
   );
 };
@@ -385,8 +389,8 @@ export const NoShowMyClinicAppointmentDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.APPOINTMENT_NO_SHOW],
-      clinicOwner: true,
-      resource: 'appointment-doctor',
+      ownership: 'clinic',
+      resource: 'appointment',
     }),
   );
 };
@@ -410,8 +414,8 @@ export const NoShowMyAppointmentDecorators = () => {
     }),
     Permission({
       permissions: [PERMISSIONS.APPOINTMENT_NO_SHOW],
-      owner: true,
-      resource: 'appointment-doctor',
+      ownership: 'doctor',
+      resource: 'appointment',
     }),
   );
 };

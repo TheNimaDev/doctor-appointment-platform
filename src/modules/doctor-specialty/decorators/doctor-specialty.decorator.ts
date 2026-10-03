@@ -9,7 +9,7 @@ import {
   ApiOkResponse,
   ApiParam,
 } from '@nestjs/swagger';
-import { Permission, PERMISSIONS, Public } from '@/common';
+import { Context, Permission, PERMISSIONS, Public } from '@/common';
 import * as DoctorSpecialtyRes from '../res';
 import * as DoctorSpecialtyDto from '../dto';
 
@@ -17,12 +17,13 @@ export const AddDoctorSpecialtyDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.CREATED),
     ApiBearerAuth('accessToken'),
+    Context('doctor'),
     ApiBody({ type: DoctorSpecialtyDto.AddDoctorSpecialtyDto }),
     ApiCreatedResponse({ type: DoctorSpecialtyRes.AddDoctorSpecialtyResponse }),
     ApiBadRequestResponse({ type: DoctorSpecialtyRes.AddDoctorSpecialtyBadRequestResponse }),
     ApiNotFoundResponse({ type: DoctorSpecialtyRes.AddDoctorSpecialtyNotFoundResponse }),
     ApiConflictResponse({ type: DoctorSpecialtyRes.AddDoctorSpecialtyConflictResponse }),
-    Permission({ permissions: [PERMISSIONS.DOCTOR_UPDATE] }),
+    Permission({ permissions: [PERMISSIONS.DOCTOR_SPECIALTY_CREATE] }),
   );
 };
 
@@ -30,9 +31,10 @@ export const FindMyDoctorSpecialtiesDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('doctor'),
     ApiOkResponse({ type: DoctorSpecialtyRes.FindMyDoctorSpecialtiesResponse }),
     ApiNotFoundResponse({ type: DoctorSpecialtyRes.FindMyDoctorSpecialtiesNotFoundResponse }),
-    Permission({ permissions: [PERMISSIONS.DOCTOR_READ] }),
+    Permission({ permissions: [PERMISSIONS.DOCTOR_SPECIALTY_READ] }),
   );
 };
 
@@ -58,6 +60,7 @@ export const SetDoctorSpecialtyPrimaryDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('doctor'),
     ApiParam({
       name: 'specialtyId',
       description: 'Specialty ID',
@@ -67,7 +70,11 @@ export const SetDoctorSpecialtyPrimaryDecorators = () => {
     }),
     ApiOkResponse({ type: DoctorSpecialtyRes.SetDoctorSpecialtyPrimaryResponse }),
     ApiNotFoundResponse({ type: DoctorSpecialtyRes.SetDoctorSpecialtyPrimaryNotFoundResponse }),
-    Permission({ permissions: [PERMISSIONS.DOCTOR_UPDATE] }),
+    Permission({
+      permissions: [PERMISSIONS.DOCTOR_UPDATE, PERMISSIONS.DOCTOR_SPECIALTY_UPDATE],
+      ownership: 'owner',
+      resource: 'doctor-specialty',
+    }),
   );
 };
 
@@ -84,6 +91,10 @@ export const RemoveDoctorSpecialtyDecorators = () => {
     }),
     ApiOkResponse({ type: DoctorSpecialtyRes.RemoveDoctorSpecialtyResponse }),
     ApiNotFoundResponse({ type: DoctorSpecialtyRes.RemoveDoctorSpecialtyNotFoundResponse }),
-    Permission({ permissions: [PERMISSIONS.DOCTOR_UPDATE] }),
+    Permission({
+      permissions: [PERMISSIONS.DOCTOR_DELETE, PERMISSIONS.DOCTOR_SPECIALTY_DELETE],
+      ownership: 'owner',
+      resource: 'doctor-specialty',
+    }),
   );
 };

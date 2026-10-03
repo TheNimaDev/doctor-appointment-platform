@@ -7,7 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { BaseException, AccessRequest } from '@/types';
+import { BaseException, OwnershipRequest } from '@/types';
 import { PERMISSION_METADATA, PermissionDecoratorParams, PERMISSIONS } from '@/common';
 import { OWNERSHIP_CONFIG } from '@/common/configs';
 import { DatabaseService } from '@/modules/database/database.service';
@@ -16,7 +16,6 @@ import { DatabaseService } from '@/modules/database/database.service';
 export class OwnershipGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
-
     private readonly databaseService: DatabaseService,
   ) {}
 
@@ -25,15 +24,14 @@ export class OwnershipGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]) ?? {
-      owner: false,
-      clinicOwner: false,
+      ownership: undefined,
       permissions: [],
       requiredAll: false,
       resource: undefined,
       resourceIdParam: 'id',
     };
 
-    if (!metadata.owner && !metadata.clinicOwner) {
+    if (!metadata.ownership) {
       return true;
     }
 
@@ -51,14 +49,9 @@ export class OwnershipGuard implements CanActivate {
       } as BaseException);
     }
 
-    const req = context.switchToHttp().getRequest<AccessRequest>();
+    const request = context.switchToHttp().getRequest<OwnershipRequest>();
 
-    if (req.user.permissions.includes(PERMISSIONS.OWNER_ALL)) {
-      return true;
-    }
-
-    const userId = req.user.userId;
-    const rawResourceId = req.params[metadata.resourceIdParam];
+    const rawResourceId = request.params[metadata.resourceIdParam];
     const resourceId = Array.isArray(rawResourceId) ? rawResourceId[0] : rawResourceId;
 
     if (!resourceId) {
@@ -93,44 +86,46 @@ export class OwnershipGuard implements CanActivate {
       } as BaseException);
     }
 
-    if (metadata.owner) {
-      const ownerUserId = config.getUserId?.(resource);
+    request.ownershipData = resource;
 
-      if (!ownerUserId) {
-        throw new InternalServerErrorException({
-          message: `Unable to resolve owner for resource: ${metadata.resource}.`,
-          error: 'Ownership Resolution Failed',
-        } as BaseException);
-      }
-
-      if (ownerUserId !== userId) {
-        throw new ForbiddenException({
-          message: `You are not the owner of this ${this.formatResourceName(metadata.resource)}.`,
-          error: 'Ownership Verification Failed',
-        } as BaseException);
-      }
-
+    if (request.user.permissions.includes(PERMISSIONS.OWNER_ALL)) {
       return true;
     }
 
-    if (metadata.clinicOwner) {
-      const clinicOwnerId = config.getClinicOwnerId?.(resource);
+    const user = request.user;
 
-      if (!clinicOwnerId) {
-        throw new InternalServerErrorException({
-          message: `Unable to resolve clinic owner for resource: ${metadata.resource}.`,
-          error: 'Clinic Ownership Resolution Failed',
-        } as BaseException);
-      }
+    let ownerUserId: string | undefined;
 
-      if (clinicOwnerId !== userId) {
-        throw new ForbiddenException({
-          message: `This ${this.formatResourceName(metadata.resource)} does not belong to your clinic.`,
-          error: 'Clinic Ownership Verification Failed',
-        } as BaseException);
-      }
+    switch (metadata.ownership) {
+      case 'owner':
+        ownerUserId = config.getOwnerUserId?.(resource);
+        break;
 
-      return true;
+      case 'doctor':
+        ownerUserId = config.getDoctorUserId?.(resource);
+        break;
+
+      case 'patient':
+        ownerUserId = config.getPatientUserId?.(resource);
+        break;
+
+      case 'clinic':
+        ownerUserId = config.getClinicUserId?.(resource);
+        break;
+    }
+
+    if (!ownerUserId) {
+      throw new InternalServerErrorException({
+        message: `Unable to resolve ${metadata.ownership} ownership for resource: ${metadata.resource}.`,
+        error: 'Ownership Resolution Failed',
+      } as BaseException);
+    }
+
+    if (ownerUserId !== user.userId) {
+      throw new ForbiddenException({
+        message: `Access denied. You dont have access to this ${this.formatResourceName(metadata.resource)}.`,
+        error: 'Ownership Verification Failed',
+      } as BaseException);
     }
 
     return true;

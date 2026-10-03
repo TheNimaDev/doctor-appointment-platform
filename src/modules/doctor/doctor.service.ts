@@ -13,7 +13,6 @@ import {
   FindDoctorsPayload,
   UpdateDoctorPayload,
   BaseException,
-  ResolveDoctorPayload,
   UpdateDoctorStatusPayload,
 } from '@/types';
 import { checkDatabaseError } from '@/lib';
@@ -88,31 +87,6 @@ export class DoctorService {
   }
 
   /**
-   * Find an active doctor by ID.
-   */
-  async findActiveById(payload: FindDoctorByIdPayload): Promise<DoctorResponse> {
-    const repository = this.getRepository(payload.manager);
-
-    const doctor = await repository.findOne({
-      where: {
-        id: payload.id,
-        status: DoctorStatus.ACTIVE,
-      },
-    });
-
-    if (!doctor) {
-      throw new NotFoundException({
-        message: 'Doctor not found in database.',
-        error: 'Doctor Not Found',
-      } as BaseException);
-    }
-
-    return {
-      doctor,
-    };
-  }
-
-  /**
    * Find a doctor by ID.
    */
   async findById(payload: FindDoctorByIdPayload): Promise<DoctorResponse> {
@@ -121,6 +95,9 @@ export class DoctorService {
     const doctor = await repository.findOne({
       where: {
         id: payload.id,
+        ...(payload.status && {
+          status: payload.status,
+        }),
       },
     });
 
@@ -197,10 +174,8 @@ export class DoctorService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const { doctor } = await this.resolveDoctor(payload);
-
       const updatedDoctor = await repository.preload({
-        id: doctor.id,
+        id: payload.id,
         ...(payload.medicalCode !== undefined && {
           medicalCode: payload.medicalCode,
         }),
@@ -247,7 +222,10 @@ export class DoctorService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const { doctor } = await this.resolveDoctor(payload);
+      const { doctor } = await this.findById({
+        id: payload.id,
+        manager: payload.manager,
+      });
 
       doctor.status = payload.status;
 
@@ -271,10 +249,13 @@ export class DoctorService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const { doctor } = await this.resolveDoctor(payload);
+      await this.findById({
+        id: payload.id,
+        manager: payload.manager,
+      });
 
       const result = await repository.softDelete({
-        id: doctor.id,
+        id: payload.id,
       });
 
       if (result.affected === 0) {
@@ -293,22 +274,5 @@ export class DoctorService {
         mainResource: 'Doctor',
       });
     }
-  }
-
-  /**
-   * Resolve a doctor by either user ID or doctor ID.
-   */
-  async resolveDoctor(payload: ResolveDoctorPayload): Promise<DoctorResponse> {
-    if ('userId' in payload) {
-      return this.findByUserId({
-        userId: payload.userId,
-        manager: payload.manager,
-      });
-    }
-
-    return this.findById({
-      id: payload.doctorId,
-      manager: payload.manager,
-    });
   }
 }

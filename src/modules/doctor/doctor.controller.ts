@@ -3,6 +3,7 @@ import { DoctorService } from './doctor.service';
 import { CreateDoctorDto, FindDoctorDto, UpdateDoctorDto } from './dto';
 import type { AccessRequest, ApiResponse, DoctorResponse, DoctorsResponse } from '@/types';
 import * as DoctorDecorator from './decorators';
+import { DoctorStatus } from './enums';
 
 @Controller('doctors')
 export class DoctorController {
@@ -48,13 +49,11 @@ export class DoctorController {
   @Get('my')
   @DoctorDecorator.FindMyDoctorDecorators()
   async findMy(@Req() req: AccessRequest): Promise<ApiResponse<DoctorResponse>> {
-    const data = await this.doctorService.findByUserId({
-      userId: req.user.userId,
-    });
-
     return {
       message: 'Doctor profile retrieved successfully.',
-      data,
+      data: {
+        doctor: req.doctor!,
+      },
     };
   }
 
@@ -96,8 +95,9 @@ export class DoctorController {
   @Get(':id')
   @DoctorDecorator.FindDoctorDecorators()
   async findActiveById(@Param('id') id: string): Promise<ApiResponse<DoctorResponse>> {
-    const data = await this.doctorService.findActiveById({
+    const data = await this.doctorService.findById({
       id,
+      status: DoctorStatus.ACTIVE,
     });
 
     return {
@@ -116,7 +116,7 @@ export class DoctorController {
     @Body() updateDoctorDto: UpdateDoctorDto,
   ): Promise<ApiResponse<DoctorResponse>> {
     const data = await this.doctorService.update({
-      userId: req.user.userId,
+      id: req.doctor!.id,
       ...updateDoctorDto,
     });
 
@@ -136,7 +136,7 @@ export class DoctorController {
     @Body() updateDoctorDto: UpdateDoctorDto,
   ): Promise<ApiResponse<DoctorResponse>> {
     const data = await this.doctorService.update({
-      doctorId: id,
+      id,
       ...updateDoctorDto,
     });
 
@@ -153,7 +153,7 @@ export class DoctorController {
   @DoctorDecorator.DeleteMyDoctorDecorators()
   async deleteMy(@Req() req: AccessRequest): Promise<ApiResponse> {
     await this.doctorService.delete({
-      userId: req.user.userId,
+      id: req.doctor!.id,
     });
 
     return {
@@ -168,7 +168,7 @@ export class DoctorController {
   @DoctorDecorator.DeleteDoctorDecorators()
   async delete(@Param('id') id: string): Promise<ApiResponse> {
     await this.doctorService.delete({
-      doctorId: id,
+      id,
     });
 
     return {

@@ -16,7 +16,7 @@ export interface DoctorSpecialtiesResponse {
 
 /** Parameters for adding a specialty to a doctor. */
 export interface AddDoctorSpecialtyPayload {
-  userId: string;
+  doctorId: string;
   specialtyId: string;
   isPrimary?: boolean;
   manager?: EntityManager;
@@ -24,8 +24,7 @@ export interface AddDoctorSpecialtyPayload {
 
 /** Parameters for finding a doctor specialty relation. */
 export interface FindDoctorSpecialtyPayload {
-  doctorId: string;
-  specialtyId: string;
+  id: string;
   manager?: EntityManager;
 }
 
@@ -37,20 +36,19 @@ export interface FindDoctorSpecialtiesPayload {
 
 /** Parameters for setting a doctor's primary specialty. */
 export interface SetPrimaryDoctorSpecialtyPayload {
-  userId: string;
-  specialtyId: string;
+  id: string;
+  doctorId: string;
   manager?: EntityManager;
 }
 
 /** Parameters for finding all specialties associated with a doctor's user ID. */
 export interface FindDoctorSpecialtiesByUserIdPayload {
-  userId: string;
+  doctorId: string;
   manager?: EntityManager;
 }
 
 /** Parameters for removing a specialty from a doctor. */
 export interface RemoveDoctorSpecialtyPayload {
-  userId: string;
-  specialtyId: string;
+  id: string;
   manager?: EntityManager;
 }

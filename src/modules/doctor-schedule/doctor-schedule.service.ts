@@ -23,7 +23,7 @@ import {
 } from '@/types';
 import { DoctorClinicService } from '@/modules/doctor-clinic/doctor-clinic.service';
 import { DoctorService } from '@/modules/doctor/doctor.service';
-import { ClinicService } from '../clinic/clinic.service';
+import { ClinicService } from '@/modules/clinic/clinic.service';
 import { ScheduleStatus } from './enums';
 
 @Injectable()
@@ -54,11 +54,9 @@ export class DoctorScheduleService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const { doctor } = await this.doctorService.resolveDoctor(payload);
-
       const { doctorClinic } = await this.doctorClinicService.findByDoctorAndClinic({
         clinicId: payload.clinicId,
-        doctorId: doctor.id,
+        doctorId: payload.doctorId,
         manager: payload.manager,
       });
 
@@ -119,29 +117,9 @@ export class DoctorScheduleService {
   async getById(payload: FindDoctorScheduleByIdPayload): Promise<DoctorScheduleResponse> {
     const repository = this.getRepository(payload.manager);
 
-    if (payload.clinicOwnerId) {
-      await this.clinicService.findByOwnerId({
-        ownerId: payload.clinicOwnerId,
-        manager: payload.manager,
-      });
-    } else if (payload.userId) {
-      await this.doctorService.findByUserId({
-        userId: payload.userId,
-        manager: payload.manager,
-      });
-    }
-
     const doctorSchedule = await repository.findOne({
       where: {
         id: payload.id,
-        doctorClinic: {
-          ...(payload.userId !== undefined && {
-            doctor: { userId: payload.userId },
-          }),
-          ...(payload.clinicOwnerId !== undefined && {
-            clinic: { ownerId: payload.clinicOwnerId },
-          }),
-        },
       },
     });
 
@@ -195,19 +173,11 @@ export class DoctorScheduleService {
   async findByClinic(payload: FindClinicSchedulesPayload): Promise<DoctorSchedulesResponse> {
     const repository = this.getRepository(payload.manager);
 
-    const { clinic } = await this.clinicService.findByOwnerId({
-      ownerId: payload.userId,
-      manager: payload.manager,
-    });
-
-    const { doctorClinics } = await this.doctorClinicService.findByClinicId({
-      clinicId: clinic.id,
-      manager: payload.manager,
-    });
-
     const doctorSchedules = await repository.find({
       where: {
-        doctorClinicId: In(doctorClinics.map((doctorClinic) => doctorClinic.id)),
+        doctorClinic: {
+          clinicId: payload.clinicId,
+        },
       },
       order: {
         dayOfWeek: 'ASC',
@@ -225,16 +195,16 @@ export class DoctorScheduleService {
   async findActiveByDoctor(payload: FindActiveDoctorSchedulesPayload): Promise<DoctorSchedulesResponse> {
     const repository = this.getRepository(payload.manager);
 
-    const { doctor } = await this.doctorService.resolveDoctor(payload);
-
-    const { doctorClinics } = await this.doctorClinicService.findByDoctorId({
-      doctorId: doctor.id,
+    await this.doctorService.findById({
+      id: payload.doctorId,
       manager: payload.manager,
     });
 
     const doctorSchedules = await repository.find({
       where: {
-        doctorClinicId: In(doctorClinics.map((doctorClinic) => doctorClinic.id)),
+        doctorClinic: {
+          doctorId: payload.doctorId,
+        },
         status: ScheduleStatus.ACTIVE,
       },
       order: {
@@ -254,19 +224,11 @@ export class DoctorScheduleService {
   async findByDoctor(payload: FindDoctorSchedulesPayload): Promise<DoctorSchedulesResponse> {
     const repository = this.getRepository(payload.manager);
 
-    const { doctor } = await this.doctorService.findByUserId({
-      userId: payload.userId,
-      manager: payload.manager,
-    });
-
-    const { doctorClinics } = await this.doctorClinicService.findByDoctorId({
-      doctorId: doctor.id,
-      manager: payload.manager,
-    });
-
     const doctorSchedules = await repository.find({
       where: {
-        doctorClinicId: In(doctorClinics.map((doctorClinic) => doctorClinic.id)),
+        doctorClinic: {
+          doctorId: payload.doctorId,
+        },
       },
       order: {
         dayOfWeek: 'ASC',
@@ -285,11 +247,19 @@ export class DoctorScheduleService {
   async findActiveByDoctorAndClinic(payload: FindActiveDoctorClinicSchedulesPayload): Promise<DoctorSchedulesResponse> {
     const repository = this.getRepository(payload.manager);
 
-    const { doctor } = await this.doctorService.resolveDoctor(payload);
+    await this.doctorService.findById({
+      id: payload.doctorId,
+      manager: payload.manager,
+    });
+
+    await this.clinicService.findById({
+      id: payload.clinicId,
+      manager: payload.manager,
+    });
 
     const { doctorClinic } = await this.doctorClinicService.findByDoctorAndClinic({
       clinicId: payload.clinicId,
-      doctorId: doctor.id,
+      doctorId: payload.clinicId,
       manager: payload.manager,
     });
 
@@ -308,46 +278,19 @@ export class DoctorScheduleService {
       doctorSchedules,
     };
   }
+
   /**
    * Get all schedules belonging to a doctor-clinic relation.
    */
   async findByDoctorAndClinic(payload: FindDoctorClinicSchedulesPayload): Promise<DoctorSchedulesResponse> {
     const repository = this.getRepository(payload.manager);
 
-    if (payload.clinicOwnerId && payload.doctorId) {
-      await this.clinicService.findByOwnerId({
-        ownerId: payload.clinicOwnerId,
-        manager: payload.manager,
-      });
-      await this.doctorService.findById({
-        id: payload.doctorId,
-        manager: payload.manager,
-      });
-    } else if (payload.userId && payload.clinicId) {
-      await this.doctorService.findByUserId({
-        userId: payload.userId,
-        manager: payload.manager,
-      });
-      await this.clinicService.findById({
-        id: payload.clinicId,
-        manager: payload.manager,
-      });
-    }
-
-    const doctorClinic =
-      payload.userId !== undefined
-        ? {
-            doctor: { userId: payload.userId },
-            clinic: { id: payload.clinicId },
-          }
-        : {
-            doctor: { id: payload.doctorId },
-            clinic: { ownerId: payload.clinicOwnerId },
-          };
-
     const doctorSchedules = await repository.find({
       where: {
-        doctorClinic,
+        doctorClinic: {
+          doctorId: payload.doctorId,
+          clinicId: payload.clinicId,
+        },
       },
       order: {
         dayOfWeek: 'ASC',
@@ -367,30 +310,8 @@ export class DoctorScheduleService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      if (payload.clinicOwnerId) {
-        await this.clinicService.findByOwnerId({
-          ownerId: payload.clinicOwnerId,
-          manager: payload.manager,
-        });
-      } else if (payload.userId) {
-        await this.doctorService.findByUserId({
-          userId: payload.userId,
-          manager: payload.manager,
-        });
-      }
-
       const doctorSchedule = await repository.preload({
         id: payload.id,
-
-        doctorClinic: {
-          ...(payload.userId !== undefined && {
-            doctor: { userId: payload.userId },
-          }),
-          ...(payload.clinicOwnerId !== undefined && {
-            clinic: { ownerId: payload.clinicOwnerId },
-          }),
-        },
-
         ...(payload.dayOfWeek !== undefined && {
           dayOfWeek: payload.dayOfWeek,
         }),
@@ -436,30 +357,9 @@ export class DoctorScheduleService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      if (payload.clinicOwnerId) {
-        await this.clinicService.findByOwnerId({
-          ownerId: payload.clinicOwnerId,
-          manager: payload.manager,
-        });
-      } else if (payload.userId) {
-        await this.doctorService.findByUserId({
-          userId: payload.userId,
-          manager: payload.manager,
-        });
-      }
-
       const doctorSchedule = await repository.preload({
         id: payload.id,
         status: payload.status,
-
-        doctorClinic: {
-          ...(payload.userId !== undefined && {
-            doctor: { userId: payload.userId },
-          }),
-          ...(payload.clinicOwnerId !== undefined && {
-            clinic: { ownerId: payload.clinicOwnerId },
-          }),
-        },
       });
 
       if (!doctorSchedule) {
@@ -492,29 +392,9 @@ export class DoctorScheduleService {
   async deleteDoctorSchedule(payload: DeleteDoctorSchedulePayload): Promise<void> {
     const repository = this.getRepository(payload.manager);
 
-    if (payload.clinicOwnerId) {
-      await this.clinicService.findByOwnerId({
-        ownerId: payload.clinicOwnerId,
-        manager: payload.manager,
-      });
-    } else if (payload.userId) {
-      await this.doctorService.findByUserId({
-        userId: payload.userId,
-        manager: payload.manager,
-      });
-    }
-
     const doctorSchedule = await repository.findOne({
       where: {
         id: payload.id,
-        doctorClinic: {
-          ...(payload.userId !== undefined && {
-            doctor: { userId: payload.userId },
-          }),
-          ...(payload.clinicOwnerId !== undefined && {
-            clinic: { ownerId: payload.clinicOwnerId },
-          }),
-        },
       },
     });
 

@@ -10,7 +10,7 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { Permission, PERMISSIONS, Public } from '@/common';
+import { Context, Permission, PERMISSIONS, Public } from '@/common';
 import * as DoctorRes from '../res';
 import * as DoctorDto from '../dto';
 import { DoctorStatus } from '../enums';
@@ -44,6 +44,7 @@ export const FindMyDoctorDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('doctor'),
     ApiOkResponse({ type: DoctorRes.FindMyDoctorResponse }),
     ApiNotFoundResponse({ type: DoctorRes.FindMyDoctorNotFoundResponse }),
     Permission({
@@ -107,6 +108,7 @@ export const UpdateMyDoctorDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('doctor'),
     ApiBody({ type: DoctorDto.UpdateDoctorDto }),
     ApiOkResponse({ type: DoctorRes.UpdateMyDoctorResponse }),
     ApiBadRequestResponse({ type: DoctorRes.UpdateMyDoctorBadRequestResponse }),
@@ -143,6 +145,7 @@ export const DeleteMyDoctorDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),
     ApiBearerAuth('accessToken'),
+    Context('doctor'),
     ApiOkResponse({ type: DoctorRes.DeleteMyDoctorResponse }),
     ApiNotFoundResponse({ type: DoctorRes.DeleteMyDoctorNotFoundResponse }),
     Permission({

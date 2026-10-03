@@ -10,36 +10,45 @@ import { Session } from '@/modules/session/entities';
 import { RefreshToken } from '@/modules/refresh-token/entities';
 import { DoctorSpecialty } from '@/modules/doctor-specialty/entities';
 import { MedicalRecord } from '@/modules/medical-record/entities';
+import { Patient } from '@/modules/patient/entities';
+import { DoctorClinic } from '@/modules/doctor-clinic/entities';
 
 interface OwnershipConfig {
   entity: EntityTarget<ObjectLiteral>;
   relations: FindOptionsRelations<ObjectLiteral>;
 
-  getUserId?: (resource: ObjectLiteral) => string | undefined;
-  getClinicOwnerId?: (resource: ObjectLiteral) => string | undefined;
+  getOwnerUserId?: (resource: ObjectLiteral) => string | undefined;
+  getDoctorUserId?: (resource: ObjectLiteral) => string | undefined;
+  getPatientUserId?: (resource: ObjectLiteral) => string | undefined;
+  getClinicUserId?: (resource: ObjectLiteral) => string | undefined;
 }
 
 export const OWNERSHIP_CONFIG: Record<string, OwnershipConfig> = {
   user: {
     entity: User,
     relations: {},
-    getUserId: (resource) => resource.id,
+    getOwnerUserId: (resource) => resource.id,
   },
 
   doctor: {
     entity: Doctor,
     relations: {},
-    getUserId: (resource) => resource.userId,
+    getOwnerUserId: (resource) => resource.userId,
   },
 
   clinic: {
     entity: Clinic,
     relations: {},
-    getUserId: (resource) => resource.ownerId,
-    getClinicOwnerId: (resource) => resource.ownerId,
+    getOwnerUserId: (resource) => resource.ownerId,
   },
 
-  'appointment-doctor': {
+  patient: {
+    entity: Patient,
+    relations: {},
+    getOwnerUserId: (resource) => resource.userId,
+  },
+
+  appointment: {
     entity: Appointment,
     relations: {
       timeSlot: {
@@ -50,25 +59,11 @@ export const OWNERSHIP_CONFIG: Record<string, OwnershipConfig> = {
           },
         },
       },
-    },
-    getUserId: (resource) => resource.timeSlot?.schedule?.doctorClinic?.doctor?.userId,
-    getClinicOwnerId: (resource) => resource.timeSlot?.schedule?.doctorClinic?.clinic?.ownerId,
-  },
-
-  'appointment-patient': {
-    entity: Appointment,
-    relations: {
-      timeSlot: {
-        schedule: {
-          doctorClinic: {
-            clinic: true,
-          },
-        },
-      },
       patient: true,
     },
-    getUserId: (resource) => resource.patient?.userId,
-    getClinicOwnerId: (resource) => resource.timeSlot?.schedule?.doctorClinic?.clinic?.ownerId,
+    getDoctorUserId: (resource) => resource.timeSlot?.schedule?.doctorClinic?.doctor?.userId,
+    getClinicUserId: (resource) => resource.timeSlot?.schedule?.doctorClinic?.clinic?.ownerId,
+    getPatientUserId: (resource) => resource.patient?.userId,
   },
 
   'doctor-schedule': {
@@ -79,8 +74,18 @@ export const OWNERSHIP_CONFIG: Record<string, OwnershipConfig> = {
         clinic: true,
       },
     },
-    getUserId: (resource) => resource.doctorClinic?.doctor?.userId,
-    getClinicOwnerId: (resource) => resource.doctorClinic?.clinic?.ownerId,
+    getDoctorUserId: (resource) => resource.doctorClinic?.doctor?.userId,
+    getClinicUserId: (resource) => resource.doctorClinic?.clinic?.ownerId,
+  },
+
+  'doctor-clinic': {
+    entity: DoctorClinic,
+    relations: {
+      doctor: true,
+      clinic: true,
+    },
+    getDoctorUserId: (resource) => resource.doctor?.userId,
+    getClinicUserId: (resource) => resource.clinic?.ownerId,
   },
 
   'time-slot': {
@@ -93,14 +98,14 @@ export const OWNERSHIP_CONFIG: Record<string, OwnershipConfig> = {
         },
       },
     },
-    getUserId: (resource) => resource.schedule?.doctorClinic?.doctor?.userId,
-    getClinicOwnerId: (resource) => resource.schedule?.doctorClinic?.clinic?.ownerId,
+    getDoctorUserId: (resource) => resource.schedule?.doctorClinic?.doctor?.userId,
+    getClinicUserId: (resource) => resource.schedule?.doctorClinic?.clinic?.ownerId,
   },
 
   session: {
     entity: Session,
     relations: {},
-    getUserId: (resource) => resource.userId,
+    getOwnerUserId: (resource) => resource.userId,
   },
 
   'refresh-token': {
@@ -108,7 +113,7 @@ export const OWNERSHIP_CONFIG: Record<string, OwnershipConfig> = {
     relations: {
       session: true,
     },
-    getUserId: (resource) => resource.session?.userId,
+    getOwnerUserId: (resource) => resource.session?.userId,
   },
 
   'doctor-specialty': {
@@ -116,10 +121,10 @@ export const OWNERSHIP_CONFIG: Record<string, OwnershipConfig> = {
     relations: {
       doctor: true,
     },
-    getUserId: (resource) => resource.doctor?.userId,
+    getOwnerUserId: (resource) => resource.doctor?.userId,
   },
 
-  'medical-record-doctor': {
+  'medical-record': {
     entity: MedicalRecord,
     relations: {
       appointment: {
@@ -127,37 +132,13 @@ export const OWNERSHIP_CONFIG: Record<string, OwnershipConfig> = {
           schedule: {
             doctorClinic: {
               doctor: true,
-            },
-          },
-        },
-      },
-    },
-    getUserId: (resource) => resource.appointment?.timeSlot?.schedule?.doctorClinic?.doctor?.userId,
-  },
-
-  'medical-record-clinic': {
-    entity: MedicalRecord,
-    relations: {
-      appointment: {
-        timeSlot: {
-          schedule: {
-            doctorClinic: {
               clinic: true,
             },
           },
         },
       },
     },
-    getClinicOwnerId: (resource) => resource.appointment?.timeSlot?.schedule?.doctorClinic?.clinic?.ownerId,
-  },
-
-  'medical-record-patient': {
-    entity: MedicalRecord,
-    relations: {
-      appointment: {
-        patient: true,
-      },
-    },
-    getUserId: (resource) => resource.appointment?.patient?.userId,
+    getDoctorUserId: (resource) => resource.appointment?.timeSlot?.schedule?.doctorClinic?.doctor?.userId,
+    getClinicUserId: (resource) => resource.appointment?.timeSlot?.schedule?.doctorClinic?.clinic?.ownerId,
   },
 };

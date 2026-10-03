@@ -8,27 +8,17 @@ import {
   FindMedicalRecordByIdPayload,
   MedicalRecordResponse,
   DeleteMedicalRecordPayload,
-  ResolveMedicalRecordPayload,
   UpdateMedicalRecordPayload,
-  FindPatientMedicalRecordByIdPayload,
   FindPatientMedicalRecordsPayload,
   MedicalRecordsResponse,
   FindDoctorMedicalRecordsPayload,
-  FindDoctorMedicalRecordByIdPayload,
   FindClinicAdminMedicalRecordsPayload,
-  FindClinicAdminMedicalRecordByIdPayload,
-  FindPatientMedicalRecordByAppointmentIdPayload,
-  FindDoctorMedicalRecordByAppointmentIdPayload,
-  FindClinicAdminMedicalRecordByAppointmentIdPayload,
   FindMedicalRecordsPayload,
 } from '@/types';
 import { BaseException } from '@/types';
 import { checkDatabaseError } from '@/lib';
 import { AppointmentService } from '@/modules/appointment/appointment.service';
-import { DoctorService } from '../doctor/doctor.service';
 import { AppointmentStatus } from '../appointment/enums';
-import { PatientService } from '../patient/patient.service';
-import { ClinicService } from '../clinic/clinic.service';
 
 @Injectable()
 export class MedicalRecordService {
@@ -36,9 +26,6 @@ export class MedicalRecordService {
     @InjectRepository(MedicalRecord)
     private readonly medicalRecordRepository: Repository<MedicalRecord>,
     private readonly appointmentService: AppointmentService,
-    private readonly doctorService: DoctorService,
-    private readonly patientService: PatientService,
-    private readonly clinicService: ClinicService,
   ) {}
 
   /**
@@ -58,14 +45,8 @@ export class MedicalRecordService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const { doctor } = await this.doctorService.findByUserId({
-        userId: payload.userId,
-        manager: payload.manager,
-      });
-
-      const { appointment } = await this.appointmentService.getDoctorAppointmentById({
+      const { appointment } = await this.appointmentService.getById({
         id: payload.appointmentId,
-        userId: doctor.userId,
         manager: payload.manager,
       });
 
@@ -170,92 +151,16 @@ export class MedicalRecordService {
   async findPatientMedicalRecords(payload: FindPatientMedicalRecordsPayload): Promise<MedicalRecordsResponse> {
     const repository = this.getRepository(payload.manager);
 
-    const { patient } = await this.patientService.findByUserId({
-      userId: payload.userId,
-      manager: payload.manager,
-    });
-
     const medicalRecords = await repository.find({
       where: {
         appointment: {
-          patientId: patient.id,
+          patientId: payload.patientId,
         },
       },
     });
 
     return {
       medicalRecords,
-    };
-  }
-
-  /**
-   * Get a medical record from the authenticated patient.
-   */
-  async findPatientMedicalRecordById(payload: FindPatientMedicalRecordByIdPayload): Promise<MedicalRecordResponse> {
-    const repository = this.getRepository(payload.manager);
-
-    const { patient } = await this.patientService.findByUserId({
-      userId: payload.userId,
-      manager: payload.manager,
-    });
-
-    const medicalRecord = await repository.findOne({
-      where: {
-        id: payload.id,
-        appointment: {
-          patientId: patient.id,
-        },
-      },
-    });
-
-    if (!medicalRecord) {
-      throw new NotFoundException({
-        message: 'Medical record not found in database.',
-        error: 'Medical Record Not Found',
-      } as BaseException);
-    }
-
-    return {
-      medicalRecord,
-    };
-  }
-
-  /**
-   * Get a medical record from the authenticated patient by appointment ID.
-   */
-  async findPatientMedicalRecordByAppointmentId(
-    payload: FindPatientMedicalRecordByAppointmentIdPayload,
-  ): Promise<MedicalRecordResponse> {
-    const repository = this.getRepository(payload.manager);
-
-    const { appointment } = await this.appointmentService.getById({
-      id: payload.appointmentId,
-      manager: payload.manager,
-    });
-
-    const { patient } = await this.patientService.findByUserId({
-      userId: payload.userId,
-      manager: payload.manager,
-    });
-
-    const medicalRecord = await repository.findOne({
-      where: {
-        appointment: {
-          id: appointment.id,
-          patientId: patient.id,
-        },
-      },
-    });
-
-    if (!medicalRecord) {
-      throw new NotFoundException({
-        message: 'Medical record not found in database.',
-        error: 'Medical Record Not Found',
-      } as BaseException);
-    }
-
-    return {
-      medicalRecord,
     };
   }
 
@@ -265,18 +170,13 @@ export class MedicalRecordService {
   async findDoctorMedicalRecords(payload: FindDoctorMedicalRecordsPayload): Promise<MedicalRecordsResponse> {
     const repository = this.getRepository(payload.manager);
 
-    const { doctor } = await this.doctorService.findByUserId({
-      userId: payload.userId,
-      manager: payload.manager,
-    });
-
     const medicalRecords = await repository.find({
       where: {
         appointment: {
           timeSlot: {
             schedule: {
               doctorClinic: {
-                doctorId: doctor.id,
+                doctorId: payload.doctorId,
               },
             },
           },
@@ -286,89 +186,6 @@ export class MedicalRecordService {
 
     return {
       medicalRecords,
-    };
-  }
-
-  /**
-   * Get a medical record from the authenticated doctor.
-   */
-  async findDoctorMedicalRecordById(payload: FindDoctorMedicalRecordByIdPayload): Promise<MedicalRecordResponse> {
-    const repository = this.getRepository(payload.manager);
-
-    const { doctor } = await this.doctorService.findByUserId({
-      userId: payload.userId,
-      manager: payload.manager,
-    });
-
-    const medicalRecord = await repository.findOne({
-      where: {
-        id: payload.id,
-        appointment: {
-          timeSlot: {
-            schedule: {
-              doctorClinic: {
-                doctorId: doctor.id,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!medicalRecord) {
-      throw new NotFoundException({
-        message: 'Medical record not found in database.',
-        error: 'Medical Record Not Found',
-      } as BaseException);
-    }
-
-    return {
-      medicalRecord,
-    };
-  }
-
-  /**
-   * Get a medical record from the authenticated doctor by appointment ID.
-   */
-  async findDoctorMedicalRecordByAppointmentId(
-    payload: FindDoctorMedicalRecordByAppointmentIdPayload,
-  ): Promise<MedicalRecordResponse> {
-    const repository = this.getRepository(payload.manager);
-
-    const { appointment } = await this.appointmentService.getById({
-      id: payload.appointmentId,
-      manager: payload.manager,
-    });
-
-    const { doctor } = await this.doctorService.findByUserId({
-      userId: payload.userId,
-      manager: payload.manager,
-    });
-
-    const medicalRecord = await repository.findOne({
-      where: {
-        appointment: {
-          id: appointment.id,
-          timeSlot: {
-            schedule: {
-              doctorClinic: {
-                doctorId: doctor.id,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!medicalRecord) {
-      throw new NotFoundException({
-        message: 'Medical record not found in database.',
-        error: 'Medical Record Not Found',
-      } as BaseException);
-    }
-
-    return {
-      medicalRecord,
     };
   }
 
@@ -378,11 +195,6 @@ export class MedicalRecordService {
   async findClinicAdminMedicalRecords(payload: FindClinicAdminMedicalRecordsPayload): Promise<MedicalRecordsResponse> {
     const repository = this.getRepository(payload.manager);
 
-    const { clinic } = await this.clinicService.findByOwnerId({
-      ownerId: payload.userId,
-      manager: payload.manager,
-    });
-
     const medicalRecords = await repository.find({
       where: {
         appointment: {
@@ -390,7 +202,7 @@ export class MedicalRecordService {
             schedule: {
               doctorClinic: {
                 clinic: {
-                  ownerId: clinic.ownerId,
+                  ownerId: payload.clinicId,
                 },
               },
             },
@@ -401,95 +213,6 @@ export class MedicalRecordService {
 
     return {
       medicalRecords,
-    };
-  }
-
-  /**
-   * Get a medical record from the authenticated admin's clinic.
-   */
-  async findClinicAdminMedicalRecordById(
-    payload: FindClinicAdminMedicalRecordByIdPayload,
-  ): Promise<MedicalRecordResponse> {
-    const repository = this.getRepository(payload.manager);
-
-    const { clinic } = await this.clinicService.findByOwnerId({
-      ownerId: payload.userId,
-      manager: payload.manager,
-    });
-
-    const medicalRecord = await repository.findOne({
-      where: {
-        id: payload.id,
-        appointment: {
-          timeSlot: {
-            schedule: {
-              doctorClinic: {
-                clinic: {
-                  ownerId: clinic.ownerId,
-                },
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!medicalRecord) {
-      throw new NotFoundException({
-        message: 'Medical record not found in database.',
-        error: 'Medical Record Not Found',
-      } as BaseException);
-    }
-
-    return {
-      medicalRecord,
-    };
-  }
-
-  /**
-   * Get a medical record from the authenticated admin's clinic by appointment ID.
-   */
-  async findClinicAdminMedicalRecordByAppointmentId(
-    payload: FindClinicAdminMedicalRecordByAppointmentIdPayload,
-  ): Promise<MedicalRecordResponse> {
-    const repository = this.getRepository(payload.manager);
-
-    const { appointment } = await this.appointmentService.getById({
-      id: payload.appointmentId,
-      manager: payload.manager,
-    });
-
-    const { clinic } = await this.clinicService.findByOwnerId({
-      ownerId: payload.userId,
-      manager: payload.manager,
-    });
-
-    const medicalRecord = await repository.findOne({
-      where: {
-        appointment: {
-          id: appointment.id,
-          timeSlot: {
-            schedule: {
-              doctorClinic: {
-                clinic: {
-                  ownerId: clinic.ownerId,
-                },
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!medicalRecord) {
-      throw new NotFoundException({
-        message: 'Medical record not found in database.',
-        error: 'Medical Record Not Found',
-      } as BaseException);
-    }
-
-    return {
-      medicalRecord,
     };
   }
 
@@ -500,10 +223,8 @@ export class MedicalRecordService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const { medicalRecord } = await this.resolveMedicalRecord(payload);
-
       const updatedMedicalRecord = await repository.preload({
-        id: medicalRecord.id,
+        id: payload.id,
         ...(payload.diagnosis !== undefined && {
           diagnosis: payload.diagnosis,
         }),
@@ -546,10 +267,8 @@ export class MedicalRecordService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const { medicalRecord } = await this.resolveMedicalRecord(payload);
-
       const result = await repository.softDelete({
-        id: medicalRecord.id,
+        id: payload.id,
       });
 
       if (result.affected === 0) {
@@ -568,24 +287,5 @@ export class MedicalRecordService {
         mainResource: 'Medical Record',
       });
     }
-  }
-
-  /**
-   * Resolve a medical record by either appointment ID or medical record ID.
-   */
-  async resolveMedicalRecord(payload: ResolveMedicalRecordPayload): Promise<MedicalRecordResponse> {
-    if ('appointmentId' in payload) {
-      return this.findDoctorMedicalRecordByAppointmentId({
-        userId: payload.userId,
-        appointmentId: payload.appointmentId,
-        manager: payload.manager,
-      });
-    }
-
-    return this.findDoctorMedicalRecordById({
-      id: payload.medicalRecordId,
-      userId: payload.userId,
-      manager: payload.manager,
-    });
   }
 }
