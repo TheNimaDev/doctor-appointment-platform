@@ -46,19 +46,9 @@ export class DoctorClinicService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const { doctor } = await this.doctorService.findById({
-        id: payload.doctorId,
-        manager: payload.manager,
-      });
-
-      const { clinic } = await this.clinicService.findByOwnerId({
-        ownerId: payload.clinicOwnerId,
-        manager: payload.manager,
-      });
-
       const doctorClinic = repository.create({
-        doctorId: doctor.id,
-        clinicId: clinic.id,
+        doctorId: payload.doctorId,
+        clinicId: payload.clinicId,
       });
 
       const savedDoctorClinic = await repository.save(doctorClinic);
@@ -160,14 +150,9 @@ export class DoctorClinicService {
   async findClinicDoctors(payload: FindClinicDoctorsByOwnerIdPayload): Promise<DoctorClinicsResponse> {
     const repository = this.getRepository(payload.manager);
 
-    const { clinic } = await this.clinicService.findByOwnerId({
-      ownerId: payload.clinicOwnerId,
-      manager: payload.manager,
-    });
-
     const doctorClinics = await repository.find({
       where: {
-        clinicId: clinic.id,
+        clinicId: payload.clinicId,
       },
     });
 
@@ -182,14 +167,9 @@ export class DoctorClinicService {
   async findDoctorClinics(payload: FindDoctorClinicsByUserIdPayload): Promise<DoctorClinicsResponse> {
     const repository = this.getRepository(payload.manager);
 
-    const { doctor } = await this.doctorService.findByUserId({
-      userId: payload.userId,
-      manager: payload.manager,
-    });
-
     const doctorClinics = await repository.find({
       where: {
-        doctorId: doctor.id,
+        doctorId: payload.doctorId,
       },
     });
 
@@ -242,19 +222,8 @@ export class DoctorClinicService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const { doctor } = await this.doctorService.findById({
-        id: payload.doctorId,
-        manager: payload.manager,
-      });
-
-      const { clinic } = await this.clinicService.findByOwnerId({
-        ownerId: payload.clinicOwnerId,
-        manager: payload.manager,
-      });
-
       const result = await repository.softDelete({
-        doctorId: doctor.id,
-        clinicId: clinic.id,
+        id: payload.id,
       });
 
       if (result.affected === 0) {
