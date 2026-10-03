@@ -195,16 +195,16 @@ export class DoctorScheduleService {
   async findActiveByDoctor(payload: FindActiveDoctorSchedulesPayload): Promise<DoctorSchedulesResponse> {
     const repository = this.getRepository(payload.manager);
 
-    const { doctor } = await this.doctorService.resolveDoctor(payload);
-
-    const { doctorClinics } = await this.doctorClinicService.findByDoctorId({
-      doctorId: doctor.id,
+    await this.doctorService.findById({
+      id: payload.doctorId,
       manager: payload.manager,
     });
 
     const doctorSchedules = await repository.find({
       where: {
-        doctorClinicId: In(doctorClinics.map((doctorClinic) => doctorClinic.id)),
+        doctorClinic: {
+          doctorId: payload.doctorId,
+        },
         status: ScheduleStatus.ACTIVE,
       },
       order: {
@@ -247,11 +247,19 @@ export class DoctorScheduleService {
   async findActiveByDoctorAndClinic(payload: FindActiveDoctorClinicSchedulesPayload): Promise<DoctorSchedulesResponse> {
     const repository = this.getRepository(payload.manager);
 
-    const { doctor } = await this.doctorService.resolveDoctor(payload);
+    await this.doctorService.findById({
+      id: payload.doctorId,
+      manager: payload.manager,
+    });
+
+    await this.clinicService.findById({
+      id: payload.clinicId,
+      manager: payload.manager,
+    });
 
     const { doctorClinic } = await this.doctorClinicService.findByDoctorAndClinic({
       clinicId: payload.clinicId,
-      doctorId: doctor.id,
+      doctorId: payload.clinicId,
       manager: payload.manager,
     });
 
@@ -270,6 +278,7 @@ export class DoctorScheduleService {
       doctorSchedules,
     };
   }
+
   /**
    * Get all schedules belonging to a doctor-clinic relation.
    */
