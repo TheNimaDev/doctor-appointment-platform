@@ -6,34 +6,33 @@
 
 Prescription بعد از انجام ویزیت ایجاد می‌شود.
 
-Flow:
+Structure:
 
 ```
+Patient
+   1
+   ↓
+   N
 Appointment
-
-COMPLETED
-
-↓
-
+   1
+   ↓
+   0..1
 Prescription
-
-↓
-
+   1
+   ↓
+   N
 PrescriptionItems
 ```
-
 ---
 
 # Fields
 
 | Field         | Type     | Nullable | Description      |
-| ------------- | -------- | -------- | ---------------- | --- |
+| ------------- | -------- | -------- | ---------------- |
 | id            | UUID     | ❌       | Primary Key      |
 | appointmentId | UUID     | ❌       | FK → Appointment |
-| doctorId      | UUID     | ❌       | FK → Doctor      |
-| patientId     | UUID     | ❌       | FK → Patient     |
 | notes         | text     | ✅       | توضیحات نسخه     |
-| pdfFileId     | UUID     | ✅       | FK → File        | @   |
+| pdfFileId     | UUID     | ✅       | FK → File        |
 | createdAt     | datetime | ❌       | زمان ایجاد       |
 | updatedAt     | datetime | ❌       | زمان بروزرسانی   |
 | deletedAt     | datetime | ✅       | Soft Delete      |
@@ -60,40 +59,6 @@ Appointment
 
 ---
 
-## Many To One
-
-### Prescription → Doctor
-
-```
-Prescription
-
-N
-
-↓
-
-1
-
-Doctor
-```
-
----
-
-### Prescription → Patient
-
-```
-Prescription
-
-N
-
-↓
-
-1
-
-Patient
-```
-
----
-
 ## One To Many
 
 ### Prescription → PrescriptionItem
@@ -108,6 +73,14 @@ Prescription
 N
 
 PrescriptionItem
+```
+
+---
+
+# Indexes
+
+```
+UNIQUE(appointmentId)
 ```
 
 ---
