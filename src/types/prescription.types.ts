@@ -2,7 +2,7 @@ import { EntityManager } from 'typeorm';
 import { Prescription } from '@/modules/prescription/entities';
 
 /** Prescription without relation data. */
-export type SafePrescription = Omit<Prescription, 'appointment'>;
+export type SafePrescription = Omit<Prescription, 'appointment' | 'items'>;
 
 /** Single prescription API response. */
 export interface PrescriptionResponse {
