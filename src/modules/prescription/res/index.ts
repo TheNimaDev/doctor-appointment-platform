@@ -5,3 +5,4 @@ export * from './find-prescription.response';
 export * from './find-prescription-by-appointment.response';
 export * from './find-patient-prescriptions.response';
 export * from './find-patient-prescription.response';
+export * from './find-patient-prescription-by-appointment.response';
