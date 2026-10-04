@@ -36,6 +36,7 @@ Items:
 | quantity       | int          | ✅       | تعداد             |
 | createdAt      | datetime     | ❌       | زمان ایجاد        |
 | updatedAt      | datetime     | ❌       | زمان بروزرسانی    |
+| deletedAt      | datetime     | ✅       | Soft Delete      |
 
 ---
 
@@ -71,24 +72,19 @@ Items:
 
 ```
 Medicine:
-
 Amoxicillin
 
-
 Dosage:
-
 500mg
 
-
 Usage:
-
 Every 8 hours
 
-
 Duration:
-
 7 days
-```
+
+Quantity:
+21
 
 ---
 
@@ -102,13 +98,21 @@ Duration:
 
 ## Rule 2
 
-نسخه بدون دارو معتبر نیست.
+یک Prescription در حالت نهایی/ثبت‌شده باید حداقل یک PrescriptionItem داشته باشد.
 
 ---
 
 ## Rule 3
 
-حذف دارو باید از طریق حذف نسخه یا Soft Delete مدیریت شود.
+PrescriptionItem باید از Prescription خود جدا نشود.
+
+حذف نسخه باید مطابق سیاست حذف Prescription انجام شود و حذف مستقیم دارو در صورت نیاز با Soft Delete مدیریت شود.
+
+---
+
+## Rule 4
+
+اگر quantity مقدار داشته باشد، باید بزرگ‌تر از صفر باشد.
 
 ---
 
