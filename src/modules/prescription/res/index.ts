@@ -11,3 +11,4 @@ export * from './find-doctor-prescription.response';
 export * from './find-doctor-prescription-by-appointment.response';
 export * from './find-my-clinic-prescriptions.response';
 export * from './find-my-clinic-prescription.response';
+export * from './find-my-clinic-prescription-by-appointment.response';
