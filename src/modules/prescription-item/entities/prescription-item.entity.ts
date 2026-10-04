@@ -4,9 +4,12 @@ import {
   DeleteDateColumn,
   Entity,
   Index,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Prescription } from '@/modules/prescription/entities';
 
 @Entity('prescription_items')
 @Index(['prescriptionId'])
@@ -16,6 +19,12 @@ export class PrescriptionItem {
 
   @Column({ type: 'uuid' })
   prescriptionId: string;
+
+  @ManyToOne(() => Prescription, (prescription) => prescription.items, {
+    onDelete: 'RESTRICT',
+  })
+  @JoinColumn({ name: 'prescriptionId' })
+  prescription: Prescription;
 
   @Column({ type: 'varchar', length: 255 })
   medicineName: string;

@@ -4,12 +4,14 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
 import { Appointment } from '@/modules/appointment/entities';
+import { PrescriptionItem } from '@/modules/prescription-item/entities';
 
 @Entity('prescriptions')
 @Unique(['appointmentId'])
@@ -25,6 +27,9 @@ export class Prescription {
   })
   @JoinColumn({ name: 'appointmentId' })
   appointment: Appointment;
+
+  @OneToMany(() => PrescriptionItem, (prescriptionItem) => prescriptionItem.prescription)
+  items: PrescriptionItem[];
 
   @Column({ type: 'text', nullable: true })
   notes: string | null;
