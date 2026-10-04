@@ -3,7 +3,7 @@ import { Appointment } from '@/modules/appointment/entities';
 import { AppointmentStatus } from '@/modules/appointment/enums';
 
 /** Appointment without relation data. */
-export type SafeAppointment = Omit<Appointment, 'timeSlot' | 'patient' | 'medicalRecord'>;
+export type SafeAppointment = Omit<Appointment, 'timeSlot' | 'patient' | 'medicalRecord' | 'prescription'>;
 
 /** Appointment API response. */
 export interface AppointmentResponse {
@@ -34,7 +34,6 @@ export interface FindMyClinicAppointmentsPayload {
   status?: AppointmentStatus;
   manager?: EntityManager;
 }
-
 
 /** Parameters required to find all appointments. */
 export interface FindAppointmentsPayload {
