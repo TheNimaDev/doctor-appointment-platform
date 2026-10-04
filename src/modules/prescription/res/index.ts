@@ -1,2 +1,3 @@
 export * from './prescription.response';
 export * from './create-prescription.response';
+export * from './find-prescriptions.response';
