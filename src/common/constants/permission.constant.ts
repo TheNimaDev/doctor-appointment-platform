@@ -297,6 +297,39 @@ export const MEDICAL_RECORD_PERMISSIONS = {
   },
 } as const satisfies PermissionStructure;
 
+export const PRESCRIPTION_PERMISSIONS = {
+  PRESCRIPTION_CREATE: {
+    name: 'prescription:create',
+    module: 'prescription',
+    action: 'create',
+  },
+  PRESCRIPTION_READ_PATIENT: {
+    name: 'prescription:read-patient',
+    module: 'prescription',
+    action: 'read-patient',
+  },
+  PRESCRIPTION_READ_DOCTOR: {
+    name: 'prescription:read-doctor',
+    module: 'prescription',
+    action: 'read-doctor',
+  },
+  PRESCRIPTION_READ_CLINIC: {
+    name: 'prescription:read-clinic',
+    module: 'prescription',
+    action: 'read-clinic',
+  },
+  PRESCRIPTION_UPDATE: {
+    name: 'prescription:update',
+    module: 'prescription',
+    action: 'update',
+  },
+  PRESCRIPTION_DELETE: {
+    name: 'prescription:delete',
+    module: 'prescription',
+    action: 'delete',
+  },
+} as const satisfies PermissionStructure;
+
 export const RAW_PERMISSIONS_OBJECT = {
   ...BASE_PERMISSIONS,
   ...USER_PERMISSIONS,
@@ -310,6 +343,7 @@ export const RAW_PERMISSIONS_OBJECT = {
   ...DOCTOR_CLINIC_PERMISSIONS,
   ...PATIENT_PERMISSIONS,
   ...MEDICAL_RECORD_PERMISSIONS,
+  ...PRESCRIPTION_PERMISSIONS,
 } as const satisfies PermissionStructure;
 
 type ReturnPermissionObject = Readonly<{
