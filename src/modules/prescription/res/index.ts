@@ -13,3 +13,4 @@ export * from './find-my-clinic-prescriptions.response';
 export * from './find-my-clinic-prescription.response';
 export * from './find-my-clinic-prescription-by-appointment.response';
 export * from './update-prescription.response';
+export * from './delete-prescription.response';
