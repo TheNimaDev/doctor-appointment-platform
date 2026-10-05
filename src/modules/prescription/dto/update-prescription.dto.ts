@@ -1,4 +1,4 @@
-import { PartialType } from '@nestjs/mapped-types';
+import { OmitType, PartialType } from '@nestjs/swagger';
 import { CreatePrescriptionDto } from './create-prescription.dto';
 
-export class UpdatePrescriptionDto extends PartialType(CreatePrescriptionDto) {}
+export class UpdatePrescriptionDto extends PartialType(OmitType(CreatePrescriptionDto, ['items'] as const)) {}
