@@ -9,7 +9,12 @@ import type {
   PrescriptionsResponse,
   SafePrescription,
 } from '@/types';
-import { CreatePrescriptionDto, UpdatePrescriptionDto } from './dto';
+import {
+  CreatePrescriptionDto,
+  CreatePrescriptionItemDto,
+  UpdatePrescriptionDto,
+  UpdatePrescriptionItemDto,
+} from './dto';
 
 @Controller('prescriptions')
 export class PrescriptionController {
@@ -31,6 +36,26 @@ export class PrescriptionController {
 
     return {
       message: 'Prescription created successfully.',
+      data,
+    };
+  }
+
+  /**
+   * Create prescription items for a prescription.
+   */
+  @Post(':id')
+  @PrescriptionDecorator.CreatePrescriptionItemsDecorators()
+  async createItems(
+    @Param('id') id: string,
+    @Body() createPrescriptionItemDtos: CreatePrescriptionItemDto[],
+  ): Promise<ApiResponse<PrescriptionResponse>> {
+    const data = await this.prescriptionService.createItemsHandler({
+      prescriptionId: id,
+      items: createPrescriptionItemDtos,
+    });
+
+    return {
+      message: 'Prescription items created successfully.',
       data,
     };
   }
@@ -246,6 +271,26 @@ export class PrescriptionController {
   }
 
   /**
+   * Update a prescription item.
+   */
+  @Patch('item/:id')
+  @PrescriptionDecorator.UpdatePrescriptionItemDecorators()
+  async updateItem(
+    @Param('id') id: string,
+    @Body() updatePrescriptionItemDto: UpdatePrescriptionItemDto,
+  ): Promise<ApiResponse<PrescriptionResponse>> {
+    const data = await this.prescriptionService.updateItem({
+      id,
+      ...updatePrescriptionItemDto,
+    });
+
+    return {
+      message: 'Prescription item updated successfully.',
+      data,
+    };
+  }
+
+  /**
    * Soft-delete a prescription.
    */
   @Delete(':id')
@@ -257,6 +302,21 @@ export class PrescriptionController {
 
     return {
       message: 'Prescription deleted successfully.',
+    };
+  }
+
+  /**
+   * Soft-delete a prescription item.
+   */
+  @Delete('item/:id')
+  @PrescriptionDecorator.DeletePrescriptionItemDecorators()
+  async deleteItem(@Param('id') id: string): Promise<ApiResponse> {
+    await this.prescriptionService.deleteItem({
+      id,
+    });
+
+    return {
+      message: 'Prescription item deleted successfully.',
     };
   }
 }
