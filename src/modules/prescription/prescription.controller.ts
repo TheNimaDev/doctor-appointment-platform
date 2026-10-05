@@ -43,7 +43,7 @@ export class PrescriptionController {
   /**
    * Create prescription items for a prescription.
    */
-  @Post(':id')
+  @Post(':id/items')
   @PrescriptionDecorator.CreatePrescriptionItemsDecorators()
   async createItems(
     @Param('id') id: string,
