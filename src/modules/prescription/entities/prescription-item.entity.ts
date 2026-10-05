@@ -9,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Prescription } from '@/modules/prescription/entities';
+import { Prescription } from './prescription.entity';
 
 @Entity('prescription_items')
 @Index(['prescriptionId'])
