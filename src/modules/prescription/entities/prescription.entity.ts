@@ -11,7 +11,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Appointment } from '@/modules/appointment/entities';
-import { PrescriptionItem } from '@/modules/prescription-item/entities';
+import { PrescriptionItem } from './prescription-item.entity';
 
 @Entity('prescriptions')
 @Unique(['appointmentId'])
