@@ -16,3 +16,4 @@ export * from './find-my-clinic-prescription-by-appointment.response';
 export * from './update-prescription.response';
 export * from './update-prescription-item.response';
 export * from './delete-prescription.response';
+export * from './delete-prescription-item.response';
