@@ -2,7 +2,7 @@ import { EntityManager } from 'typeorm';
 import { Prescription } from '@/modules/prescription/entities';
 
 /** Prescription without relation data. */
-export type SafePrescription = Omit<Prescription, 'appointment' | 'items'>;
+export type SafePrescription = Omit<Prescription, 'appointment'>;
 
 /** Single prescription API response. */
 export interface PrescriptionResponse {
@@ -14,10 +14,32 @@ export interface PrescriptionsResponse {
   prescriptions: SafePrescription[];
 }
 
+/** Prescription item Parameters. */
+export interface PrescriptionItemPayload {
+  medicineName: string;
+  dosage: string;
+  usage: string;
+  duration?: string | null;
+  quantity?: number | null;
+}
+
 /** Parameters for creating a prescription. */
 export interface CreatePrescriptionPayload {
   appointmentId: string;
   notes?: string | null;
+  items: PrescriptionItemPayload[];
+}
+
+/** Parameters for creating prescription items within a transaction. */
+export interface CreatePrescriptionItemsHandlerPayload {
+  items: PrescriptionItemPayload[];
+  prescriptionId: string;
+}
+
+/** Parameters for creating prescription items. */
+export interface CreatePrescriptionItemsPayload {
+  items: PrescriptionItemPayload[];
+  prescriptionId: string;
   manager?: EntityManager;
 }
 
@@ -63,8 +85,20 @@ export interface UpdatePrescriptionPayload {
   manager?: EntityManager;
 }
 
+/** Parameters for updating a prescription item. */
+export type UpdatePrescriptionItemPayload = PrescriptionItemPayload & {
+  id: string;
+  manager?: EntityManager;
+};
+
 /** Parameters for deleting a prescription. */
 export interface DeletePrescriptionPayload {
+  id: string;
+  manager?: EntityManager;
+}
+
+/** Parameters for deleting a prescription item. */
+export interface DeletePrescriptionItemPayload {
   id: string;
   manager?: EntityManager;
 }
