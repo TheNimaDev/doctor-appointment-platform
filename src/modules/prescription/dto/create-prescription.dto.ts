@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { ArrayMinSize, IsArray, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { CreatePrescriptionItemDto } from './create-prescription-item.dto';
 
 export class CreatePrescriptionDto {
@@ -9,6 +9,7 @@ export class CreatePrescriptionDto {
 
   @IsArray()
   @ValidateNested({ each: true })
+  @ArrayMinSize(1)
   @Type(() => CreatePrescriptionItemDto)
   items: CreatePrescriptionItemDto[];
 }
