@@ -54,6 +54,42 @@ export const CreatePrescriptionDecorators = () => {
 };
 
 /**
+ * Create Prescription Items
+ */
+export const CreatePrescriptionItemsDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.CREATED),
+    ApiBearerAuth('accessToken'),
+    Context('doctor'),
+    ApiParam({
+      name: 'id',
+      description: 'Prescription ID',
+      type: String,
+      format: 'uuid',
+      example: '7f8c4f2e-9f6c-4f2d-8d13-2a4f8c9b7e61',
+    }),
+    ApiBody({
+      type: PrescriptionDto.CreatePrescriptionItemDto,
+      isArray: true,
+    }),
+    ApiCreatedResponse({
+      type: PrescriptionRes.CreatePrescriptionItemsResponse,
+    }),
+    ApiBadRequestResponse({
+      type: PrescriptionRes.CreatePrescriptionItemsBadRequestResponse,
+    }),
+    ApiNotFoundResponse({
+      type: PrescriptionRes.CreatePrescriptionItemsNotFoundResponse,
+    }),
+    Permission({
+      permissions: [PERMISSIONS.PRESCRIPTION_UPDATE],
+      ownership: 'doctor',
+      resource: 'prescription',
+    }),
+  );
+};
+
+/**
  * Find all Prescriptions
  */
 export const FindPrescriptionsDecorators = () => {
@@ -385,6 +421,41 @@ export const UpdatePrescriptionDecorators = () => {
 };
 
 /**
+ * Update Prescription Item
+ */
+export const UpdatePrescriptionItemDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.OK),
+    ApiBearerAuth('accessToken'),
+    Context('doctor'),
+    ApiParam({
+      name: 'id',
+      description: 'Prescription Item ID',
+      type: String,
+      format: 'uuid',
+      example: '4c6e8f1a-4f7c-9a2e-3d5b-2a4f8c9b7e61',
+    }),
+    ApiBody({
+      type: PrescriptionDto.UpdatePrescriptionItemDto,
+    }),
+    ApiOkResponse({
+      type: PrescriptionRes.UpdatePrescriptionItemResponse,
+    }),
+    ApiBadRequestResponse({
+      type: PrescriptionRes.UpdatePrescriptionItemBadRequestResponse,
+    }),
+    ApiNotFoundResponse({
+      type: PrescriptionRes.UpdatePrescriptionItemNotFoundResponse,
+    }),
+    Permission({
+      permissions: [PERMISSIONS.PRESCRIPTION_UPDATE],
+      ownership: 'doctor',
+      resource: 'prescription-item',
+    }),
+  );
+};
+
+/**
  * Delete Prescription
  */
 export const DeletePrescriptionDecorators = () => {
@@ -407,6 +478,36 @@ export const DeletePrescriptionDecorators = () => {
       permissions: [PERMISSIONS.PRESCRIPTION_DELETE],
       ownership: 'doctor',
       resource: 'prescription',
+    }),
+  );
+};
+
+/**
+ * Delete Prescription Item
+ */
+export const DeletePrescriptionItemDecorators = () => {
+  return applyDecorators(
+    HttpCode(HttpStatus.NO_CONTENT),
+    ApiBearerAuth('accessToken'),
+    Context('doctor'),
+    ApiParam({
+      name: 'id',
+      description: 'Prescription Item ID',
+      type: String,
+      format: 'uuid',
+      example: '4c6e8f1a-4f7c-9a2e-3d5b-2a4f8c9b7e61',
+    }),
+    ApiNoContentResponse(),
+    ApiBadRequestResponse({
+      type: PrescriptionRes.DeletePrescriptionItemBadRequestResponse,
+    }),
+    ApiNotFoundResponse({
+      type: PrescriptionRes.DeletePrescriptionItemNotFoundResponse,
+    }),
+    Permission({
+      permissions: [PERMISSIONS.PRESCRIPTION_DELETE],
+      ownership: 'doctor',
+      resource: 'prescription-item',
     }),
   );
 };
