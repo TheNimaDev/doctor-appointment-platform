@@ -86,7 +86,7 @@ export interface UpdatePrescriptionPayload {
 }
 
 /** Parameters for updating a prescription item. */
-export type UpdatePrescriptionItemPayload = PrescriptionItemPayload & {
+export type UpdatePrescriptionItemPayload = Partial<PrescriptionItemPayload> & {
   id: string;
   manager?: EntityManager;
 };
