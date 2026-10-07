@@ -20,6 +20,7 @@ export class TimeSlotController {
     const data = await this.timeSlotService.findByClinicOrDoctor({
       doctorId,
       date,
+      status: TimeSlotStatus.AVAILABLE,
     });
 
     return {
@@ -42,6 +43,7 @@ export class TimeSlotController {
       doctorId,
       clinicId,
       date,
+      status: TimeSlotStatus.AVAILABLE,
     });
 
     return {
@@ -62,6 +64,7 @@ export class TimeSlotController {
     const data = await this.timeSlotService.findByClinicOrDoctor({
       clinicId,
       date,
+      status: TimeSlotStatus.AVAILABLE,
     });
 
     return {
