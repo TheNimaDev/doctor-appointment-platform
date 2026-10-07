@@ -21,6 +21,7 @@ import { Payment } from '@/modules/payment/entities';
 @Index(['patientId'])
 @Index(['timeSlotId'])
 @Index(['status'])
+@Index(['expiresAt'])
 @Entity('appointments')
 export class Appointment {
   @PrimaryGeneratedColumn('uuid')
@@ -54,6 +55,9 @@ export class Appointment {
 
   @Column({ type: 'text', nullable: true })
   notes: string | null;
+
+  @Column({ type: 'datetime', nullable: true })
+  expiresAt: Date | null;
 
   @Column({ type: 'datetime', nullable: true })
   cancelledAt: Date | null;
