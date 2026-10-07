@@ -64,7 +64,7 @@ export async function seedDoctorClinics(
 
     await doctorClinicService.create({
       doctorId: doctor.id,
-      clinicId: clinicAdmin.id,
+      clinicId: clinic.id,
       manager,
     });
 
