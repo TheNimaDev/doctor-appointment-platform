@@ -7,6 +7,7 @@ const appointmentExample = {
   timeSlotId: '2b4d7e9a-1c3f-4b5d-8e7f-9a1b2c3d4e5f',
   status: AppointmentStatus.PENDING,
   notes: 'First consultation.',
+  expiresAt: new Date('2026-01-01T00:10:00.000Z'),
   cancelledAt: null,
   cancellationReason: null,
   createdAt: new Date('2026-01-01T00:00:00.000Z'),
