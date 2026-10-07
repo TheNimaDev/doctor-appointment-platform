@@ -24,6 +24,7 @@ import { AppointmentStatus } from './enums';
 import { APPOINTMENT_ALLOWED_TRANSITIONS } from './constants';
 import { ClinicService } from '@/modules/clinic/clinic.service';
 import { PatientService } from '../patient/patient.service';
+import ms from 'ms';
 
 @Injectable()
 export class AppointmentService {
@@ -146,6 +147,7 @@ export class AppointmentService {
           patientId: patient.id,
           timeSlotId: timeSlot.id,
           notes: payload.notes,
+          expiresAt: new Date(getServerDateTime().getTime() + ms('10m')),
         });
 
         const savedAppointment = await repository.save(appointment);
