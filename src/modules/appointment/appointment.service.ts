@@ -225,7 +225,7 @@ export class AppointmentService {
         manager,
       });
 
-      if (payload.status === AppointmentStatus.CANCELLED || payload.status === AppointmentStatus.REJECTED) {
+      if (payload.status === AppointmentStatus.CANCELLED) {
         await this.timeSlotService.updateStatus({
           id: appointment.timeSlotId,
           status: TimeSlotStatus.AVAILABLE,

@@ -218,40 +218,6 @@ export class AppointmentController {
   }
 
   /**
-   * Reject an appointment belonging to the current admin's clinic.
-   */
-  @Patch('my-clinic/:id/reject')
-  @AppointmentDecorator.RejectMyClinicAppointmentDecorators()
-  async rejectMyClinicAppointment(@Param('id') id: string): Promise<ApiResponse<AppointmentResponse>> {
-    const data = await this.appointmentService.handleAppointmentStatus({
-      id,
-      status: AppointmentStatus.REJECTED,
-    });
-
-    return {
-      message: 'Appointment rejected successfully.',
-      data,
-    };
-  }
-
-  /**
-   * Reject an appointment belonging to the current doctor.
-   */
-  @Patch('my/:id/reject')
-  @AppointmentDecorator.RejectMyAppointmentDecorators()
-  async rejectMyAppointment(@Param('id') id: string): Promise<ApiResponse<AppointmentResponse>> {
-    const data = await this.appointmentService.handleAppointmentStatus({
-      id,
-      status: AppointmentStatus.REJECTED,
-    });
-
-    return {
-      message: 'Appointment rejected successfully.',
-      data,
-    };
-  }
-
-  /**
    * Complete an appointment belonging to the current admin's clinic.
    */
   @Patch('my-clinic/:id/complete')

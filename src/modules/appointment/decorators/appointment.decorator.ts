@@ -270,56 +270,6 @@ export const ConfirmMyAppointmentDecorators = () => {
   );
 };
 
-export const RejectMyClinicAppointmentDecorators = () => {
-  return applyDecorators(
-    HttpCode(HttpStatus.OK),
-    ApiBearerAuth('accessToken'),
-    ApiParam({
-      name: 'id',
-      description: 'Appointment ID',
-      type: String,
-      format: 'uuid',
-      example: '7f8c4f2e-9f6c-4f2d-8d13-2a4f8c9b7e61',
-    }),
-    ApiOkResponse({
-      type: AppointmentRes.RejectAppointmentResponse,
-    }),
-    ApiNotFoundResponse({
-      type: AppointmentRes.RejectAppointmentNotFoundResponse,
-    }),
-    Permission({
-      permissions: [PERMISSIONS.APPOINTMENT_REJECT],
-      ownership: 'clinic',
-      resource: 'appointment',
-    }),
-  );
-};
-
-export const RejectMyAppointmentDecorators = () => {
-  return applyDecorators(
-    HttpCode(HttpStatus.OK),
-    ApiBearerAuth('accessToken'),
-    ApiParam({
-      name: 'id',
-      description: 'Appointment ID',
-      type: String,
-      format: 'uuid',
-      example: '7f8c4f2e-9f6c-4f2d-8d13-2a4f8c9b7e61',
-    }),
-    ApiOkResponse({
-      type: AppointmentRes.RejectAppointmentResponse,
-    }),
-    ApiNotFoundResponse({
-      type: AppointmentRes.RejectAppointmentNotFoundResponse,
-    }),
-    Permission({
-      permissions: [PERMISSIONS.APPOINTMENT_REJECT],
-      ownership: 'doctor',
-      resource: 'appointment',
-    }),
-  );
-};
-
 export const CompleteMyClinicAppointmentDecorators = () => {
   return applyDecorators(
     HttpCode(HttpStatus.OK),

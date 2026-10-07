@@ -10,6 +10,5 @@ export * from './find-my-clinic-appointments.response';
 export * from './find-my-clinic-appointment.response';
 export * from './cancel-appointment.response';
 export * from './confirm-appointment.response';
-export * from './reject-appointment.response';
 export * from './complete-appointment.response';
 export * from './no-show-appointment.response';
