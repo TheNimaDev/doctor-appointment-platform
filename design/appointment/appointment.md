@@ -25,6 +25,7 @@ Appointment هسته اصلی سیستم نوبت‌دهی است و مشخص م
 | timeSlotId         | UUID         | ❌       | FK → TimeSlot  |
 | status             | enum         | ❌       | وضعیت نوبت     |
 | notes              | text         | ✅       | توضیحات بیمار  |
+| expiresAt          | datetime     | ✅       | زمان انقضای رزرو 
 | cancelledAt        | datetime     | ✅       | زمان لغو       |
 | cancellationReason | varchar(255) | ✅       | دلیل لغو       |
 | createdAt          | datetime     | ❌       | زمان ایجاد     |
@@ -49,6 +50,8 @@ CANCELLED;
 COMPLETED;
 
 NO_SHOW;
+
+EXPIRED;
 ```
 
 ---
@@ -57,7 +60,7 @@ NO_SHOW;
 
 ## PENDING
 
-نوبت ایجاد شده ولی هنوز تایید نشده است.
+نوبت ایجاد شده ولی هنوز پرداخت آن با موفقیت تایید نشده است.
 
 Example:
 
@@ -73,12 +76,12 @@ PENDING
 
 ## CONFIRMED
 
-نوبت تایید شده است.
+پرداخت نوبت با موفقیت تایید شده و نوبت قطعی شده است.
 
 Example:
 
 ```
-Doctor accepted
+Payment verified
 
 ↓
 
@@ -112,6 +115,12 @@ Doctor cancelled
 ## NO_SHOW
 
 بیمار مراجعه نکرده است.
+
+---
+
+## EXPIRED
+
+مهلت پرداخت نوبت تمام شده و نوبت منقضی شده است.
 
 ---
 
@@ -215,6 +224,8 @@ INDEX(patientId)
 INDEX(status)
 
 INDEX(timeSlotId)
+
+INDEX(expiresAt)
 ```
 
 ---
@@ -276,7 +287,7 @@ AVAILABLE
 
 ↓
 
-BOOKED
+HELD
 ```
 
 ---
@@ -287,16 +298,54 @@ BOOKED
 
 ```
 Appointment Created
+
+status = PENDING
+
+expiresAt = now + 10 minutes
 ```
 
 ---
 
 ## Step 7
 
+ساخت Payment:
+
+```
+Payment Created
+
+status = PENDING
+```
+
+---
+
+## Step 8
+
+ساخت Transaction:
+
+```
+Transaction Created
+
+status = PENDING
+```
+
+---
+
+## Step 9
+
 Commit:
 
 ```
 COMMIT
+```
+
+---
+
+## Step 10
+
+ارسال کاربر به Payment Gateway:
+
+```
+Redirect To Gateway
 ```
 
 ---
@@ -351,6 +400,20 @@ BOOKED
 Create Appointment
 ```
 
+Correct:
+
+```
+AVAILABLE
+
+↓
+
+HELD
+
+↓
+
+Create Appointment
+```
+
 ---
 
 ## Rule 3
@@ -394,6 +457,18 @@ Patient unavailable
 
 ---
 
+## Rule 6
+
+Appointment تا زمان پرداخت موفق `PENDING` باقی می‌ماند.
+
+---
+
+## Rule 7
+
+در صورت تمام شدن مهلت پرداخت، Appointment به `EXPIRED` تغییر می‌کند و TimeSlot دوباره `AVAILABLE` می‌شود.
+
+---
+
 # Appointment Lifecycle
 
 ```
@@ -426,6 +501,16 @@ CONFIRMED
 ↓
 
 NO_SHOW
+```
+
+یا:
+
+```
+PENDING
+
+↓
+
+EXPIRED
 ```
 
 ---
