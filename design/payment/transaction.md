@@ -12,7 +12,6 @@ Example:
 
 ```
 Payment
-
 |
 ├── Transaction 1
 |      FAILED
@@ -83,8 +82,6 @@ Description:
 ```
 INDEX(paymentId)
 
-INDEX(transactionId)
-
 INDEX(status)
 ```
 
@@ -95,10 +92,10 @@ INDEX(status)
 ## Unique Gateway Transaction
 
 ```sql
-UNIQUE(transactionId)
+UNIQUE(gateway, transactionId)
 ```
 
-جلوگیری از ثبت دوباره یک تراکنش.
+جلوگیری از ثبت دوباره یک تراکنش در یک درگاه مشخص.
 
 ---
 
@@ -150,7 +147,13 @@ Transaction موفق باید Reference Number داشته باشد.
 
 ## Rule 3
 
-هر Gateway Transaction فقط یک بار ثبت می‌شود.
+هر Gateway Transaction فقط یک بار در همان Gateway ثبت می‌شود.
+
+---
+
+## Rule 4
+
+هر تلاش جدید برای پرداخت یک Transaction جدید ایجاد می‌کند.
 
 ---
 
