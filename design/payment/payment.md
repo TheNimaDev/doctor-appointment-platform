@@ -28,14 +28,12 @@ Transaction
 | ------------- | ----------- | -------- | ---------------- |
 | id            | UUID        | ❌       | Primary Key      |
 | appointmentId | UUID        | ❌       | FK → Appointment |
-| patientId     | UUID        | ❌       | FK → Patient     |
 | amount        | decimal     | ❌       | مبلغ پرداخت      |
 | status        | enum        | ❌       | وضعیت پرداخت     |
 | gateway       | varchar(50) | ❌       | درگاه پرداخت     |
 | paidAt        | datetime    | ✅       | زمان پرداخت موفق |
 | createdAt     | datetime    | ❌       | زمان ایجاد       |
 | updatedAt     | datetime    | ❌       | زمان بروزرسانی   |
-| deletedAt     | datetime    | ✅       | Soft Delete      |
 
 ---
 
@@ -59,7 +57,7 @@ REFUNDED;
 
 ## PENDING
 
-پرداخت ایجاد شده ولی هنوز انجام نشده.
+پرداخت ایجاد شده ولی هنوز با موفقیت تایید نشده است.
 
 Example:
 
@@ -121,28 +119,6 @@ Description:
 
 ---
 
-## Many To One
-
-### Payment → Patient
-
-```
-Payment
-
-N
-
-↓
-
-1
-
-Patient
-```
-
-Description:
-
-هر بیمار می‌تواند چند پرداخت داشته باشد.
-
----
-
 ## One To Many
 
 ### Payment → Transaction
@@ -170,7 +146,9 @@ Payment
 
 Attempt 1 → Failed
 
-Attempt 2 → Success
+Attempt 2 → Failed
+
+Attempt 3 → Success
 ```
 
 ---
@@ -178,10 +156,6 @@ Attempt 2 → Success
 # Indexes
 
 ```
-INDEX(appointmentId)
-
-INDEX(patientId)
-
 INDEX(status)
 ```
 
@@ -195,7 +169,7 @@ INDEX(status)
 UNIQUE(appointmentId)
 ```
 
-یک Appointment نباید چند Payment فعال داشته باشد.
+یک Appointment نباید چند Payment داشته باشد.
 
 ---
 
@@ -207,6 +181,10 @@ Create Appointment
 ↓
 
 Create Payment
+
+↓
+
+Create Transaction
 
 ↓
 
@@ -222,7 +200,11 @@ Verify Payment
 
 ↓
 
-Update Status
+Update Transaction Status
+
+↓
+
+Update Payment Status
 
 SUCCESS
 
@@ -250,6 +232,12 @@ Appointment بدون Payment موفق نباید Confirm شود.
 ## Rule 3
 
 تغییر وضعیت Payment فقط از طریق Payment Service انجام می‌شود.
+
+---
+
+## Rule 4
+
+هر تلاش برای پرداخت یک Transaction جدید ایجاد می‌کند.
 
 ---
 
