@@ -133,7 +133,7 @@ export class AppointmentService {
 
         const { timeSlot } = await this.timeSlotService.updateStatus({
           id: payload.timeSlotId,
-          status: TimeSlotStatus.BOOKED,
+          status: TimeSlotStatus.HELD,
           manager,
         });
 
