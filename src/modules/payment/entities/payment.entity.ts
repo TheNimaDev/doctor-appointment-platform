@@ -1,5 +1,16 @@
-import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  Unique,
+  UpdateDateColumn,
+} from 'typeorm';
 import { PaymentStatus } from '../enums';
+import { Appointment } from '@/modules/appointment/entities';
 
 @Entity('payments')
 @Index(['status'])
@@ -10,6 +21,10 @@ export class Payment {
 
   @Column({ type: 'uuid' })
   appointmentId: string;
+
+  @OneToOne(() => Appointment, (appointment) => appointment.payment)
+  @JoinColumn({ name: 'appointmentId' })
+  appointment: Appointment;
 
   @Column({ type: 'decimal', precision: 12, scale: 2 })
   amount: string;

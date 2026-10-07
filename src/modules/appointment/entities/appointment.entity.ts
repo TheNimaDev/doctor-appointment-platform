@@ -16,6 +16,7 @@ import { TimeSlot } from '@/modules/time-slot/entities';
 import { Patient } from '@/modules/patient/entities';
 import { MedicalRecord } from '@/modules/medical-record/entities';
 import { Prescription } from '@/modules/prescription/entities';
+import { Payment } from '@/modules/payment/entities';
 
 @Index(['patientId'])
 @Index(['timeSlotId'])
@@ -44,6 +45,9 @@ export class Appointment {
 
   @OneToOne(() => Prescription, (prescription) => prescription.appointment)
   prescription: Prescription;
+
+  @OneToOne(() => Payment, (payment) => payment.appointment)
+  payment: Payment;
 
   @Column({ type: 'enum', enum: AppointmentStatus, default: AppointmentStatus.PENDING })
   status: AppointmentStatus;
