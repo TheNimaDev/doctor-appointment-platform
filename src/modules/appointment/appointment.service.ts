@@ -307,4 +307,43 @@ export class AppointmentService {
       });
     }
   }
+
+  /**
+   * Expire appointments whose payment deadline has passed.
+   */
+  async expireAppointments(): Promise<void> {
+    const now = getServerDateTime();
+
+    await this.databaseService.dataSource.transaction(async (manager) => {
+      const repository = this.getRepository(manager);
+
+      const appointments = await repository
+        .createQueryBuilder('appointment')
+        .setLock('pessimistic_write')
+        .where('appointment.status = :status', {
+          status: AppointmentStatus.PENDING,
+        })
+        .andWhere('appointment.expiresAt IS NOT NULL')
+        .andWhere('appointment.expiresAt <= :now', { now })
+        .getMany();
+
+      for (const appointment of appointments) {
+        await repository.update(
+          {
+            id: appointment.id,
+            status: AppointmentStatus.PENDING,
+          },
+          {
+            status: AppointmentStatus.EXPIRED,
+          },
+        );
+
+        await this.timeSlotService.updateStatus({
+          id: appointment.timeSlotId,
+          status: TimeSlotStatus.AVAILABLE,
+          manager,
+        });
+      }
+    });
+  }
 }
