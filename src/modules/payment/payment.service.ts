@@ -40,7 +40,6 @@ export class PaymentService {
       const payment = repository.create({
         appointmentId: payload.appointmentId,
         amount: payload.amount,
-        gateway: payload.gateway,
         status: PaymentStatus.PENDING,
       });
 
