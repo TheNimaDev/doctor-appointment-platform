@@ -1,11 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression, Timeout } from '@nestjs/schedule';
-import { TimeSlotJob } from './jobs';
+import { TimeSlotJob, AppointmentJob } from './jobs';
 import { addDays, getServerDate } from '@/lib';
 
 @Injectable()
 export class SchedulerService {
-  constructor(private readonly timeSlotJob: TimeSlotJob) {}
+  constructor(
+    private readonly timeSlotJob: TimeSlotJob,
+    private readonly appointmentJob: AppointmentJob,
+  ) {}
 
   /**
    * Generate time slots on application startup.
@@ -41,5 +44,13 @@ export class SchedulerService {
   @Cron(CronExpression.EVERY_MINUTE)
   async expireTimeSlots() {
     await this.timeSlotJob.expireTimeSlots();
+  }
+
+  /**
+   * Expire past appointments.
+   */
+  @Cron(CronExpression.EVERY_MINUTE)
+  async expireAppointments() {
+    await this.appointmentJob.expireAppointments();
   }
 }
