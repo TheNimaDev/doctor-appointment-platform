@@ -30,7 +30,6 @@ Transaction
 | appointmentId | UUID        | ❌       | FK → Appointment |
 | amount        | decimal     | ❌       | مبلغ پرداخت      |
 | status        | enum        | ❌       | وضعیت پرداخت     |
-| gateway       | varchar(50) | ❌       | درگاه پرداخت     |
 | paidAt        | datetime    | ✅       | زمان پرداخت موفق |
 | createdAt     | datetime    | ❌       | زمان ایجاد       |
 | updatedAt     | datetime    | ❌       | زمان بروزرسانی   |
