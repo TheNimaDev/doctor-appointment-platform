@@ -22,9 +22,11 @@ import { DatabaseService } from '@/modules/database/database.service';
 import { DoctorService } from '@/modules/doctor/doctor.service';
 import { AppointmentStatus } from './enums';
 import { APPOINTMENT_ALLOWED_TRANSITIONS } from './constants';
-import { ClinicService } from '@/modules/clinic/clinic.service';
 import { PatientService } from '../patient/patient.service';
 import ms from 'ms';
+import { PaymentService } from '../payment/payment.service';
+import { DoctorScheduleService } from '../doctor-schedule/doctor-schedule.service';
+import { DoctorClinicService } from '../doctor-clinic/doctor-clinic.service';
 
 @Injectable()
 export class AppointmentService {
@@ -35,8 +37,10 @@ export class AppointmentService {
     private readonly databaseService: DatabaseService,
     private readonly timeSlotService: TimeSlotService,
     private readonly doctorService: DoctorService,
-    private readonly clinicService: ClinicService,
+    private readonly doctorScheduleService: DoctorScheduleService,
+    private readonly doctorClinicService: DoctorClinicService,
     private readonly patientService: PatientService,
+    private readonly paymentService: PaymentService,
   ) {}
 
   /**
@@ -129,7 +133,7 @@ export class AppointmentService {
    */
   async reserveAppointment(payload: ReserveAppointmentPayload): Promise<AppointmentResponse> {
     try {
-      const appointment = await this.databaseService.dataSource.transaction(async (manager) => {
+      return await this.databaseService.dataSource.transaction(async (manager) => {
         const repository = this.getRepository(manager);
 
         const { timeSlot } = await this.timeSlotService.updateStatus({
@@ -143,6 +147,21 @@ export class AppointmentService {
           manager,
         });
 
+        const { doctorSchedule } = await this.doctorScheduleService.getById({
+          id: timeSlot.scheduleId,
+          manager,
+        });
+
+        const { doctorClinic } = await this.doctorClinicService.findById({
+          id: doctorSchedule.doctorClinicId,
+          manager,
+        });
+
+        const { doctor } = await this.doctorService.findById({
+          id: doctorClinic.doctorId,
+          manager,
+        });
+
         const appointment = repository.create({
           patientId: patient.id,
           timeSlotId: timeSlot.id,
@@ -152,11 +171,14 @@ export class AppointmentService {
 
         const savedAppointment = await repository.save(appointment);
 
-        return savedAppointment;
+        await this.paymentService.create({
+          appointmentId: savedAppointment.id,
+          amount: doctor.consultationFee,
+          manager,
+        });
+
+        return { appointment: savedAppointment };
       });
-      return {
-        appointment,
-      };
     } catch (error) {
       if (error instanceof BadRequestException) {
         throw error;
