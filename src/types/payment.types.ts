@@ -19,7 +19,6 @@ export interface PaymentsResponse {
 export interface CreatePaymentPayload {
   appointmentId: string;
   amount: string;
-  gateway: string;
   manager?: EntityManager;
 }
 
