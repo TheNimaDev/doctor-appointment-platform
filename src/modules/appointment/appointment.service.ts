@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { Appointment } from './entities';
-import { checkDatabaseError, getServerDateTime } from '@/lib';
+import { checkDatabaseError, combineDateAndTime, getServerDateTime } from '@/lib';
 import {
   BaseException,
   FindAppointmentByIdPayload,
@@ -328,21 +328,20 @@ export class AppointmentService {
         .getMany();
 
       for (const appointment of appointments) {
-        await repository.update(
-          {
-            id: appointment.id,
-            status: AppointmentStatus.PENDING,
-          },
-          {
-            status: AppointmentStatus.EXPIRED,
-          },
-        );
-
-        await this.timeSlotService.updateStatus({
+        const { timeSlot } = await this.timeSlotService.getById({
           id: appointment.timeSlotId,
-          status: TimeSlotStatus.AVAILABLE,
           manager,
         });
+
+        if (timeSlot.status === TimeSlotStatus.HELD) {
+          const slotStartDateTime = combineDateAndTime(timeSlot.date, timeSlot.startTime);
+
+          await this.timeSlotService.updateStatus({
+            id: timeSlot.id,
+            status: slotStartDateTime <= now ? TimeSlotStatus.EXPIRED : TimeSlotStatus.AVAILABLE,
+            manager,
+          });
+        }
       }
     });
   }
