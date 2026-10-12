@@ -32,9 +32,6 @@ export class Payment {
   @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.PENDING })
   status: PaymentStatus;
 
-  @Column({ type: 'varchar', length: 50 })
-  gateway: string;
-
   @Column({ type: 'datetime', nullable: true })
   paidAt: Date | null;
 
