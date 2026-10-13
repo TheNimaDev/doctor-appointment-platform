@@ -25,3 +25,4 @@ export * from './patient.types';
 export * from './medical-record.types';
 export * from './prescription.types';
 export * from './payment.types';
+export * from './http.types';
