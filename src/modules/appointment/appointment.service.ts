@@ -270,10 +270,18 @@ export class AppointmentService {
     const repository = this.getRepository(payload.manager);
 
     try {
-      const { appointment } = await this.getById({
-        id: payload.id,
-        manager: payload.manager,
-      });
+      const appointment = await repository
+        .createQueryBuilder('appointment')
+        .setLock('pessimistic_write')
+        .where('appointment.id = :id', { id: payload.id })
+        .getOne();
+
+      if (!appointment) {
+        throw new NotFoundException({
+          message: 'Appointment not found in database.',
+          error: 'Appointment Not Found',
+        } as BaseException);
+      }
 
       const allowed = APPOINTMENT_ALLOWED_TRANSITIONS[appointment.status];
 
