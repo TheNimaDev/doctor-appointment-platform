@@ -1,5 +1,16 @@
-import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  Unique,
+  UpdateDateColumn,
+} from 'typeorm';
 import { TransactionStatus } from '../enums';
+import { Payment } from '@/modules/payment/entities';
 
 @Entity('transactions')
 @Index(['paymentId'])
@@ -11,6 +22,10 @@ export class Transaction {
 
   @Column({ type: 'uuid' })
   paymentId: string;
+
+  @ManyToOne(() => Payment, (payment) => payment.transactions, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'paymentId' })
+  payment: Payment;
 
   @Column({ type: 'varchar', length: 255 })
   transactionId: string;

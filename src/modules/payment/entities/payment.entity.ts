@@ -4,6 +4,7 @@ import {
   Entity,
   Index,
   JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   Unique,
@@ -11,6 +12,7 @@ import {
 } from 'typeorm';
 import { PaymentStatus } from '../enums';
 import { Appointment } from '@/modules/appointment/entities';
+import { Transaction } from '@/modules/transaction/entities';
 
 @Entity('payments')
 @Index(['status'])
@@ -25,6 +27,9 @@ export class Payment {
   @OneToOne(() => Appointment, (appointment) => appointment.payment)
   @JoinColumn({ name: 'appointmentId' })
   appointment: Appointment;
+
+  @OneToMany(() => Transaction, (transaction) => transaction.payment)
+  transactions: Transaction[];
 
   @Column({ type: 'decimal', precision: 12, scale: 2 })
   amount: string;
