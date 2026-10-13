@@ -23,3 +23,4 @@ export * from './patient';
 export * from './medical-record';
 export * from './prescription';
 export * from './payment';
+export * from './transaction';
