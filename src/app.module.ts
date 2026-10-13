@@ -12,9 +12,11 @@ import {
 } from '@/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { HttpExceptionFilter } from '@/common/';
 import { ValidationError } from 'class-validator';
 import { ValidationFieldError } from './types';
+import { throttlerConfig } from './lib';
 
 function flattenValidationErrors(errors: ValidationError[], parentPath = ''): ValidationFieldError[] {
   const result: ValidationFieldError[] = [];
@@ -53,6 +55,9 @@ function flattenValidationErrors(errors: ValidationError[], parentPath = ''): Va
     // Initialize task scheduling
     ScheduleModule.forRoot(),
 
+    // Throttler module - Rate limiting
+    ThrottlerModule.forRoot(throttlerConfig),
+
     // Application modules
     Modules.DatabaseModule,
     Modules.UserModule,
@@ -80,6 +85,10 @@ function flattenValidationErrors(errors: ValidationError[], parentPath = ''): Va
     Modules.PaymentModule,
   ],
   providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
     {
       provide: APP_PIPE,
       useValue: new ValidationPipe({
