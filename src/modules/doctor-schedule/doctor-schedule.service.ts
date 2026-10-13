@@ -259,7 +259,7 @@ export class DoctorScheduleService {
 
     const { doctorClinic } = await this.doctorClinicService.findByDoctorAndClinic({
       clinicId: payload.clinicId,
-      doctorId: payload.clinicId,
+      doctorId: payload.doctorId,
       manager: payload.manager,
     });
 
