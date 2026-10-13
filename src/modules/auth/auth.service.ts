@@ -72,7 +72,6 @@ export class AuthService {
         manager,
         type: EmailType.EMAIL_VERIFICATION,
       });
-      console.log(token.token); // TODO: Remove before production
 
       return {
         user,
@@ -235,10 +234,7 @@ export class AuthService {
       .getOne();
 
     if (!user) {
-      throw new UnauthorizedException({
-        message: 'Invalid user credentials',
-        error: 'Invalid Credentials',
-      } as BaseException);
+      return;
     }
 
     const isValidPassword = await compareSecret(params.password, user.password);
@@ -420,7 +416,6 @@ export class AuthService {
         type: EmailType.PASSWORD_RESET,
         manager,
       });
-      console.log(token.token); // TODO: Remove before production
 
       return token;
     });
