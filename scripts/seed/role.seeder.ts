@@ -12,6 +12,7 @@ import {
   PERMISSIONS,
   ROLES,
   TIME_SLOT_PERMISSIONS,
+  TRANSACTION_PERMISSIONS,
   USER_PERMISSIONS,
 } from '@/common';
 
@@ -161,6 +162,7 @@ export async function seedRoles(manager: EntityManager): Promise<void> {
       PERMISSIONS.DOCTOR_CLINIC_READ,
       PERMISSIONS.MEDICAL_RECORD_READ_PATIENT,
       PERMISSIONS.PRESCRIPTION_READ_PATIENT,
+      ...Object.values(TRANSACTION_PERMISSIONS).map((permission) => permission.name),
     ],
   });
 }
