@@ -7,7 +7,7 @@ import { PostHttpRequestPayload } from '@/types';
 export class HttpService {
   constructor(private readonly httpService: NestHttpService) {}
 
-  async post<T>(payload: PostHttpRequestPayload<T>): Promise<unknown> {
+  async post<T>(payload: PostHttpRequestPayload<T>): Promise<any> {
     const response = await firstValueFrom(this.httpService.post<T>(payload.url, payload.data));
 
     return response.data;
