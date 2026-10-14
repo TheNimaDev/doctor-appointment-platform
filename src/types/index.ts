@@ -26,3 +26,4 @@ export * from './medical-record.types';
 export * from './prescription.types';
 export * from './payment.types';
 export * from './http.types';
+export * from './transaction.types';
