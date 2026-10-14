@@ -330,6 +330,19 @@ export const PRESCRIPTION_PERMISSIONS = {
   },
 } as const satisfies PermissionStructure;
 
+export const TRANSACTION_PERMISSIONS = {
+  TRANSACTION_CREATE: {
+    name: 'transaction:create',
+    module: 'transaction',
+    action: 'create',
+  },
+  TRANSACTION_READ: {
+    name: 'transaction:read',
+    module: 'transaction',
+    action: 'read',
+  },
+} as const satisfies PermissionStructure;
+
 export const RAW_PERMISSIONS_OBJECT = {
   ...BASE_PERMISSIONS,
   ...USER_PERMISSIONS,
@@ -344,6 +357,7 @@ export const RAW_PERMISSIONS_OBJECT = {
   ...PATIENT_PERMISSIONS,
   ...MEDICAL_RECORD_PERMISSIONS,
   ...PRESCRIPTION_PERMISSIONS,
+  ...TRANSACTION_PERMISSIONS,
 } as const satisfies PermissionStructure;
 
 type ReturnPermissionObject = Readonly<{
