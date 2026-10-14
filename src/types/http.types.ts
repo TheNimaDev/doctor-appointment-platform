@@ -3,7 +3,6 @@ export interface ZibalRequestPayload {
   merchant: string;
   amount: number;
   callbackUrl: string;
-  orderId: string;
   description?: string;
 }
 
