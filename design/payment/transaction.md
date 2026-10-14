@@ -28,7 +28,7 @@ Payment
 | ------------- | ------------ | -------- | ------------------ |
 | id            | UUID         | ❌       | Primary Key        |
 | paymentId     | UUID         | ❌       | FK → Payment       |
-| transactionId | varchar(255) | ❌       | شناسه تراکنش درگاه |
+| trackId       | varchar(255) | ❌       | شناسه تراکنش درگاه |
 | gateway       | varchar(50)  | ❌       | نام درگاه          |
 | amount        | decimal      | ❌       | مبلغ تراکنش        |
 | status        | enum         | ❌       | وضعیت تراکنش       |
@@ -89,10 +89,10 @@ INDEX(status)
 
 # Constraints
 
-## Unique Gateway Transaction
+## Unique Gateway Track
 
 ```sql
-UNIQUE(gateway, transactionId)
+UNIQUE(gateway, trackId)
 ```
 
 جلوگیری از ثبت دوباره یک تراکنش در یک درگاه مشخص.

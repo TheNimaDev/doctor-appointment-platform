@@ -15,7 +15,7 @@ import { Payment } from '@/modules/payment/entities';
 @Entity('transactions')
 @Index(['paymentId'])
 @Index(['status'])
-@Unique(['gateway', 'transactionId'])
+@Unique(['gateway', 'trackId'])
 export class Transaction {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -28,7 +28,7 @@ export class Transaction {
   payment: Payment;
 
   @Column({ type: 'varchar', length: 255 })
-  transactionId: string;
+  trackId: string;
 
   @Column({ type: 'varchar', length: 50 })
   gateway: string;
