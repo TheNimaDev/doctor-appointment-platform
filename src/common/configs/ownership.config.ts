@@ -13,6 +13,8 @@ import { MedicalRecord } from '@/modules/medical-record/entities';
 import { Patient } from '@/modules/patient/entities';
 import { DoctorClinic } from '@/modules/doctor-clinic/entities';
 import { Prescription, PrescriptionItem } from '@/modules/prescription/entities';
+import { Payment } from '@/modules/payment/entities';
+import { Transaction } from '@/modules/transaction/entities';
 
 interface OwnershipConfig {
   entity: EntityTarget<ObjectLiteral>;
@@ -185,5 +187,27 @@ export const OWNERSHIP_CONFIG: Record<string, OwnershipConfig> = {
     getDoctorUserId: (resource) => resource.prescription.appointment?.timeSlot?.schedule?.doctorClinic?.doctor?.userId,
     getClinicUserId: (resource) => resource.prescription.appointment?.timeSlot?.schedule?.doctorClinic?.clinic?.ownerId,
     getPatientUserId: (resource) => resource.prescription.appointment?.patient?.userId,
+  },
+
+  payment: {
+    entity: Payment,
+    relations: {
+      appointment: {
+        patient: true,
+      },
+    },
+    getOwnerUserId: (resource) => resource.appointment?.patient?.userId,
+  },
+
+  transaction: {
+    entity: Transaction,
+    relations: {
+      payment: {
+        appointment: {
+          patient: true,
+        },
+      },
+    },
+    getOwnerUserId: (resource) => resource.payment.appointment?.patient?.userId,
   },
 };
